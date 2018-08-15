@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>NET472</TargetFramework>
+    <ApplicationIcon />
+    <OutputType>Exe</OutputType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <LangVersion>latest</LangVersion>
+    <StartupObject>Wikiled.IB.Market.Api.Console.Program</StartupObject>
+  </PropertyGroup>
+</Project>

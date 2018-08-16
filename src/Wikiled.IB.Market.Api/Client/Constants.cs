@@ -4,7 +4,6 @@ namespace Wikiled.IB.Market.Api.Client
     {
         public const int ClientVersion = 66; //API v. 9.71
         public const byte Eol = 0;
-        public const string BagSecType = "BAG";
         public const int RedirectCountMax = 2;
 
         public const int FaGroups = 1;

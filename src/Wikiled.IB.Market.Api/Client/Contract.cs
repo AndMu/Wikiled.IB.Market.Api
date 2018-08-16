@@ -35,7 +35,7 @@ namespace Wikiled.IB.Market.Api.Client
          *      NEWS- news
          *		FUND- mutual fund
 		 */
-        public string SecType { get; set; }
+        public SecType SecType { get; set; }
 
         /**
         * @brief The contract's last trading day or contract month (for Options and Futures). Strings with format YYYYMM will be interpreted as the Contract Month whereas YYYYMMDD will be interpreted as Last Trading Day.
@@ -60,7 +60,7 @@ namespace Wikiled.IB.Market.Api.Client
         /**
          * @brief The destination exchange.
          */
-        public string Exchange { get; set; }
+        public ExchangeType Exchange { get; set; }
 
         /**
          * @brief The underlying's currency

@@ -8,4 +8,12 @@
     <LangVersion>latest</LangVersion>
     <StartupObject>Wikiled.IB.Market.Api.Console.Program</StartupObject>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Wikiled.Common" Version="1.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Wikiled.IB.Market.Api\Wikiled.IB.Market.Api.csproj" />
+  </ItemGroup>
 </Project>

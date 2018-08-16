@@ -24,7 +24,7 @@ namespace Wikiled.IB.Market.Api.Client
 
         public double ReadDouble()
         {
-            var doubleAsstring = ReadString();
+            string doubleAsstring = ReadString();
             if (string.IsNullOrEmpty(doubleAsstring) ||
                 doubleAsstring == "0")
             {
@@ -36,13 +36,13 @@ namespace Wikiled.IB.Market.Api.Client
 
         public double ReadDoubleMax()
         {
-            var str = ReadString();
+            string str = ReadString();
             return str == null || str.Length == 0 ? double.MaxValue : double.Parse(str, NumberFormatInfo.InvariantInfo);
         }
 
         public long ReadLong()
         {
-            var longAsstring = ReadString();
+            string longAsstring = ReadString();
             if (string.IsNullOrEmpty(longAsstring) ||
                 longAsstring == "0")
             {
@@ -54,7 +54,7 @@ namespace Wikiled.IB.Market.Api.Client
 
         public int ReadInt()
         {
-            var intAsstring = ReadString();
+            string intAsstring = ReadString();
             if (string.IsNullOrEmpty(intAsstring) ||
                 intAsstring == "0")
             {
@@ -66,19 +66,31 @@ namespace Wikiled.IB.Market.Api.Client
 
         public int ReadIntMax()
         {
-            var str = ReadString();
+            string str = ReadString();
             return str == null || str.Length == 0 ? int.MaxValue : int.Parse(str);
         }
 
         public bool ReadBoolFromInt()
         {
-            var str = ReadString();
-            return str == null ? false : int.Parse(str) != 0;
+            string str = ReadString();
+            return str != null && int.Parse(str) != 0;
+        }
+
+        public T ReadEnum<T>()
+            where T : struct
+        {
+            string text = ReadString();
+            if (!Enum.TryParse(text, true, out T value))
+            {
+                throw new ArgumentOutOfRangeException($"Can't parse {text} to {typeof(T)}");
+            }
+
+            return value;
         }
 
         public string ReadString()
         {
-            var b = dataReader.ReadByte();
+            byte b = dataReader.ReadByte();
 
             nDecodedLen++;
 
@@ -87,7 +99,7 @@ namespace Wikiled.IB.Market.Api.Client
                 return null;
             }
 
-            var strBuilder = new StringBuilder();
+            StringBuilder strBuilder = new StringBuilder();
             strBuilder.Append((char)b);
             while (true)
             {
@@ -131,7 +143,7 @@ namespace Wikiled.IB.Market.Api.Client
 
             if (serverVersion == -1)
             {
-                var srv = ReadString();
+                string srv = ReadString();
 
                 serverVersion = 0;
 
@@ -143,7 +155,7 @@ namespace Wikiled.IB.Market.Api.Client
                 return;
             }
 
-            var serverTime = "";
+            string serverTime = "";
 
             if (serverVersion >= 20)
             {
@@ -475,9 +487,9 @@ namespace Wikiled.IB.Market.Api.Client
 
         private void TickByTickEvent()
         {
-            var reqId = ReadInt();
-            var tickType = ReadInt();
-            var time = ReadLong();
+            int reqId = ReadInt();
+            int tickType = ReadInt();
+            long time = ReadLong();
             BitMask mask;
             TickAttrib attribs;
 
@@ -487,14 +499,16 @@ namespace Wikiled.IB.Market.Api.Client
                     break;
                 case 1: // Last
                 case 2: // AllLast
-                    var price = ReadDouble();
-                    var size = ReadInt();
+                    double price = ReadDouble();
+                    int size = ReadInt();
                     mask = new BitMask(ReadInt());
-                    attribs = new TickAttrib();
-                    attribs.PastLimit = mask[0];
-                    attribs.Unreported = mask[1];
-                    var exchange = ReadString();
-                    var specialConditions = ReadString();
+                    attribs = new TickAttrib
+                    {
+                        PastLimit = mask[0],
+                        Unreported = mask[1]
+                    };
+                    string exchange = ReadString();
+                    string specialConditions = ReadString();
                     eWrapper.TickByTickAllLast(reqId,
                                                tickType,
                                                time,
@@ -505,18 +519,20 @@ namespace Wikiled.IB.Market.Api.Client
                                                specialConditions);
                     break;
                 case 3: // BidAsk
-                    var bidPrice = ReadDouble();
-                    var askPrice = ReadDouble();
-                    var bidSize = ReadInt();
-                    var askSize = ReadInt();
+                    double bidPrice = ReadDouble();
+                    double askPrice = ReadDouble();
+                    int bidSize = ReadInt();
+                    int askSize = ReadInt();
                     mask = new BitMask(ReadInt());
-                    attribs = new TickAttrib();
-                    attribs.BidPastLow = mask[0];
-                    attribs.AskPastHigh = mask[1];
+                    attribs = new TickAttrib
+                    {
+                        BidPastLow = mask[0],
+                        AskPastHigh = mask[1]
+                    };
                     eWrapper.TickByTickBidAsk(reqId, time, bidPrice, askPrice, bidSize, askSize, attribs);
                     break;
                 case 4: // MidPoint
-                    var midPoint = ReadDouble();
+                    double midPoint = ReadDouble();
                     eWrapper.TickByTickMidPoint(reqId, time, midPoint);
                     break;
             }
@@ -524,82 +540,82 @@ namespace Wikiled.IB.Market.Api.Client
 
         private void HistoricalTickLastEvent()
         {
-            var reqId = ReadInt();
-            var nTicks = ReadInt();
-            var ticks = new HistoricalTickLast[nTicks];
+            int reqId = ReadInt();
+            int nTicks = ReadInt();
+            HistoricalTickLast[] ticks = new HistoricalTickLast[nTicks];
 
-            for (var i = 0; i < nTicks; i++)
+            for (int i = 0; i < nTicks; i++)
             {
-                var time = ReadLong();
-                var mask = ReadInt();
-                var price = ReadDouble();
-                var size = ReadLong();
-                var exchange = ReadString();
-                var specialConditions = ReadString();
+                long time = ReadLong();
+                int mask = ReadInt();
+                double price = ReadDouble();
+                long size = ReadLong();
+                string exchange = ReadString();
+                string specialConditions = ReadString();
 
                 ticks[i] = new HistoricalTickLast(time, mask, price, size, exchange, specialConditions);
             }
 
-            var done = ReadBoolFromInt();
+            bool done = ReadBoolFromInt();
 
             eWrapper.HistoricalTicksLast(reqId, ticks, done);
         }
 
         private void HistoricalTickBidAskEvent()
         {
-            var reqId = ReadInt();
-            var nTicks = ReadInt();
-            var ticks = new HistoricalTickBidAsk[nTicks];
+            int reqId = ReadInt();
+            int nTicks = ReadInt();
+            HistoricalTickBidAsk[] ticks = new HistoricalTickBidAsk[nTicks];
 
-            for (var i = 0; i < nTicks; i++)
+            for (int i = 0; i < nTicks; i++)
             {
-                var time = ReadLong();
-                var mask = ReadInt();
-                var priceBid = ReadDouble();
-                var priceAsk = ReadDouble();
-                var sizeBid = ReadLong();
-                var sizeAsk = ReadLong();
+                long time = ReadLong();
+                int mask = ReadInt();
+                double priceBid = ReadDouble();
+                double priceAsk = ReadDouble();
+                long sizeBid = ReadLong();
+                long sizeAsk = ReadLong();
 
                 ticks[i] = new HistoricalTickBidAsk(time, mask, priceBid, priceAsk, sizeBid, sizeAsk);
             }
 
-            var done = ReadBoolFromInt();
+            bool done = ReadBoolFromInt();
 
             eWrapper.HistoricalTicksBidAsk(reqId, ticks, done);
         }
 
         private void HistoricalTickEvent()
         {
-            var reqId = ReadInt();
-            var nTicks = ReadInt();
-            var ticks = new HistoricalTick[nTicks];
+            int reqId = ReadInt();
+            int nTicks = ReadInt();
+            HistoricalTick[] ticks = new HistoricalTick[nTicks];
 
-            for (var i = 0; i < nTicks; i++)
+            for (int i = 0; i < nTicks; i++)
             {
-                var time = ReadLong();
+                long time = ReadLong();
                 ReadInt(); // for consistency
-                var price = ReadDouble();
-                var size = ReadLong();
+                double price = ReadDouble();
+                long size = ReadLong();
 
                 ticks[i] = new HistoricalTick(time, price, size);
             }
 
-            var done = ReadBoolFromInt();
+            bool done = ReadBoolFromInt();
 
             eWrapper.HistoricalTicks(reqId, ticks, done);
         }
 
         private void MarketRuleEvent()
         {
-            var marketRuleId = ReadInt();
-            var priceIncrements = new PriceIncrement[0];
-            var nPriceIncrements = ReadInt();
+            int marketRuleId = ReadInt();
+            PriceIncrement[] priceIncrements = new PriceIncrement[0];
+            int nPriceIncrements = ReadInt();
 
             if (nPriceIncrements > 0)
             {
                 Array.Resize(ref priceIncrements, nPriceIncrements);
 
-                for (var i = 0; i < nPriceIncrements; ++i)
+                for (int i = 0; i < nPriceIncrements; ++i)
                 {
                     priceIncrements[i] = new PriceIncrement(ReadDouble(), ReadDouble());
                 }
@@ -610,33 +626,33 @@ namespace Wikiled.IB.Market.Api.Client
 
         private void RerouteMktDepthReqEvent()
         {
-            var reqId = ReadInt();
-            var conId = ReadInt();
-            var exchange = ReadString();
+            int reqId = ReadInt();
+            int conId = ReadInt();
+            string exchange = ReadString();
 
             eWrapper.RerouteMktDepthReq(reqId, conId, exchange);
         }
 
         private void RerouteMktDataReqEvent()
         {
-            var reqId = ReadInt();
-            var conId = ReadInt();
-            var exchange = ReadString();
+            int reqId = ReadInt();
+            int conId = ReadInt();
+            string exchange = ReadString();
 
             eWrapper.RerouteMktDataReq(reqId, conId, exchange);
         }
 
         private void HistoricalDataUpdateEvent()
         {
-            var requestId = ReadInt();
-            var barCount = ReadInt();
-            var date = ReadString();
-            var open = ReadDouble();
-            var close = ReadDouble();
-            var high = ReadDouble();
-            var low = ReadDouble();
-            var wap = ReadDouble();
-            var volume = ReadLong();
+            int requestId = ReadInt();
+            int barCount = ReadInt();
+            string date = ReadString();
+            double open = ReadDouble();
+            double close = ReadDouble();
+            double high = ReadDouble();
+            double low = ReadDouble();
+            double wap = ReadDouble();
+            long volume = ReadLong();
 
             eWrapper.HistoricalDataUpdate(requestId,
                                           new Bar(date,
@@ -652,11 +668,11 @@ namespace Wikiled.IB.Market.Api.Client
 
         private void PnLSingleEvent()
         {
-            var reqId = ReadInt();
-            var pos = ReadInt();
-            var dailyPnL = ReadDouble();
-            var unrealizedPnL = double.MaxValue;
-            var realizedPnL = double.MaxValue;
+            int reqId = ReadInt();
+            int pos = ReadInt();
+            double dailyPnL = ReadDouble();
+            double unrealizedPnL = double.MaxValue;
+            double realizedPnL = double.MaxValue;
 
             if (serverVersion >= MinServerVer.UnrealizedPnl)
             {
@@ -668,17 +684,17 @@ namespace Wikiled.IB.Market.Api.Client
                 realizedPnL = ReadDouble();
             }
 
-            var value = ReadDouble();
+            double value = ReadDouble();
 
             eWrapper.PnlSingle(reqId, pos, dailyPnL, unrealizedPnL, realizedPnL, value);
         }
 
         private void PnLEvent()
         {
-            var reqId = ReadInt();
-            var dailyPnL = ReadDouble();
-            var unrealizedPnL = double.MaxValue;
-            var realizedPnL = double.MaxValue;
+            int reqId = ReadInt();
+            double dailyPnL = ReadDouble();
+            double unrealizedPnL = double.MaxValue;
+            double realizedPnL = double.MaxValue;
 
             if (serverVersion >= MinServerVer.UnrealizedPnl)
             {
@@ -695,11 +711,11 @@ namespace Wikiled.IB.Market.Api.Client
 
         private void HistogramDataEvent()
         {
-            var reqId = ReadInt();
-            var n = ReadInt();
-            var data = new HistogramEntry[n];
+            int reqId = ReadInt();
+            int n = ReadInt();
+            HistogramEntry[] data = new HistogramEntry[n];
 
-            for (var i = 0; i < n; i++)
+            for (int i = 0; i < n; i++)
             {
                 data[i].Price = ReadDouble();
                 data[i].Size = ReadLong();
@@ -710,50 +726,50 @@ namespace Wikiled.IB.Market.Api.Client
 
         private void HeadTimestampEvent()
         {
-            var reqId = ReadInt();
-            var headTimestamp = ReadString();
+            int reqId = ReadInt();
+            string headTimestamp = ReadString();
 
             eWrapper.HeadTimestamp(reqId, headTimestamp);
         }
 
         private void HistoricalNewsEvent()
         {
-            var requestId = ReadInt();
-            var time = ReadString();
-            var providerCode = ReadString();
-            var articleId = ReadString();
-            var headline = ReadString();
+            int requestId = ReadInt();
+            string time = ReadString();
+            string providerCode = ReadString();
+            string articleId = ReadString();
+            string headline = ReadString();
 
             eWrapper.HistoricalNews(requestId, time, providerCode, articleId, headline);
         }
 
         private void HistoricalNewsEndEvent()
         {
-            var requestId = ReadInt();
-            var hasMore = ReadBoolFromInt();
+            int requestId = ReadInt();
+            bool hasMore = ReadBoolFromInt();
 
             eWrapper.HistoricalNewsEnd(requestId, hasMore);
         }
 
         private void NewsArticleEvent()
         {
-            var requestId = ReadInt();
-            var articleType = ReadInt();
-            var articleText = ReadString();
+            int requestId = ReadInt();
+            int articleType = ReadInt();
+            string articleText = ReadString();
 
             eWrapper.NewsArticle(requestId, articleType, articleText);
         }
 
         private void NewsProvidersEvent()
         {
-            var newsProviders = new NewsProvider[0];
-            var nNewsProviders = ReadInt();
+            NewsProvider[] newsProviders = new NewsProvider[0];
+            int nNewsProviders = ReadInt();
 
             if (nNewsProviders > 0)
             {
                 Array.Resize(ref newsProviders, nNewsProviders);
 
-                for (var i = 0; i < nNewsProviders; ++i)
+                for (int i = 0; i < nNewsProviders; ++i)
                 {
                     newsProviders[i] = new NewsProvider(ReadString(), ReadString());
                 }
@@ -764,15 +780,15 @@ namespace Wikiled.IB.Market.Api.Client
 
         private void SmartComponentsEvent()
         {
-            var reqId = ReadInt();
-            var n = ReadInt();
-            var theMap = new Dictionary<int, KeyValuePair<string, char>>();
+            int reqId = ReadInt();
+            int n = ReadInt();
+            Dictionary<int, KeyValuePair<string, char>> theMap = new Dictionary<int, KeyValuePair<string, char>>();
 
-            for (var i = 0; i < n; i++)
+            for (int i = 0; i < n; i++)
             {
-                var bitNumber = ReadInt();
-                var exchange = ReadString();
-                var exchangeLetter = ReadChar();
+                int bitNumber = ReadInt();
+                string exchange = ReadString();
+                char exchangeLetter = ReadChar();
 
                 theMap.Add(bitNumber, new KeyValuePair<string, char>(exchange, exchangeLetter));
             }
@@ -782,59 +798,61 @@ namespace Wikiled.IB.Market.Api.Client
 
         private void TickReqParamsEvent()
         {
-            var tickerId = ReadInt();
-            var minTick = ReadDouble();
-            var bboExchange = ReadString();
-            var snapshotPermissions = ReadInt();
+            int tickerId = ReadInt();
+            double minTick = ReadDouble();
+            string bboExchange = ReadString();
+            int snapshotPermissions = ReadInt();
 
             eWrapper.TickReqParams(tickerId, minTick, bboExchange, snapshotPermissions);
         }
 
         private void TickNewsEvent()
         {
-            var tickerId = ReadInt();
-            var timeStamp = ReadLong();
-            var providerCode = ReadString();
-            var articleId = ReadString();
-            var headline = ReadString();
-            var extraData = ReadString();
+            int tickerId = ReadInt();
+            long timeStamp = ReadLong();
+            string providerCode = ReadString();
+            string articleId = ReadString();
+            string headline = ReadString();
+            string extraData = ReadString();
 
             eWrapper.TickNews(tickerId, timeStamp, providerCode, articleId, headline, extraData);
         }
 
         private void SymbolSamplesEvent()
         {
-            var reqId = ReadInt();
-            var contractDescriptions = new ContractDescription[0];
-            var nContractDescriptions = ReadInt();
+            int reqId = ReadInt();
+            ContractDescription[] contractDescriptions = new ContractDescription[0];
+            int nContractDescriptions = ReadInt();
 
             if (nContractDescriptions > 0)
             {
                 Array.Resize(ref contractDescriptions, nContractDescriptions);
 
-                for (var i = 0; i < nContractDescriptions; ++i)
+                for (int i = 0; i < nContractDescriptions; ++i)
                 {
                     // read contract fields
-                    var contract = new Contract();
-                    contract.ConId = ReadInt();
-                    contract.Symbol = ReadString();
-                    contract.SecType = ReadString();
-                    contract.PrimaryExch = ReadString();
-                    contract.Currency = ReadString();
+                    Contract contract = new Contract
+                    {
+                        ConId = ReadInt(),
+                        Symbol = ReadString(),
+                        SecType = ReadEnum<SecType>(),
+                        PrimaryExch = ReadString(),
+                        Currency = ReadString()
+                    };
 
                     // read derivative sec types list
-                    var derivativeSecTypes = new string[0];
-                    var nDerivativeSecTypes = ReadInt();
+                    string[] derivativeSecTypes = new string[0];
+                    int nDerivativeSecTypes = ReadInt();
                     if (nDerivativeSecTypes > 0)
                     {
                         Array.Resize(ref derivativeSecTypes, nDerivativeSecTypes);
-                        for (var j = 0; j < nDerivativeSecTypes; ++j)
+                        for (int j = 0; j < nDerivativeSecTypes; ++j)
                         {
                             derivativeSecTypes[j] = ReadString();
                         }
                     }
 
-                    var contractDescription = new ContractDescription(contract, derivativeSecTypes);
+                    ContractDescription contractDescription = new ContractDescription(contract, derivativeSecTypes);
                     contractDescriptions[i] = contractDescription;
                 }
             }
@@ -844,14 +862,14 @@ namespace Wikiled.IB.Market.Api.Client
 
         private void FamilyCodesEvent()
         {
-            var familyCodes = new FamilyCode[0];
-            var nFamilyCodes = ReadInt();
+            FamilyCode[] familyCodes = new FamilyCode[0];
+            int nFamilyCodes = ReadInt();
 
             if (nFamilyCodes > 0)
             {
                 Array.Resize(ref familyCodes, nFamilyCodes);
 
-                for (var i = 0; i < nFamilyCodes; ++i)
+                for (int i = 0; i < nFamilyCodes; ++i)
                 {
                     familyCodes[i] = new FamilyCode(ReadString(), ReadString());
                 }
@@ -862,14 +880,14 @@ namespace Wikiled.IB.Market.Api.Client
 
         private void MktDepthExchangesEvent()
         {
-            var depthMktDataDescriptions = new DepthMktDataDescription[0];
-            var nDescriptions = ReadInt();
+            DepthMktDataDescription[] depthMktDataDescriptions = new DepthMktDataDescription[0];
+            int nDescriptions = ReadInt();
 
             if (nDescriptions > 0)
             {
                 Array.Resize(ref depthMktDataDescriptions, nDescriptions);
 
-                for (var i = 0; i < nDescriptions; i++)
+                for (int i = 0; i < nDescriptions; i++)
                 {
                     if (serverVersion >= MinServerVer.ServiceDataType)
                     {
@@ -897,11 +915,11 @@ namespace Wikiled.IB.Market.Api.Client
 
         private void SoftDollarTierEvent()
         {
-            var reqId = ReadInt();
-            var nTiers = ReadInt();
-            var tiers = new SoftDollarTier[nTiers];
+            int reqId = ReadInt();
+            int nTiers = ReadInt();
+            SoftDollarTier[] tiers = new SoftDollarTier[nTiers];
 
-            for (var i = 0; i < nTiers; i++)
+            for (int i = 0; i < nTiers; i++)
             {
                 tiers[i] = new SoftDollarTier(ReadString(), ReadString(), ReadString());
             }
@@ -911,30 +929,30 @@ namespace Wikiled.IB.Market.Api.Client
 
         private void SecurityDefinitionOptionParameterEndEvent()
         {
-            var reqId = ReadInt();
+            int reqId = ReadInt();
 
             eWrapper.SecurityDefinitionOptionParameterEnd(reqId);
         }
 
         private void SecurityDefinitionOptionParameterEvent()
         {
-            var reqId = ReadInt();
-            var exchange = ReadString();
-            var underlyingConId = ReadInt();
-            var tradingClass = ReadString();
-            var multiplier = ReadString();
-            var expirationsSize = ReadInt();
-            var expirations = new HashSet<string>();
-            var strikes = new HashSet<double>();
+            int reqId = ReadInt();
+            string exchange = ReadString();
+            int underlyingConId = ReadInt();
+            string tradingClass = ReadString();
+            string multiplier = ReadString();
+            int expirationsSize = ReadInt();
+            HashSet<string> expirations = new HashSet<string>();
+            HashSet<double> strikes = new HashSet<double>();
 
-            for (var i = 0; i < expirationsSize; i++)
+            for (int i = 0; i < expirationsSize; i++)
             {
                 expirations.Add(ReadString());
             }
 
-            var strikesSize = ReadInt();
+            int strikesSize = ReadInt();
 
-            for (var i = 0; i < strikesSize; i++)
+            for (int i = 0; i < strikesSize; i++)
             {
                 strikes.Add(ReadDouble());
             }
@@ -950,81 +968,81 @@ namespace Wikiled.IB.Market.Api.Client
 
         private void DisplayGroupUpdatedEvent()
         {
-            var msgVersion = ReadInt();
-            var reqId = ReadInt();
-            var contractInfo = ReadString();
+            int msgVersion = ReadInt();
+            int reqId = ReadInt();
+            string contractInfo = ReadString();
 
             eWrapper.DisplayGroupUpdated(reqId, contractInfo);
         }
 
         private void DisplayGroupListEvent()
         {
-            var msgVersion = ReadInt();
-            var reqId = ReadInt();
-            var groups = ReadString();
+            int msgVersion = ReadInt();
+            int reqId = ReadInt();
+            string groups = ReadString();
 
             eWrapper.DisplayGroupList(reqId, groups);
         }
 
         private void VerifyCompletedEvent()
         {
-            var msgVersion = ReadInt();
-            var isSuccessful = string.Compare(ReadString(), "true", true) == 0;
-            var errorText = ReadString();
+            int msgVersion = ReadInt();
+            bool isSuccessful = string.Compare(ReadString(), "true", true) == 0;
+            string errorText = ReadString();
 
             eWrapper.VerifyCompleted(isSuccessful, errorText);
         }
 
         private void VerifyMessageApiEvent()
         {
-            var msgVersion = ReadInt();
-            var apiData = ReadString();
+            int msgVersion = ReadInt();
+            string apiData = ReadString();
 
             eWrapper.VerifyMessageApi(apiData);
         }
 
         private void VerifyAndAuthCompletedEvent()
         {
-            var msgVersion = ReadInt();
-            var isSuccessful = string.Compare(ReadString(), "true", true) == 0;
-            var errorText = ReadString();
+            int msgVersion = ReadInt();
+            bool isSuccessful = string.Compare(ReadString(), "true", true) == 0;
+            string errorText = ReadString();
 
             eWrapper.VerifyAndAuthCompleted(isSuccessful, errorText);
         }
 
         private void VerifyAndAuthMessageApiEvent()
         {
-            var msgVersion = ReadInt();
-            var apiData = ReadString();
-            var xyzChallenge = ReadString();
+            int msgVersion = ReadInt();
+            string apiData = ReadString();
+            string xyzChallenge = ReadString();
 
             eWrapper.VerifyAndAuthMessageApi(apiData, xyzChallenge);
         }
 
         private void TickPriceEvent()
         {
-            var msgVersion = ReadInt();
-            var requestId = ReadInt();
-            var tickType = ReadInt();
-            var price = ReadDouble();
-            var size = 0;
+            int msgVersion = ReadInt();
+            int requestId = ReadInt();
+            int tickType = ReadInt();
+            double price = ReadDouble();
+            int size = 0;
 
             if (msgVersion >= 2)
             {
                 size = ReadInt();
             }
 
-            var attr = new TickAttrib();
+            TickAttrib attr = new TickAttrib();
 
             if (msgVersion >= 3)
             {
-                var attrMask = ReadInt();
+                int attrMask = ReadInt();
 
                 attr.CanAutoExecute = attrMask == 1;
 
                 if (serverVersion >= MinServerVer.PastLimit)
                 {
-                    var mask = new BitMask(attrMask);
+                    BitMask mask = new BitMask(attrMask);
 
                     attr.CanAutoExecute = mask[0];
                     attr.PastLimit = mask[1];
@@ -1041,7 +1059,7 @@ namespace Wikiled.IB.Market.Api.Client
 
             if (msgVersion >= 2)
             {
-                var sizeTickType = -1; //not a tick
+                int sizeTickType = -1; //not a tick
                 switch (tickType)
                 {
                     case TickType.Bid:
@@ -1073,43 +1091,43 @@ namespace Wikiled.IB.Market.Api.Client
 
         private void TickSizeEvent()
         {
-            var msgVersion = ReadInt();
-            var requestId = ReadInt();
-            var tickType = ReadInt();
-            var size = ReadInt();
+            int msgVersion = ReadInt();
+            int requestId = ReadInt();
+            int tickType = ReadInt();
+            int size = ReadInt();
             eWrapper.TickSize(requestId, tickType, size);
         }
 
         private void TickStringEvent()
         {
-            var msgVersion = ReadInt();
-            var requestId = ReadInt();
-            var tickType = ReadInt();
-            var value = ReadString();
+            int msgVersion = ReadInt();
+            int requestId = ReadInt();
+            int tickType = ReadInt();
+            string value = ReadString();
             eWrapper.TickString(requestId, tickType, value);
         }
 
         private void TickGenericEvent()
         {
-            var msgVersion = ReadInt();
-            var requestId = ReadInt();
-            var tickType = ReadInt();
-            var value = ReadDouble();
+            int msgVersion = ReadInt();
+            int requestId = ReadInt();
+            int tickType = ReadInt();
+            double value = ReadDouble();
             eWrapper.TickGeneric(requestId, tickType, value);
         }
 
         private void TickEfpEvent()
         {
-            var msgVersion = ReadInt();
-            var requestId = ReadInt();
-            var tickType = ReadInt();
-            var basisPoints = ReadDouble();
-            var formattedBasisPoints = ReadString();
-            var impliedFuturesPrice = ReadDouble();
-            var holdDays = ReadInt();
-            var futureLastTradeDate = ReadString();
-            var dividendImpact = ReadDouble();
-            var dividendsToLastTradeDate = ReadDouble();
+            int msgVersion = ReadInt();
+            int requestId = ReadInt();
+            int tickType = ReadInt();
+            double basisPoints = ReadDouble();
+            string formattedBasisPoints = ReadString();
+            double impliedFuturesPrice = ReadDouble();
+            int holdDays = ReadInt();
+            string futureLastTradeDate = ReadString();
+            double dividendImpact = ReadDouble();
+            double dividendsToLastTradeDate = ReadDouble();
             eWrapper.TickEfp(requestId,
                              tickType,
                              basisPoints,
@@ -1123,85 +1141,87 @@ namespace Wikiled.IB.Market.Api.Client
 
         private void TickSnapshotEndEvent()
         {
-            var msgVersion = ReadInt();
-            var requestId = ReadInt();
+            int msgVersion = ReadInt();
+            int requestId = ReadInt();
             eWrapper.TickSnapshotEnd(requestId);
         }
 
         private void ErrorEvent()
         {
-            var msgVersion = ReadInt();
+            int msgVersion = ReadInt();
             if (msgVersion < 2)
             {
-                var msg = ReadString();
+                string msg = ReadString();
                 eWrapper.Error(msg);
             }
             else
             {
-                var id = ReadInt();
-                var errorCode = ReadInt();
-                var errorMsg = ReadString();
+                int id = ReadInt();
+                int errorCode = ReadInt();
+                string errorMsg = ReadString();
                 eWrapper.Error(id, errorCode, errorMsg);
             }
         }
 
         private void CurrentTimeEvent()
         {
-            var msgVersion = ReadInt(); //version
-            var time = ReadLong();
+            int msgVersion = ReadInt(); //version
+            long time = ReadLong();
             eWrapper.CurrentTime(time);
         }
 
         private void ManagedAccountsEvent()
         {
-            var msgVersion = ReadInt();
-            var accountsList = ReadString();
+            int msgVersion = ReadInt();
+            string accountsList = ReadString();
             eWrapper.ManagedAccounts(accountsList);
         }
 
         private void NextValidIdEvent()
         {
-            var msgVersion = ReadInt();
-            var orderId = ReadInt();
+            int msgVersion = ReadInt();
+            int orderId = ReadInt();
             eWrapper.NextValidId(orderId);
         }
 
         private void DeltaNeutralValidationEvent()
         {
-            var msgVersion = ReadInt();
-            var requestId = ReadInt();
-            var deltaNeutralContract = new DeltaNeutralContract();
-            deltaNeutralContract.ConId = ReadInt();
-            deltaNeutralContract.Delta = ReadDouble();
-            deltaNeutralContract.Price = ReadDouble();
+            int msgVersion = ReadInt();
+            int requestId = ReadInt();
+            DeltaNeutralContract deltaNeutralContract = new DeltaNeutralContract
+            {
+                ConId = ReadInt(),
+                Delta = ReadDouble(),
+                Price = ReadDouble()
+            };
             eWrapper.DeltaNeutralValidation(requestId, deltaNeutralContract);
         }
 
         private void TickOptionComputationEvent()
         {
-            var msgVersion = ReadInt();
-            var requestId = ReadInt();
-            var tickType = ReadInt();
-            var impliedVolatility = ReadDouble();
+            int msgVersion = ReadInt();
+            int requestId = ReadInt();
+            int tickType = ReadInt();
+            double impliedVolatility = ReadDouble();
             if (impliedVolatility.Equals(-1))
             {
                 // -1 is the "not yet computed" indicator
                 impliedVolatility = double.MaxValue;
             }
 
-            var delta = ReadDouble();
+            double delta = ReadDouble();
             if (delta.Equals(-2))
             {
                 // -2 is the "not yet computed" indicator
                 delta = double.MaxValue;
             }
 
-            var optPrice = double.MaxValue;
-            var pvDividend = double.MaxValue;
-            var gamma = double.MaxValue;
-            var vega = double.MaxValue;
-            var theta = double.MaxValue;
-            var undPrice = double.MaxValue;
+            double optPrice = double.MaxValue;
+            double pvDividend = double.MaxValue;
+            double gamma = double.MaxValue;
+            double vega = double.MaxValue;
+            double theta = double.MaxValue;
+            double undPrice = double.MaxValue;
             if (msgVersion >= 6 || tickType == TickType.ModelOption || tickType == TickType.DelayedModelOption)
             {
                 optPrice = ReadDouble();
@@ -1264,28 +1284,28 @@ namespace Wikiled.IB.Market.Api.Client
 
         private void AccountSummaryEvent()
         {
-            var msgVersion = ReadInt();
-            var requestId = ReadInt();
-            var account = ReadString();
-            var tag = ReadString();
-            var value = ReadString();
-            var currency = ReadString();
+            int msgVersion = ReadInt();
+            int requestId = ReadInt();
+            string account = ReadString();
+            string tag = ReadString();
+            string value = ReadString();
+            string currency = ReadString();
             eWrapper.AccountSummary(requestId, account, tag, value, currency);
         }
 
         private void AccountSummaryEndEvent()
         {
-            var msgVersion = ReadInt();
-            var requestId = ReadInt();
+            int msgVersion = ReadInt();
+            int requestId = ReadInt();
             eWrapper.AccountSummaryEnd(requestId);
         }
 
         private void AccountValueEvent()
         {
-            var msgVersion = ReadInt();
-            var key = ReadString();
-            var value = ReadString();
-            var currency = ReadString();
+            int msgVersion = ReadInt();
+            string key = ReadString();
+            string value = ReadString();
+            string currency = ReadString();
             string accountName = null;
             if (msgVersion >= 2)
             {
@@ -1297,17 +1317,17 @@ namespace Wikiled.IB.Market.Api.Client
 
         private void BondContractDetailsEvent()
         {
-            var msgVersion = ReadInt();
-            var requestId = -1;
+            int msgVersion = ReadInt();
+            int requestId = -1;
             if (msgVersion >= 3)
             {
                 requestId = ReadInt();
             }
 
-            var contract = new ContractDetails();
+            ContractDetails contract = new ContractDetails();
 
             contract.Contract.Symbol = ReadString();
-            contract.Contract.SecType = ReadString();
+            contract.Contract.SecType = ReadEnum<SecType>();
             contract.Cusip = ReadString();
             contract.Coupon = ReadDouble();
             ReadLastTradeDate(contract, true);
@@ -1319,7 +1339,7 @@ namespace Wikiled.IB.Market.Api.Client
             contract.Callable = ReadBoolFromInt();
             contract.Putable = ReadBoolFromInt();
             contract.DescAppend = ReadString();
-            contract.Contract.Exchange = ReadString();
+            contract.Contract.Exchange = (ExchangeType)Enum.Parse(typeof(ExchangeType), ReadString());
             contract.Contract.Currency = ReadString();
             contract.MarketName = ReadString();
             contract.Contract.TradingClass = ReadString();
@@ -1353,15 +1373,17 @@ namespace Wikiled.IB.Market.Api.Client
 
             if (msgVersion >= 5)
             {
-                var secIdListCount = ReadInt();
+                int secIdListCount = ReadInt();
                 if (secIdListCount > 0)
                 {
                     contract.SecIdList = new List<TagValue>();
-                    for (var i = 0; i < secIdListCount; ++i)
+                    for (int i = 0; i < secIdListCount; ++i)
                     {
-                        var tagValue = new TagValue();
-                        tagValue.Tag = ReadString();
-                        tagValue.Value = ReadString();
+                        TagValue tagValue = new TagValue
+                        {
+                            Tag = ReadString(),
+                            Value = ReadString()
+                        };
                         contract.SecIdList.Add(tagValue);
                     }
                 }
@@ -1382,15 +1404,15 @@ namespace Wikiled.IB.Market.Api.Client
 
         private void PortfolioValueEvent()
         {
-            var msgVersion = ReadInt();
-            var contract = new Contract();
+            int msgVersion = ReadInt();
+            Contract contract = new Contract();
             if (msgVersion >= 6)
             {
                 contract.ConId = ReadInt();
             }
 
             contract.Symbol = ReadString();
-            contract.SecType = ReadString();
+            contract.SecType = ReadEnum<SecType>();
             contract.LastTradeDateOrContractMonth = ReadString();
             contract.Strike = ReadDouble();
             contract.Right = ReadString();
@@ -1411,12 +1433,12 @@ namespace Wikiled.IB.Market.Api.Client
                 contract.TradingClass = ReadString();
             }
 
-            var position = serverVersion >= MinServerVer.FractionalPositions ? ReadDouble() : ReadInt();
-            var marketPrice = ReadDouble();
-            var marketValue = ReadDouble();
-            var averageCost = 0.0;
-            var unrealizedPnl = 0.0;
-            var realizedPnl = 0.0;
+            double position = serverVersion >= MinServerVer.FractionalPositions ? ReadDouble() : ReadInt();
+            double marketPrice = ReadDouble();
+            double marketValue = ReadDouble();
+            double averageCost = 0.0;
+            double unrealizedPnl = 0.0;
+            double realizedPnl = 0.0;
             if (msgVersion >= 3)
             {
                 averageCost = ReadDouble();
@@ -1447,34 +1469,34 @@ namespace Wikiled.IB.Market.Api.Client
 
         private void AccountUpdateTimeEvent()
         {
-            var msgVersion = ReadInt();
-            var timestamp = ReadString();
+            int msgVersion = ReadInt();
+            string timestamp = ReadString();
             eWrapper.UpdateAccountTime(timestamp);
         }
 
         private void AccountDownloadEndEvent()
         {
-            var msgVersion = ReadInt();
-            var account = ReadString();
+            int msgVersion = ReadInt();
+            string account = ReadString();
             eWrapper.AccountDownloadEnd(account);
         }
 
         private void OrderStatusEvent()
         {
-            var msgVersion = serverVersion >= MinServerVer.MarketCapPrice ? int.MaxValue : ReadInt();
-            var id = ReadInt();
-            var status = ReadString();
-            var filled = serverVersion >= MinServerVer.FractionalPositions ? ReadDouble() : ReadInt();
-            var remaining = serverVersion >= MinServerVer.FractionalPositions ? ReadDouble() : ReadInt();
-            var avgFillPrice = ReadDouble();
+            int msgVersion = serverVersion >= MinServerVer.MarketCapPrice ? int.MaxValue : ReadInt();
+            int id = ReadInt();
+            string status = ReadString();
+            double filled = serverVersion >= MinServerVer.FractionalPositions ? ReadDouble() : ReadInt();
+            double remaining = serverVersion >= MinServerVer.FractionalPositions ? ReadDouble() : ReadInt();
+            double avgFillPrice = ReadDouble();
 
-            var permId = 0;
+            int permId = 0;
             if (msgVersion >= 2)
             {
                 permId = ReadInt();
             }
 
-            var parentId = 0;
+            int parentId = 0;
             if (msgVersion >= 3)
             {
                 parentId = ReadInt();
@@ -1486,7 +1508,7 @@ namespace Wikiled.IB.Market.Api.Client
                 lastFillPrice = ReadDouble();
             }
 
-            var clientId = 0;
+            int clientId = 0;
             if (msgVersion >= 5)
             {
                 clientId = ReadInt();
@@ -1498,7 +1520,7 @@ namespace Wikiled.IB.Market.Api.Client
                 whyHeld = ReadString();
             }
 
-            var mktCapPrice = double.MaxValue;
+            double mktCapPrice = double.MaxValue;
 
             if (serverVersion >= MinServerVer.MarketCapPrice)
             {
@@ -1520,20 +1542,22 @@ namespace Wikiled.IB.Market.Api.Client
 
         private void OpenOrderEvent()
         {
-            var msgVersion = ReadInt();
+            int msgVersion = ReadInt();
             // read order id
-            var order = new Order();
-            order.OrderId = ReadInt();
+            Order order = new Order
+            {
+                OrderId = ReadInt()
+            };
 
             // read contract fields
-            var contract = new Contract();
+            Contract contract = new Contract();
             if (msgVersion >= 17)
             {
                 contract.ConId = ReadInt();
             }
 
             contract.Symbol = ReadString();
-            contract.SecType = ReadString();
+            contract.SecType = ReadEnum<SecType>();
             contract.LastTradeDateOrContractMonth = ReadString();
             contract.Strike = ReadDouble();
             contract.Right = ReadString();
@@ -1542,7 +1566,7 @@ namespace Wikiled.IB.Market.Api.Client
                 contract.Multiplier = ReadString();
             }
 
-            contract.Exchange = ReadString();
+            contract.Exchange = ReadEnum<ExchangeType>();
             contract.Currency = ReadString();
             if (msgVersion >= 2)
             {
@@ -1687,7 +1711,7 @@ namespace Wikiled.IB.Market.Api.Client
                 order.VolatilityType = ReadInt();
                 if (msgVersion == 11)
                 {
-                    var receivedInt = ReadInt();
+                    int receivedInt = ReadInt();
                     order.DeltaNeutralOrderType = receivedInt == 0 ? "NONE" : "MKT";
                 }
                 else
@@ -1742,22 +1766,22 @@ namespace Wikiled.IB.Market.Api.Client
 
             if (msgVersion >= 29)
             {
-                var comboLegsCount = ReadInt();
+                int comboLegsCount = ReadInt();
                 if (comboLegsCount > 0)
                 {
                     contract.ComboLegs = new List<ComboLeg>(comboLegsCount);
-                    for (var i = 0; i < comboLegsCount; ++i)
+                    for (int i = 0; i < comboLegsCount; ++i)
                     {
-                        var conId = ReadInt();
-                        var ratio = ReadInt();
-                        var action = ReadString();
-                        var exchange = ReadString();
-                        var openClose = ReadInt();
-                        var shortSaleSlot = ReadInt();
-                        var designatedLocation = ReadString();
-                        var exemptCode = ReadInt();
+                        int conId = ReadInt();
+                        int ratio = ReadInt();
+                        string action = ReadString();
+                        string exchange = ReadString();
+                        int openClose = ReadInt();
+                        int shortSaleSlot = ReadInt();
+                        string designatedLocation = ReadString();
+                        int exemptCode = ReadInt();
 
-                        var comboLeg = new ComboLeg(conId,
+                        ComboLeg comboLeg = new ComboLeg(conId,
                                                     ratio,
                                                     action,
                                                     exchange,
@@ -1769,15 +1793,15 @@ namespace Wikiled.IB.Market.Api.Client
                     }
                 }
 
-                var orderComboLegsCount = ReadInt();
+                int orderComboLegsCount = ReadInt();
                 if (orderComboLegsCount > 0)
                 {
                     order.OrderComboLegs = new List<OrderComboLeg>(orderComboLegsCount);
-                    for (var i = 0; i < orderComboLegsCount; ++i)
+                    for (int i = 0; i < orderComboLegsCount; ++i)
                     {
-                        var price = ReadDoubleMax();
+                        double price = ReadDoubleMax();
 
-                        var orderComboLeg = new OrderComboLeg(price);
+                        OrderComboLeg orderComboLeg = new OrderComboLeg(price);
                         order.OrderComboLegs.Add(orderComboLeg);
                     }
                 }
@@ -1785,15 +1809,17 @@ namespace Wikiled.IB.Market.Api.Client
 
             if (msgVersion >= 26)
             {
-                var smartComboRoutingParamsCount = ReadInt();
+                int smartComboRoutingParamsCount = ReadInt();
                 if (smartComboRoutingParamsCount > 0)
                 {
                     order.SmartComboRoutingParams = new List<TagValue>(smartComboRoutingParamsCount);
-                    for (var i = 0; i < smartComboRoutingParamsCount; ++i)
+                    for (int i = 0; i < smartComboRoutingParamsCount; ++i)
                     {
-                        var tagValue = new TagValue();
-                        tagValue.Tag = ReadString();
-                        tagValue.Value = ReadString();
+                        TagValue tagValue = new TagValue
+                        {
+                            Tag = ReadString(),
+                            Value = ReadString()
+                        };
                         order.SmartComboRoutingParams.Add(tagValue);
                     }
                 }
@@ -1856,10 +1882,12 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 if (ReadBoolFromInt())
                 {
-                    var deltaNeutralContract = new DeltaNeutralContract();
-                    deltaNeutralContract.ConId = ReadInt();
-                    deltaNeutralContract.Delta = ReadDouble();
-                    deltaNeutralContract.Price = ReadDouble();
+                    DeltaNeutralContract deltaNeutralContract = new DeltaNeutralContract
+                    {
+                        ConId = ReadInt(),
+                        Delta = ReadDouble(),
+                        Price = ReadDouble()
+                    };
                     contract.DeltaNeutralContract = deltaNeutralContract;
                 }
             }
@@ -1869,15 +1897,17 @@ namespace Wikiled.IB.Market.Api.Client
                 order.AlgoStrategy = ReadString();
                 if (!Util.StringIsEmpty(order.AlgoStrategy))
                 {
-                    var algoParamsCount = ReadInt();
+                    int algoParamsCount = ReadInt();
                     if (algoParamsCount > 0)
                     {
                         order.AlgoParams = new List<TagValue>(algoParamsCount);
-                        for (var i = 0; i < algoParamsCount; ++i)
+                        for (int i = 0; i < algoParamsCount; ++i)
                         {
-                            var tagValue = new TagValue();
-                            tagValue.Tag = ReadString();
-                            tagValue.Value = ReadString();
+                            TagValue tagValue = new TagValue
+                            {
+                                Tag = ReadString(),
+                                Value = ReadString()
+                            };
                             order.AlgoParams.Add(tagValue);
                         }
                     }
@@ -1889,7 +1919,7 @@ namespace Wikiled.IB.Market.Api.Client
                 order.Solicited = ReadBoolFromInt();
             }
 
-            var orderState = new OrderState();
+            OrderState orderState = new OrderState();
             if (msgVersion >= 16)
             {
                 order.WhatIf = ReadBoolFromInt();
@@ -1931,14 +1961,14 @@ namespace Wikiled.IB.Market.Api.Client
                     order.ReferenceExchange = ReadString();
                 }
 
-                var nConditions = ReadInt();
+                int nConditions = ReadInt();
 
                 if (nConditions > 0)
                 {
-                    for (var i = 0; i < nConditions; i++)
+                    for (int i = 0; i < nConditions; i++)
                     {
-                        var orderConditionType = (OrderConditionType)ReadInt();
-                        var condition = OrderCondition.Create(orderConditionType);
+                        OrderConditionType orderConditionType = (OrderConditionType)ReadInt();
+                        OrderCondition condition = OrderCondition.Create(orderConditionType);
 
                         condition.Deserialize(this);
                         order.Conditions.Add(condition);
@@ -1978,26 +2008,26 @@ namespace Wikiled.IB.Market.Api.Client
 
         private void OpenOrderEndEvent()
         {
-            var msgVersion = ReadInt();
+            int msgVersion = ReadInt();
             eWrapper.OpenOrderEnd();
         }
 
         private void ContractDataEvent()
         {
-            var msgVersion = ReadInt();
-            var requestId = -1;
+            int msgVersion = ReadInt();
+            int requestId = -1;
             if (msgVersion >= 3)
             {
                 requestId = ReadInt();
             }
 
-            var contract = new ContractDetails();
+            ContractDetails contract = new ContractDetails();
             contract.Contract.Symbol = ReadString();
-            contract.Contract.SecType = ReadString();
+            contract.Contract.SecType = ReadEnum<SecType>();
             ReadLastTradeDate(contract, false);
             contract.Contract.Strike = ReadDouble();
             contract.Contract.Right = ReadString();
-            contract.Contract.Exchange = ReadString();
+            contract.Contract.Exchange = ReadEnum<ExchangeType>();
             contract.Contract.Currency = ReadString();
             contract.Contract.LocalSymbol = ReadString();
             contract.MarketName = ReadString();
@@ -2047,15 +2077,17 @@ namespace Wikiled.IB.Market.Api.Client
 
             if (msgVersion >= 7)
             {
-                var secIdListCount = ReadInt();
+                int secIdListCount = ReadInt();
                 if (secIdListCount > 0)
                 {
                     contract.SecIdList = new List<TagValue>(secIdListCount);
-                    for (var i = 0; i < secIdListCount; ++i)
+                    for (int i = 0; i < secIdListCount; ++i)
                     {
-                        var tagValue = new TagValue();
-                        tagValue.Tag = ReadString();
-                        tagValue.Value = ReadString();
+                        TagValue tagValue = new TagValue
+                        {
+                            Tag = ReadString(),
+                            Value = ReadString()
+                        };
                         contract.SecIdList.Add(tagValue);
                     }
                 }
@@ -2088,35 +2120,35 @@ namespace Wikiled.IB.Market.Api.Client
 
         private void ContractDataEndEvent()
         {
-            var msgVersion = ReadInt();
-            var requestId = ReadInt();
+            int msgVersion = ReadInt();
+            int requestId = ReadInt();
             eWrapper.ContractDetailsEnd(requestId);
         }
 
         private void ExecutionDataEvent()
         {
-            var msgVersion = serverVersion;
+            int msgVersion = serverVersion;
 
             if (serverVersion < MinServerVer.LastLiquidity)
             {
                 msgVersion = ReadInt();
             }
 
-            var requestId = -1;
+            int requestId = -1;
             if (msgVersion >= 7)
             {
                 requestId = ReadInt();
             }
 
-            var orderId = ReadInt();
-            var contract = new Contract();
+            int orderId = ReadInt();
+            Contract contract = new Contract();
             if (msgVersion >= 5)
             {
                 contract.ConId = ReadInt();
             }
 
             contract.Symbol = ReadString();
-            contract.SecType = ReadString();
+            contract.SecType = ReadEnum<SecType>();
             contract.LastTradeDateOrContractMonth = ReadString();
             contract.Strike = ReadDouble();
             contract.Right = ReadString();
@@ -2125,7 +2157,7 @@ namespace Wikiled.IB.Market.Api.Client
                 contract.Multiplier = ReadString();
             }
 
-            contract.Exchange = ReadString();
+            contract.Exchange = ReadEnum<ExchangeType>();
             contract.Currency = ReadString();
             contract.LocalSymbol = ReadString();
             if (msgVersion >= 10)
@@ -2133,15 +2165,17 @@ namespace Wikiled.IB.Market.Api.Client
                 contract.TradingClass = ReadString();
             }
 
-            var exec = new Execution();
-            exec.OrderId = orderId;
-            exec.ExecId = ReadString();
-            exec.Time = ReadString();
-            exec.AcctNumber = ReadString();
-            exec.Exchange = ReadString();
-            exec.Side = ReadString();
-            exec.Shares = serverVersion >= MinServerVer.FractionalPositions ? ReadDouble() : ReadInt();
-            exec.Price = ReadDouble();
+            Execution exec = new Execution
+            {
+                OrderId = orderId,
+                ExecId = ReadString(),
+                Time = ReadString(),
+                AcctNumber = ReadString(),
+                Exchange = ReadString(),
+                Side = ReadString(),
+                Shares = serverVersion >= MinServerVer.FractionalPositions ? ReadDouble() : ReadInt(),
+                Price = ReadDouble()
+            };
             if (msgVersion >= 2)
             {
                 exec.PermId = ReadInt();
@@ -2189,44 +2223,46 @@ namespace Wikiled.IB.Market.Api.Client
 
         private void ExecutionDataEndEvent()
         {
-            var msgVersion = ReadInt();
-            var requestId = ReadInt();
+            int msgVersion = ReadInt();
+            int requestId = ReadInt();
             eWrapper.ExecDetailsEnd(requestId);
         }
 
         private void CommissionReportEvent()
         {
-            var msgVersion = ReadInt();
-            var commissionReport = new CommissionReport();
-            commissionReport.ExecId = ReadString();
-            commissionReport.Commission = ReadDouble();
-            commissionReport.Currency = ReadString();
-            commissionReport.RealizedPnl = ReadDouble();
-            commissionReport.Yield = ReadDouble();
-            commissionReport.YieldRedemptionDate = ReadInt();
+            int msgVersion = ReadInt();
+            CommissionReport commissionReport = new CommissionReport
+            {
+                ExecId = ReadString(),
+                Commission = ReadDouble(),
+                Currency = ReadString(),
+                RealizedPnl = ReadDouble(),
+                Yield = ReadDouble(),
+                YieldRedemptionDate = ReadInt()
+            };
             eWrapper.CommissionReport(commissionReport);
         }
 
         private void FundamentalDataEvent()
         {
-            var msgVersion = ReadInt();
-            var requestId = ReadInt();
-            var fundamentalData = ReadString();
+            int msgVersion = ReadInt();
+            int requestId = ReadInt();
+            string fundamentalData = ReadString();
             eWrapper.FundamentalData(requestId, fundamentalData);
         }
 
         private void HistoricalDataEvent()
         {
-            var msgVersion = int.MaxValue;
+            int msgVersion = int.MaxValue;
 
             if (serverVersion < MinServerVer.SyntRealtimeBars)
             {
                 msgVersion = ReadInt();
             }
 
-            var requestId = ReadInt();
-            var startDateStr = "";
-            var endDateStr = "";
+            int requestId = ReadInt();
+            string startDateStr = "";
+            string endDateStr = "";
 
             if (msgVersion >= 2)
             {
@@ -2234,17 +2270,17 @@ namespace Wikiled.IB.Market.Api.Client
                 endDateStr = ReadString();
             }
 
-            var itemCount = ReadInt();
+            int itemCount = ReadInt();
 
-            for (var ctr = 0; ctr < itemCount; ctr++)
+            for (int ctr = 0; ctr < itemCount; ctr++)
             {
-                var date = ReadString();
-                var open = ReadDouble();
-                var high = ReadDouble();
-                var low = ReadDouble();
-                var close = ReadDouble();
-                var volume = serverVersion < MinServerVer.SyntRealtimeBars ? ReadInt() : ReadLong();
-                var wap = ReadDouble();
+                string date = ReadString();
+                double open = ReadDouble();
+                double high = ReadDouble();
+                double low = ReadDouble();
+                double close = ReadDouble();
+                long volume = serverVersion < MinServerVer.SyntRealtimeBars ? ReadInt() : ReadLong();
+                double wap = ReadDouble();
 
                 if (serverVersion < MinServerVer.SyntRealtimeBars)
                 {
@@ -2252,7 +2288,7 @@ namespace Wikiled.IB.Market.Api.Client
                     ReadString();
                 }
 
-                var barCount = -1;
+                int barCount = -1;
 
                 if (msgVersion >= 3)
                 {
@@ -2276,68 +2312,70 @@ namespace Wikiled.IB.Market.Api.Client
 
         private void MarketDataTypeEvent()
         {
-            var msgVersion = ReadInt();
-            var requestId = ReadInt();
-            var marketDataType = ReadInt();
+            int msgVersion = ReadInt();
+            int requestId = ReadInt();
+            int marketDataType = ReadInt();
             eWrapper.MarketDataType(requestId, marketDataType);
         }
 
         private void MarketDepthEvent()
         {
-            var msgVersion = ReadInt();
-            var requestId = ReadInt();
-            var position = ReadInt();
-            var operation = ReadInt();
-            var side = ReadInt();
-            var price = ReadDouble();
-            var size = ReadInt();
+            int msgVersion = ReadInt();
+            int requestId = ReadInt();
+            int position = ReadInt();
+            int operation = ReadInt();
+            int side = ReadInt();
+            double price = ReadDouble();
+            int size = ReadInt();
             eWrapper.UpdateMktDepth(requestId, position, operation, side, price, size);
         }
 
         private void MarketDepthL2Event()
         {
-            var msgVersion = ReadInt();
-            var requestId = ReadInt();
-            var position = ReadInt();
-            var marketMaker = ReadString();
-            var operation = ReadInt();
-            var side = ReadInt();
-            var price = ReadDouble();
-            var size = ReadInt();
+            int msgVersion = ReadInt();
+            int requestId = ReadInt();
+            int position = ReadInt();
+            string marketMaker = ReadString();
+            int operation = ReadInt();
+            int side = ReadInt();
+            double price = ReadDouble();
+            int size = ReadInt();
             eWrapper.UpdateMktDepthL2(requestId, position, marketMaker, operation, side, price, size);
         }
 
         private void NewsBulletinsEvent()
         {
-            var msgVersion = ReadInt();
-            var newsMsgId = ReadInt();
-            var newsMsgType = ReadInt();
-            var newsMessage = ReadString();
-            var originatingExch = ReadString();
+            int msgVersion = ReadInt();
+            int newsMsgId = ReadInt();
+            int newsMsgType = ReadInt();
+            string newsMessage = ReadString();
+            string originatingExch = ReadString();
             eWrapper.UpdateNewsBulletin(newsMsgId, newsMsgType, newsMessage, originatingExch);
         }
 
         private void PositionEvent()
         {
-            var msgVersion = ReadInt();
-            var account = ReadString();
-            var contract = new Contract();
-            contract.ConId = ReadInt();
-            contract.Symbol = ReadString();
-            contract.SecType = ReadString();
-            contract.LastTradeDateOrContractMonth = ReadString();
-            contract.Strike = ReadDouble();
-            contract.Right = ReadString();
-            contract.Multiplier = ReadString();
-            contract.Exchange = ReadString();
-            contract.Currency = ReadString();
-            contract.LocalSymbol = ReadString();
+            int msgVersion = ReadInt();
+            string account = ReadString();
+            Contract contract = new Contract
+            {
+                ConId = ReadInt(),
+                Symbol = ReadString(),
+                SecType = ReadEnum<SecType>(),
+                LastTradeDateOrContractMonth = ReadString(),
+                Strike = ReadDouble(),
+                Right = ReadString(),
+                Multiplier = ReadString(),
+                Exchange = ReadEnum<ExchangeType>(),
+                Currency = ReadString(),
+                LocalSymbol = ReadString()
+            };
             if (msgVersion >= 2)
             {
                 contract.TradingClass = ReadString();
             }
 
-            var pos = serverVersion >= MinServerVer.FractionalPositions ? ReadDouble() : ReadInt();
+            double pos = serverVersion >= MinServerVer.FractionalPositions ? ReadDouble() : ReadInt();
             double avgCost = 0;
             if (msgVersion >= 3)
             {
@@ -2349,59 +2387,59 @@ namespace Wikiled.IB.Market.Api.Client
 
         private void PositionEndEvent()
         {
-            var msgVersion = ReadInt();
+            int msgVersion = ReadInt();
             eWrapper.PositionEnd();
         }
 
         private void RealTimeBarsEvent()
         {
-            var msgVersion = ReadInt();
-            var requestId = ReadInt();
-            var time = ReadLong();
-            var open = ReadDouble();
-            var high = ReadDouble();
-            var low = ReadDouble();
-            var close = ReadDouble();
-            var volume = ReadLong();
-            var wap = ReadDouble();
-            var count = ReadInt();
+            int msgVersion = ReadInt();
+            int requestId = ReadInt();
+            long time = ReadLong();
+            double open = ReadDouble();
+            double high = ReadDouble();
+            double low = ReadDouble();
+            double close = ReadDouble();
+            long volume = ReadLong();
+            double wap = ReadDouble();
+            int count = ReadInt();
             eWrapper.RealtimeBar(requestId, time, open, high, low, close, volume, wap, count);
         }
 
         private void ScannerParametersEvent()
         {
-            var msgVersion = ReadInt();
-            var xml = ReadString();
+            int msgVersion = ReadInt();
+            string xml = ReadString();
             eWrapper.ScannerParameters(xml);
         }
 
         private void ScannerDataEvent()
         {
-            var msgVersion = ReadInt();
-            var requestId = ReadInt();
-            var numberOfElements = ReadInt();
-            for (var i = 0; i < numberOfElements; i++)
+            int msgVersion = ReadInt();
+            int requestId = ReadInt();
+            int numberOfElements = ReadInt();
+            for (int i = 0; i < numberOfElements; i++)
             {
-                var rank = ReadInt();
-                var conDet = new ContractDetails();
+                int rank = ReadInt();
+                ContractDetails conDet = new ContractDetails();
                 if (msgVersion >= 3)
                 {
                     conDet.Contract.ConId = ReadInt();
                 }
 
                 conDet.Contract.Symbol = ReadString();
-                conDet.Contract.SecType = ReadString();
+                conDet.Contract.SecType = ReadEnum<SecType>();
                 conDet.Contract.LastTradeDateOrContractMonth = ReadString();
                 conDet.Contract.Strike = ReadDouble();
                 conDet.Contract.Right = ReadString();
-                conDet.Contract.Exchange = ReadString();
+                conDet.Contract.Exchange = ReadEnum<ExchangeType>();
                 conDet.Contract.Currency = ReadString();
                 conDet.Contract.LocalSymbol = ReadString();
                 conDet.MarketName = ReadString();
                 conDet.Contract.TradingClass = ReadString();
-                var distance = ReadString();
-                var benchmark = ReadString();
-                var projection = ReadString();
+                string distance = ReadString();
+                string benchmark = ReadString();
+                string projection = ReadString();
                 string legsStr = null;
                 if (msgVersion >= 2)
                 {
@@ -2422,73 +2460,75 @@ namespace Wikiled.IB.Market.Api.Client
 
         private void ReceiveFaEvent()
         {
-            var msgVersion = ReadInt();
-            var faDataType = ReadInt();
-            var faData = ReadString();
+            int msgVersion = ReadInt();
+            int faDataType = ReadInt();
+            string faData = ReadString();
             eWrapper.ReceiveFa(faDataType, faData);
         }
 
         private void PositionMultiEvent()
         {
-            var msgVersion = ReadInt();
-            var requestId = ReadInt();
-            var account = ReadString();
-            var contract = new Contract();
-            contract.ConId = ReadInt();
-            contract.Symbol = ReadString();
-            contract.SecType = ReadString();
-            contract.LastTradeDateOrContractMonth = ReadString();
-            contract.Strike = ReadDouble();
-            contract.Right = ReadString();
-            contract.Multiplier = ReadString();
-            contract.Exchange = ReadString();
-            contract.Currency = ReadString();
-            contract.LocalSymbol = ReadString();
-            contract.TradingClass = ReadString();
-            var pos = ReadDouble();
-            var avgCost = ReadDouble();
-            var modelCode = ReadString();
+            int msgVersion = ReadInt();
+            int requestId = ReadInt();
+            string account = ReadString();
+            Contract contract = new Contract
+            {
+                ConId = ReadInt(),
+                Symbol = ReadString(),
+                SecType = ReadEnum<SecType>(),
+                LastTradeDateOrContractMonth = ReadString(),
+                Strike = ReadDouble(),
+                Right = ReadString(),
+                Multiplier = ReadString(),
+                Exchange = ReadEnum<ExchangeType>(),
+                Currency = ReadString(),
+                LocalSymbol = ReadString(),
+                TradingClass = ReadString()
+            };
+            double pos = ReadDouble();
+            double avgCost = ReadDouble();
+            string modelCode = ReadString();
             eWrapper.PositionMulti(requestId, account, modelCode, contract, pos, avgCost);
         }
 
         private void PositionMultiEndEvent()
         {
-            var msgVersion = ReadInt();
-            var requestId = ReadInt();
+            int msgVersion = ReadInt();
+            int requestId = ReadInt();
             eWrapper.PositionMultiEnd(requestId);
         }
 
         private void AccountUpdateMultiEvent()
         {
-            var msgVersion = ReadInt();
-            var requestId = ReadInt();
-            var account = ReadString();
-            var modelCode = ReadString();
-            var key = ReadString();
-            var value = ReadString();
-            var currency = ReadString();
+            int msgVersion = ReadInt();
+            int requestId = ReadInt();
+            string account = ReadString();
+            string modelCode = ReadString();
+            string key = ReadString();
+            string value = ReadString();
+            string currency = ReadString();
             eWrapper.AccountUpdateMulti(requestId, account, modelCode, key, value, currency);
         }
 
         private void AccountUpdateMultiEndEvent()
         {
-            var msgVersion = ReadInt();
-            var requestId = ReadInt();
+            int msgVersion = ReadInt();
+            int requestId = ReadInt();
             eWrapper.AccountUpdateMultiEnd(requestId);
         }
 
         public char ReadChar()
         {
-            var str = ReadString();
+            string str = ReadString();
             return str == null ? '\0' : str[0];
         }
 
         private void ReadLastTradeDate(ContractDetails contract, bool isBond)
         {
-            var lastTradeDateOrContractMonth = ReadString();
+            string lastTradeDateOrContractMonth = ReadString();
             if (lastTradeDateOrContractMonth != null)
             {
-                var splitted = Regex.Split(lastTradeDateOrContractMonth, "\\s+");
+                string[] splitted = Regex.Split(lastTradeDateOrContractMonth, "\\s+");
                 if (splitted.Length > 0)
                 {
                     if (isBond)

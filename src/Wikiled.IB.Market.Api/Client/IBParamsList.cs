@@ -48,12 +48,12 @@ namespace Wikiled.IB.Market.Api.Client
         {
             source.AddParameter(value.ConId);
             source.AddParameter(value.Symbol);
-            source.AddParameter(value.SecType);
+            source.AddParameter(value.SecType.ToString());
             source.AddParameter(value.LastTradeDateOrContractMonth);
             source.AddParameter(value.Strike);
             source.AddParameter(value.Right);
             source.AddParameter(value.Multiplier);
-            source.AddParameter(value.Exchange);
+            source.AddParameter(value.Exchange.ToString());
             source.AddParameter(value.PrimaryExch);
             source.AddParameter(value.Currency);
             source.AddParameter(value.LocalSymbol);

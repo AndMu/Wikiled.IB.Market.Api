@@ -5,6 +5,7 @@ namespace Wikiled.IB.Market.Api.Client
     public class EReaderMonitorSignal : IEReaderSignal
     {
         private readonly object cs = new object();
+
         private bool open;
 
         public void IssueSignal()

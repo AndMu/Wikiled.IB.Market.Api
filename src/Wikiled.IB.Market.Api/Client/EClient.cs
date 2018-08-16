@@ -274,12 +274,12 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(requestId);
             paramsList.AddParameter(contract.ConId);
             paramsList.AddParameter(contract.Symbol);
-            paramsList.AddParameter(contract.SecType);
+            paramsList.AddParameter(contract.SecType.ToString());
             paramsList.AddParameter(contract.LastTradeDateOrContractMonth);
             paramsList.AddParameter(contract.Strike);
             paramsList.AddParameter(contract.Right);
             paramsList.AddParameter(contract.Multiplier);
-            paramsList.AddParameter(contract.Exchange);
+            paramsList.AddParameter(contract.Exchange.ToString());
             paramsList.AddParameter(contract.PrimaryExch);
             paramsList.AddParameter(contract.Currency);
             paramsList.AddParameter(contract.LocalSymbol);
@@ -361,12 +361,12 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(reqId);
             paramsList.AddParameter(contract.ConId);
             paramsList.AddParameter(contract.Symbol);
-            paramsList.AddParameter(contract.SecType);
+            paramsList.AddParameter(contract.SecType.ToString());
             paramsList.AddParameter(contract.LastTradeDateOrContractMonth);
             paramsList.AddParameter(contract.Strike);
             paramsList.AddParameter(contract.Right);
             paramsList.AddParameter(contract.Multiplier);
-            paramsList.AddParameter(contract.Exchange);
+            paramsList.AddParameter(contract.Exchange.ToString());
             paramsList.AddParameter(contract.PrimaryExch);
             paramsList.AddParameter(contract.Currency);
             paramsList.AddParameter(contract.LocalSymbol);
@@ -430,12 +430,12 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(reqId);
             paramsList.AddParameter(contract.ConId);
             paramsList.AddParameter(contract.Symbol);
-            paramsList.AddParameter(contract.SecType);
+            paramsList.AddParameter(contract.SecType.ToString());
             paramsList.AddParameter(contract.LastTradeDateOrContractMonth);
             paramsList.AddParameter(contract.Strike);
             paramsList.AddParameter(contract.Right);
             paramsList.AddParameter(contract.Multiplier);
-            paramsList.AddParameter(contract.Exchange);
+            paramsList.AddParameter(contract.Exchange.ToString());
             paramsList.AddParameter(contract.PrimaryExch);
             paramsList.AddParameter(contract.Currency);
             paramsList.AddParameter(contract.LocalSymbol);
@@ -716,12 +716,12 @@ namespace Wikiled.IB.Market.Api.Client
             }
 
             paramsList.AddParameter(contract.Symbol);
-            paramsList.AddParameter(contract.SecType);
+            paramsList.AddParameter(contract.SecType.ToString());
             paramsList.AddParameter(contract.LastTradeDateOrContractMonth);
             paramsList.AddParameter(contract.Strike);
             paramsList.AddParameter(contract.Right);
             paramsList.AddParameter(contract.Multiplier);
-            paramsList.AddParameter(contract.Exchange);
+            paramsList.AddParameter(contract.Exchange.ToString());
             paramsList.AddParameter(contract.Currency);
             paramsList.AddParameter(contract.LocalSymbol);
             if (ServerVersion >= MinServerVer.TradingClass)
@@ -751,7 +751,7 @@ namespace Wikiled.IB.Market.Api.Client
                 return;
             }
 
-            if (!VerifyOrder(order, id, StringsAreEqual(Constants.BagSecType, contract.SecType)))
+            if (!VerifyOrder(order, id, contract.SecType == SecType.BAG))
             {
                 return;
             }
@@ -776,7 +776,7 @@ namespace Wikiled.IB.Market.Api.Client
             }
 
             paramsList.AddParameter(contract.Symbol);
-            paramsList.AddParameter(contract.SecType);
+            paramsList.AddParameter(contract.SecType.ToString());
             paramsList.AddParameter(contract.LastTradeDateOrContractMonth);
             paramsList.AddParameter(contract.Strike);
             paramsList.AddParameter(contract.Right);
@@ -785,7 +785,7 @@ namespace Wikiled.IB.Market.Api.Client
                 paramsList.AddParameter(contract.Multiplier);
             }
 
-            paramsList.AddParameter(contract.Exchange);
+            paramsList.AddParameter(contract.Exchange.ToString());
             if (ServerVersion >= 14)
             {
                 paramsList.AddParameter(contract.PrimaryExch);
@@ -875,7 +875,7 @@ namespace Wikiled.IB.Market.Api.Client
             }
 
             // paramsList.AddParameter combo legs for BAG requests
-            var isBag = StringsAreEqual(Constants.BagSecType, contract.SecType);
+            var isBag = contract.SecType == SecType.BAG;
             if (ServerVersion >= 8 && isBag)
             {
                 if (contract.ComboLegs == null)
@@ -1534,7 +1534,7 @@ namespace Wikiled.IB.Market.Api.Client
             }
 
             paramsList.AddParameter(contract.Symbol);
-            paramsList.AddParameter(contract.SecType);
+            paramsList.AddParameter(contract.SecType.ToString());
             paramsList.AddParameter(contract.LastTradeDateOrContractMonth);
             paramsList.AddParameter(contract.Strike);
             paramsList.AddParameter(contract.Right);
@@ -1545,18 +1545,18 @@ namespace Wikiled.IB.Market.Api.Client
 
             if (ServerVersion >= MinServerVer.Primaryexch)
             {
-                paramsList.AddParameter(contract.Exchange);
+                paramsList.AddParameter(contract.Exchange.ToString());
                 paramsList.AddParameter(contract.PrimaryExch);
             }
             else if (ServerVersion >= MinServerVer.Linking)
             {
-                if (!IsEmpty(contract.PrimaryExch) && (contract.Exchange == "BEST" || contract.Exchange == "SMART"))
+                if (!IsEmpty(contract.PrimaryExch) && (contract.Exchange == ExchangeType.BEST || contract.Exchange == ExchangeType.SMART))
                 {
                     paramsList.AddParameter(contract.Exchange + ":" + contract.PrimaryExch);
                 }
                 else
                 {
-                    paramsList.AddParameter(contract.Exchange);
+                    paramsList.AddParameter(contract.Exchange.ToString());
                 }
             }
 
@@ -1705,8 +1705,8 @@ namespace Wikiled.IB.Market.Api.Client
             }
 
             paramsList.AddParameter(contract.Symbol);
-            paramsList.AddParameter(contract.SecType);
-            paramsList.AddParameter(contract.Exchange);
+            paramsList.AddParameter(contract.SecType.ToString());
+            paramsList.AddParameter(contract.Exchange.ToString());
             paramsList.AddParameter(contract.PrimaryExch);
             paramsList.AddParameter(contract.Currency);
             paramsList.AddParameter(contract.LocalSymbol);
@@ -1841,12 +1841,12 @@ namespace Wikiled.IB.Market.Api.Client
             }
 
             paramsList.AddParameter(contract.Symbol);
-            paramsList.AddParameter(contract.SecType);
+            paramsList.AddParameter(contract.SecType.ToString());
             paramsList.AddParameter(contract.LastTradeDateOrContractMonth);
             paramsList.AddParameter(contract.Strike);
             paramsList.AddParameter(contract.Right);
             paramsList.AddParameter(contract.Multiplier);
-            paramsList.AddParameter(contract.Exchange);
+            paramsList.AddParameter(contract.Exchange.ToString());
             paramsList.AddParameter(contract.PrimaryExch);
             paramsList.AddParameter(contract.Currency);
             paramsList.AddParameter(contract.LocalSymbol);
@@ -1868,7 +1868,7 @@ namespace Wikiled.IB.Market.Api.Client
 
             paramsList.AddParameter(formatDate);
 
-            if (StringsAreEqual(Constants.BagSecType, contract.SecType))
+            if (contract.SecType == SecType.BAG)
             {
                 if (contract.ComboLegs == null)
                 {
@@ -2029,7 +2029,7 @@ namespace Wikiled.IB.Market.Api.Client
             }
 
             paramsList.AddParameter(contract.Symbol);
-            paramsList.AddParameter(contract.SecType);
+            paramsList.AddParameter(contract.SecType.ToString());
             paramsList.AddParameter(contract.LastTradeDateOrContractMonth);
             paramsList.AddParameter(contract.Strike);
             paramsList.AddParameter(contract.Right);
@@ -2039,7 +2039,7 @@ namespace Wikiled.IB.Market.Api.Client
                 paramsList.AddParameter(contract.Multiplier);
             }
 
-            paramsList.AddParameter(contract.Exchange);
+            paramsList.AddParameter(contract.Exchange.ToString());
 
             if (ServerVersion >= 14)
             {
@@ -2058,7 +2058,7 @@ namespace Wikiled.IB.Market.Api.Client
                 paramsList.AddParameter(contract.TradingClass);
             }
 
-            if (ServerVersion >= 8 && Constants.BagSecType.Equals(contract.SecType))
+            if (ServerVersion >= 8 && contract.SecType == SecType.BAG)
             {
                 if (contract.ComboLegs == null)
                 {
@@ -2188,7 +2188,7 @@ namespace Wikiled.IB.Market.Api.Client
             }
 
             paramsList.AddParameter(contract.Symbol);
-            paramsList.AddParameter(contract.SecType);
+            paramsList.AddParameter(contract.SecType.ToString());
             paramsList.AddParameter(contract.LastTradeDateOrContractMonth);
             paramsList.AddParameter(contract.Strike);
             paramsList.AddParameter(contract.Right);
@@ -2198,7 +2198,7 @@ namespace Wikiled.IB.Market.Api.Client
                 paramsList.AddParameter(contract.Multiplier);
             }
 
-            paramsList.AddParameter(contract.Exchange);
+            paramsList.AddParameter(contract.Exchange.ToString());
             paramsList.AddParameter(contract.Currency);
             paramsList.AddParameter(contract.LocalSymbol);
 
@@ -2343,12 +2343,12 @@ namespace Wikiled.IB.Market.Api.Client
             }
 
             paramsList.AddParameter(contract.Symbol);
-            paramsList.AddParameter(contract.SecType);
+            paramsList.AddParameter(contract.SecType.ToString());
             paramsList.AddParameter(contract.LastTradeDateOrContractMonth);
             paramsList.AddParameter(contract.Strike);
             paramsList.AddParameter(contract.Right);
             paramsList.AddParameter(contract.Multiplier);
-            paramsList.AddParameter(contract.Exchange);
+            paramsList.AddParameter(contract.Exchange.ToString());
             paramsList.AddParameter(contract.PrimaryExch);
             paramsList.AddParameter(contract.Currency);
             paramsList.AddParameter(contract.LocalSymbol);

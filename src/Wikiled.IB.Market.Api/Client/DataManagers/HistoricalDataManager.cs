@@ -17,20 +17,20 @@ namespace Wikiled.IB.Market.Api.Client.DataManagers
 
         private List<HistoricalDataMessage> historicalData;
 
-        private IBClient ibClient;
-
         public HistoricalDataManager(IBClient ibClient)
         {
-            this.ibClient = ibClient;
+            this.IbClient = ibClient;
         }
+
+        public IBClient IbClient { get; }
 
         public void AddRequest(Contract contract, string endDateTime, string durationString, string barSizeSetting, string whatToShow, int useRth, int dateFormat, bool keepUpToDate)
         {
             Clear();
-            ibClient.ClientSocket.ReqHistoricalData(CurrentTicker + HistoricalIdBase, contract, endDateTime, durationString, barSizeSetting, whatToShow, useRth, 1, keepUpToDate, new List<TagValue>());
+            IbClient.ClientSocket.ReqHistoricalData(CurrentTicker + HistoricalIdBase, contract, endDateTime, durationString, barSizeSetting, whatToShow, useRth, 1, keepUpToDate, new List<TagValue>());
         }
 
-        public void Clear()
+        public virtual void Clear()
         {
             BarCounter = -1;
             historicalData = new List<HistoricalDataMessage>();

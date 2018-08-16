@@ -6,7 +6,7 @@
 
         public ConnectionStatusMessage(bool isConnected)
         {
-            this.IsConnected = isConnected;
+            IsConnected = isConnected;
         }
     }
 }

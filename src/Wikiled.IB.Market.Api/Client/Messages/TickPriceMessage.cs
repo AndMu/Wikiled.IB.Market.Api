@@ -5,8 +5,8 @@
         public TickPriceMessage(int requestId, int field, double price, TickAttrib attribs)
             : base(requestId, field)
         {
-            this.Price = price;
-            this.Attribs = attribs;
+            Price = price;
+            Attribs = attribs;
         }
 
         public TickAttrib Attribs { get; set; }

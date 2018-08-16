@@ -2,14 +2,14 @@
 {
     public class SymbolSamplesMessage
     {
-        public int ReqId { get; private set; }
+        public int ReqId { get; }
 
-        public ContractDescription[] ContractDescriptions { get; private set; }
+        public ContractDescription[] ContractDescriptions { get; }
 
         public SymbolSamplesMessage(int reqId, ContractDescription[] contractDescriptions)
         {
-            this.ReqId = reqId;
-            this.ContractDescriptions = contractDescriptions;
+            ReqId = reqId;
+            ContractDescriptions = contractDescriptions;
         }
     }
 }

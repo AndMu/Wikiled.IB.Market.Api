@@ -133,8 +133,8 @@ namespace Wikiled.IB.Market.Api.Client
                 this.port = port;
                 SocketTransport = new ESocket(TcpStream);
 
-                this.ClientId = clientId;
-                this.ExtraAuth = extraAuth;
+                ClientId = clientId;
+                ExtraAuth = extraAuth;
 
                 SendConnectRequest();
 
@@ -160,7 +160,6 @@ namespace Wikiled.IB.Market.Api.Client
             catch (EClientException e)
             {
                 var cmp = e.Err;
-
                 Wrapper.Error(-1, cmp.Code, cmp.Message);
             }
             catch (Exception e)
@@ -172,7 +171,6 @@ namespace Wikiled.IB.Market.Api.Client
         protected override uint PrepareBuffer(BinaryWriter paramsList)
         {
             var rval = (uint)paramsList.BaseStream.Position;
-
             if (UseV100Plus)
             {
                 paramsList.Write(0);

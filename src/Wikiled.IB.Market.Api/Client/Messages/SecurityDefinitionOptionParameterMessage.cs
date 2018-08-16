@@ -4,29 +4,29 @@ namespace Wikiled.IB.Market.Api.Client.Messages
 {
     public class SecurityDefinitionOptionParameterMessage
     {
-        public int ReqId { get; private set; }
+        public int ReqId { get; }
 
-        public string Exchange { get; private set; }
+        public string Exchange { get; }
 
-        public int UnderlyingConId { get; private set; }
+        public int UnderlyingConId { get; }
 
-        public string TradingClass { get; private set; }
+        public string TradingClass { get; }
 
-        public string Multiplier { get; private set; }
+        public string Multiplier { get; }
 
-        public HashSet<string> Expirations { get; private set; }
+        public HashSet<string> Expirations { get; }
 
-        public HashSet<double> Strikes { get; private set; }
+        public HashSet<double> Strikes { get; }
 
         public SecurityDefinitionOptionParameterMessage(int reqId, string exchange, int underlyingConId, string tradingClass, string multiplier, HashSet<string> expirations, HashSet<double> strikes)
         {
-            this.ReqId = reqId;
-            this.Exchange = exchange;
-            this.UnderlyingConId = underlyingConId;
-            this.TradingClass = tradingClass;
-            this.Multiplier = multiplier;
-            this.Expirations = expirations;
-            this.Strikes = strikes;
+            ReqId = reqId;
+            Exchange = exchange;
+            UnderlyingConId = underlyingConId;
+            TradingClass = tradingClass;
+            Multiplier = multiplier;
+            Expirations = expirations;
+            Strikes = strikes;
         }
     }
 }

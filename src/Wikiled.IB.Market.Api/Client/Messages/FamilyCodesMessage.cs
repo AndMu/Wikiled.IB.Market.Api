@@ -2,11 +2,11 @@
 {
     public class FamilyCodesMessage
     {
-        public FamilyCode[] FamilyCodes { get; private set; }
+        public FamilyCode[] FamilyCodes { get; }
 
         public FamilyCodesMessage(FamilyCode[] familyCodes)
         {
-            this.FamilyCodes = familyCodes;
+            FamilyCodes = familyCodes;
         }
     }
 }

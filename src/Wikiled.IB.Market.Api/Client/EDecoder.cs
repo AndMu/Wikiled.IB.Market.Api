@@ -119,11 +119,7 @@ namespace Wikiled.IB.Market.Api.Client
 
         public int ParseAndProcessMsg(byte[] buf)
         {
-            if (dataReader != null)
-            {
-                dataReader.Dispose();
-            }
-
+            dataReader?.Dispose();
             dataReader = new BinaryReader(new MemoryStream(buf));
             nDecodedLen = 0;
 
@@ -162,10 +158,7 @@ namespace Wikiled.IB.Market.Api.Client
                 serverTime = ReadString();
             }
 
-            if (eClientMsgSink != null)
-            {
-                eClientMsgSink.ServerVersion(serverVersion, serverTime);
-            }
+            eClientMsgSink?.ServerVersion(serverVersion, serverTime);
 
             eWrapper.ConnectAck();
         }

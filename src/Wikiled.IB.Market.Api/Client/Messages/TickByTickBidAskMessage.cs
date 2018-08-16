@@ -2,19 +2,19 @@ namespace Wikiled.IB.Market.Api.Client.Messages
 {
     public class TickByTickBidAskMessage
     {
-        public int ReqId { get; private set; }
+        public int ReqId { get; }
 
-        public long Time { get; private set; }
+        public long Time { get; }
 
-        public double BidPrice { get; private set; }
+        public double BidPrice { get; }
 
-        public double AskPrice { get; private set; }
+        public double AskPrice { get; }
 
-        public long BidSize { get; private set; }
+        public long BidSize { get; }
 
-        public long AskSize { get; private set; }
+        public long AskSize { get; }
 
-        public TickAttrib Attribs { get; private set; }
+        public TickAttrib Attribs { get; }
 
         public TickByTickBidAskMessage(int reqId, long time, double bidPrice, double askPrice, long bidSize, long askSize, TickAttrib attribs)
         {

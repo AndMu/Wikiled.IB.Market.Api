@@ -2,19 +2,19 @@
 {
     public class HistoricalTickLastMessage
     {
-        public int ReqId { get; private set; }
+        public int ReqId { get; }
 
-        public long Time { get; private set; }
+        public long Time { get; }
 
-        public int Mask { get; private set; }
+        public int Mask { get; }
 
-        public double Price { get; private set; }
+        public double Price { get; }
 
-        public long Size { get; private set; }
+        public long Size { get; }
 
-        public string Exchange { get; private set; }
+        public string Exchange { get; }
 
-        public string SpecialConditions { get; private set; }
+        public string SpecialConditions { get; }
 
         public HistoricalTickLastMessage(int reqId, long time, int mask, double price, long size, string exchange, string specialConditions)
         {

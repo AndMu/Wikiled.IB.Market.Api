@@ -9,12 +9,9 @@ namespace Wikiled.IB.Market.Api.Client
 {
     public class IBClient : IEWrapper
     {
-        private readonly SynchronizationContext sc;
-
         public IBClient(IEReaderSignal signal)
         {
             ClientSocket = new EClientSocket(this, signal);
-            sc = SynchronizationContext.Current;
         }
 
         public int ClientId { get; set; }
@@ -25,92 +22,47 @@ namespace Wikiled.IB.Market.Api.Client
 
         void IEWrapper.Error(Exception e)
         {
-            var tmp = Error;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(0, 0, null, e), null);
-            }
+            Error?.Invoke(0, 0, null, e);
         }
 
         void IEWrapper.Error(string str)
         {
-            var tmp = Error;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(0, 0, str, null), null);
-            }
+            Error?.Invoke(0, 0, str, null);
         }
 
         void IEWrapper.Error(int id, int errorCode, string errorMsg)
         {
-            var tmp = Error;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(id, errorCode, errorMsg, null), null);
-            }
+            Error?.Invoke(id, errorCode, errorMsg, null);
         }
 
         void IEWrapper.ConnectionClosed()
         {
-            var tmp = ConnectionClosed;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(), null);
-            }
+            ConnectionClosed?.Invoke();
         }
 
         void IEWrapper.CurrentTime(long time)
         {
-            var tmp = CurrentTime;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(time), null);
-            }
+            CurrentTime?.Invoke(time);
         }
 
         void IEWrapper.TickPrice(int tickerId, int field, double price, TickAttrib attribs)
         {
-            var tmp = TickPrice;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new TickPriceMessage(tickerId, field, price, attribs)), null);
-            }
+            TickPrice?.Invoke(new TickPriceMessage(tickerId, field, price, attribs));
         }
 
         void IEWrapper.TickSize(int tickerId, int field, int size)
         {
-            var tmp = TickSize;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new TickSizeMessage(tickerId, field, size)), null);
-            }
+            TickSize?.Invoke(new TickSizeMessage(tickerId, field, size));
         }
 
         void IEWrapper.TickString(int tickerId, int tickType, string value)
         {
-            var tmp = TickString;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(tickerId, tickType, value), null);
-            }
+            TickString?.Invoke(tickerId, tickType, value);
         }
 
         void IEWrapper.TickGeneric(int tickerId, int field, double value)
         {
-            var tmp = TickGeneric;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(tickerId, field, value), null);
-            }
+            TickGeneric?.Invoke(tickerId, field, value);
         }
 
         void IEWrapper.TickEfp(int tickerId,
@@ -123,63 +75,35 @@ namespace Wikiled.IB.Market.Api.Client
                                double dividendImpact,
                                double dividendsToLastTradeDate)
         {
-            var tmp = TickEFP;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(tickerId,
-                                 tickType,
-                                 basisPoints,
-                                 formattedBasisPoints,
-                                 impliedFuture,
-                                 holdDays,
-                                 futureLastTradeDate,
-                                 dividendImpact,
-                                 dividendsToLastTradeDate),
-                        null);
-            }
+            TickEFP?.Invoke(tickerId,
+                             tickType,
+                             basisPoints,
+                             formattedBasisPoints,
+                             impliedFuture,
+                             holdDays,
+                             futureLastTradeDate,
+                             dividendImpact,
+                             dividendsToLastTradeDate);
         }
 
         void IEWrapper.TickSnapshotEnd(int tickerId)
         {
-            var tmp = TickSnapshotEnd;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(tickerId), null);
-            }
+            TickSnapshotEnd?.Invoke(tickerId);
         }
 
         void IEWrapper.NextValidId(int orderId)
         {
-            var tmp = NextValidId;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new ConnectionStatusMessage(true)), null);
-            }
-
-            NextOrderId = orderId;
+            NextValidId?.Invoke(new ConnectionStatusMessage(true));
         }
 
         void IEWrapper.DeltaNeutralValidation(int reqId, DeltaNeutralContract deltaNeutralContract)
         {
-            var tmp = DeltaNeutralValidation;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(reqId, deltaNeutralContract), null);
-            }
+            DeltaNeutralValidation?.Invoke(reqId, deltaNeutralContract);
         }
 
         void IEWrapper.ManagedAccounts(string accountsList)
         {
-            var tmp = ManagedAccounts;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new ManagedAccountsMessage(accountsList)), null);
-            }
+            ManagedAccounts?.Invoke(new ManagedAccountsMessage(accountsList));
         }
 
         void IEWrapper.TickOptionComputation(int tickerId,
@@ -193,52 +117,22 @@ namespace Wikiled.IB.Market.Api.Client
                                              double theta,
                                              double undPrice)
         {
-            var tmp = TickOptionCommunication;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new TickOptionMessage(tickerId,
-                                                       field,
-                                                       impliedVolatility,
-                                                       delta,
-                                                       optPrice,
-                                                       pvDividend,
-                                                       gamma,
-                                                       vega,
-                                                       theta,
-                                                       undPrice)),
-                        null);
-            }
+            TickOptionCommunication?.Invoke(new TickOptionMessage(tickerId, field, impliedVolatility, delta, optPrice, pvDividend, gamma, vega, theta, undPrice));
         }
 
         void IEWrapper.AccountSummary(int reqId, string account, string tag, string value, string currency)
         {
-            var tmp = AccountSummary;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new AccountSummaryMessage(reqId, account, tag, value, currency)), null);
-            }
+            AccountSummary?.Invoke(new AccountSummaryMessage(reqId, account, tag, value, currency));
         }
 
         void IEWrapper.AccountSummaryEnd(int reqId)
         {
-            var tmp = AccountSummaryEnd;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new AccountSummaryEndMessage(reqId)), null);
-            }
+            AccountSummaryEnd?.Invoke(new AccountSummaryEndMessage(reqId));
         }
 
         void IEWrapper.UpdateAccountValue(string key, string value, string currency, string accountName)
         {
-            var tmp = UpdateAccountValue;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new AccountValueMessage(key, value, currency, accountName)), null);
-            }
+            UpdateAccountValue?.Invoke(new AccountValueMessage(key, value, currency, accountName));
         }
 
         void IEWrapper.UpdatePortfolio(Contract contract,
@@ -250,40 +144,17 @@ namespace Wikiled.IB.Market.Api.Client
                                        double realizedPNL,
                                        string accountName)
         {
-            var tmp = UpdatePortfolio;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new UpdatePortfolioMessage(contract,
-                                                            position,
-                                                            marketPrice,
-                                                            marketValue,
-                                                            averageCost,
-                                                            unrealizedPNL,
-                                                            realizedPNL,
-                                                            accountName)),
-                        null);
-            }
+            UpdatePortfolio?.Invoke(new UpdatePortfolioMessage(contract, position, marketPrice, marketValue, averageCost, unrealizedPNL, realizedPNL, accountName));
         }
 
         void IEWrapper.UpdateAccountTime(string timestamp)
         {
-            var tmp = UpdateAccountTime;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new UpdateAccountTimeMessage(timestamp)), null);
-            }
+            UpdateAccountTime?.Invoke(new UpdateAccountTimeMessage(timestamp));
         }
 
         void IEWrapper.AccountDownloadEnd(string account)
         {
-            var tmp = AccountDownloadEnd;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new AccountDownloadEndMessage(account)), null);
-            }
+            AccountDownloadEnd?.Invoke(new AccountDownloadEndMessage(account));
         }
 
         void IEWrapper.OrderStatus(int orderId,
@@ -298,142 +169,67 @@ namespace Wikiled.IB.Market.Api.Client
                                    string whyHeld,
                                    double mktCapPrice)
         {
-            var tmp = OrderStatus;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new OrderStatusMessage(orderId,
-                                                        status,
-                                                        filled,
-                                                        remaining,
-                                                        avgFillPrice,
-                                                        permId,
-                                                        parentId,
-                                                        lastFillPrice,
-                                                        clientId,
-                                                        whyHeld,
-                                                        mktCapPrice)),
-                        null);
-            }
+            OrderStatus?.Invoke(new OrderStatusMessage(orderId, status, filled, remaining, avgFillPrice, permId, parentId, lastFillPrice, clientId, whyHeld, mktCapPrice));
         }
 
         void IEWrapper.OpenOrder(int orderId, Contract contract, Order order, OrderState orderState)
         {
-            var tmp = OpenOrder;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new OpenOrderMessage(orderId, contract, order, orderState)), null);
-            }
+            OpenOrder?.Invoke(new OpenOrderMessage(orderId, contract, order, orderState));
         }
 
         void IEWrapper.OpenOrderEnd()
         {
-            var tmp = OpenOrderEnd;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(), null);
-            }
+            OpenOrderEnd?.Invoke();
         }
 
         void IEWrapper.ContractDetails(int reqId, ContractDetails contractDetails)
         {
-            var tmp = ContractDetails;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new ContractDetailsMessage(reqId, contractDetails)), null);
-            }
+            ContractDetails?.Invoke(new ContractDetailsMessage(reqId, contractDetails));
         }
 
         void IEWrapper.ContractDetailsEnd(int reqId)
         {
-            var tmp = ContractDetailsEnd;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(reqId), null);
-            }
+            ContractDetailsEnd?.Invoke(reqId);
         }
 
         void IEWrapper.ExecDetails(int reqId, Contract contract, Execution execution)
         {
-            var tmp = ExecDetails;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new ExecutionMessage(reqId, contract, execution)), null);
-            }
+            ExecDetails?.Invoke(new ExecutionMessage(reqId, contract, execution));
         }
 
         void IEWrapper.ExecDetailsEnd(int reqId)
         {
-            var tmp = ExecDetailsEnd;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(reqId), null);
-            }
+            ExecDetailsEnd?.Invoke(reqId);
         }
 
         void IEWrapper.CommissionReport(CommissionReport commissionReport)
         {
-            var tmp = CommissionReport;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(commissionReport), null);
-            }
+            CommissionReport?.Invoke(commissionReport);
         }
 
         void IEWrapper.FundamentalData(int reqId, string data)
         {
-            var tmp = FundamentalData;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new FundamentalsMessage(data)), null);
-            }
+            FundamentalData?.Invoke(new FundamentalsMessage(data));
         }
 
         void IEWrapper.HistoricalData(int reqId, Bar bar)
         {
-            var tmp = HistoricalData;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new HistoricalDataMessage(reqId, bar)), null);
-            }
+            HistoricalData?.Invoke(new HistoricalDataMessage(reqId, bar));
         }
 
         void IEWrapper.HistoricalDataEnd(int reqId, string startDate, string endDate)
         {
-            var tmp = HistoricalDataEnd;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new HistoricalDataEndMessage(reqId, startDate, endDate)), null);
-            }
+            HistoricalDataEnd?.Invoke(new HistoricalDataEndMessage(reqId, startDate, endDate));
         }
 
         void IEWrapper.MarketDataType(int reqId, int marketDataType)
         {
-            var tmp = MarketDataType;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new MarketDataTypeMessage(reqId, marketDataType)), null);
-            }
+            MarketDataType?.Invoke(new MarketDataTypeMessage(reqId, marketDataType));
         }
 
         void IEWrapper.UpdateMktDepth(int tickerId, int position, int operation, int side, double price, int size)
         {
-            var tmp = UpdateMktDepth;
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new DeepBookMessage(tickerId, position, operation, side, price, size, "")), null);
-            }
+            UpdateMktDepth?.Invoke(new DeepBookMessage(tickerId, position, operation, side, price, size, ""));
         }
 
         void IEWrapper.UpdateMktDepthL2(int tickerId,
@@ -444,43 +240,22 @@ namespace Wikiled.IB.Market.Api.Client
                                         double price,
                                         int size)
         {
-            var tmp = UpdateMktDepthL2;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new DeepBookMessage(tickerId, position, operation, side, price, size, marketMaker)),
-                        null);
-            }
+            UpdateMktDepthL2?.Invoke(new DeepBookMessage(tickerId, position, operation, side, price, size, marketMaker));
         }
 
         void IEWrapper.UpdateNewsBulletin(int msgId, int msgType, string message, string origExchange)
         {
-            var tmp = UpdateNewsBulletin;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(msgId, msgType, message, origExchange), null);
-            }
+            UpdateNewsBulletin?.Invoke(msgId, msgType, message, origExchange);
         }
 
         void IEWrapper.Position(string account, Contract contract, double pos, double avgCost)
         {
-            var tmp = Position;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new PositionMessage(account, contract, pos, avgCost)), null);
-            }
+            Position.Invoke(new PositionMessage(account, contract, pos, avgCost));
         }
 
         void IEWrapper.PositionEnd()
         {
-            var tmp = PositionEnd;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(), null);
-            }
+            PositionEnd?.Invoke();
         }
 
         void IEWrapper.RealtimeBar(int reqId,
@@ -493,23 +268,12 @@ namespace Wikiled.IB.Market.Api.Client
                                    double WAP,
                                    int count)
         {
-            var tmp = RealtimeBar;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new RealTimeBarMessage(reqId, time, open, high, low, close, volume, WAP, count)),
-                        null);
-            }
+            RealtimeBar?.Invoke(new RealTimeBarMessage(reqId, time, open, high, low, close, volume, WAP, count));
         }
 
         void IEWrapper.ScannerParameters(string xml)
         {
-            var tmp = ScannerParameters;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(xml), null);
-            }
+            ScannerParameters?.Invoke(xml);
         }
 
         void IEWrapper.ScannerData(int reqId,
@@ -520,109 +284,52 @@ namespace Wikiled.IB.Market.Api.Client
                                    string projection,
                                    string legsStr)
         {
-            var tmp = ScannerData;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new ScannerMessage(reqId,
-                                                    rank,
-                                                    contractDetails,
-                                                    distance,
-                                                    benchmark,
-                                                    projection,
-                                                    legsStr)),
-                        null);
-            }
+            ScannerData?.Invoke(new ScannerMessage(reqId, rank, contractDetails, distance, benchmark, projection, legsStr));
         }
 
         void IEWrapper.ScannerDataEnd(int reqId)
         {
-            var tmp = ScannerDataEnd;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(reqId), null);
-            }
+            ScannerDataEnd?.Invoke(reqId);
         }
 
         void IEWrapper.ReceiveFa(int faDataType, string faXmlData)
         {
-            var tmp = ReceiveFA;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new AdvisorDataMessage(faDataType, faXmlData)), null);
-            }
+            ReceiveFA?.Invoke(new AdvisorDataMessage(faDataType, faXmlData));
         }
 
         void IEWrapper.BondContractDetails(int requestId, ContractDetails contractDetails)
         {
-            var tmp = BondContractDetails;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new BondContractDetailsMessage(requestId, contractDetails)), null);
-            }
+            BondContractDetails?.Invoke(new BondContractDetailsMessage(requestId, contractDetails));
         }
 
         void IEWrapper.VerifyMessageApi(string ApiData)
         {
-            var tmp = VerifyMessageApi;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(ApiData), null);
-            }
+            VerifyMessageApi?.Invoke(ApiData);
         }
 
         void IEWrapper.VerifyCompleted(bool isSuccessful, string errorText)
         {
-            var tmp = VerifyCompleted;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(isSuccessful, errorText), null);
-            }
+            VerifyCompleted?.Invoke(isSuccessful, errorText);
         }
 
         void IEWrapper.VerifyAndAuthMessageApi(string ApiData, string xyzChallenge)
         {
-            var tmp = VerifyAndAuthMessageApi;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(ApiData, xyzChallenge), null);
-            }
+            VerifyAndAuthMessageApi?.Invoke(ApiData, xyzChallenge);
         }
 
         void IEWrapper.VerifyAndAuthCompleted(bool isSuccessful, string errorText)
         {
-            var tmp = VerifyAndAuthCompleted;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(isSuccessful, errorText), null);
-            }
+            VerifyAndAuthCompleted?.Invoke(isSuccessful, errorText);
         }
 
         void IEWrapper.DisplayGroupList(int reqId, string groups)
         {
-            var tmp = DisplayGroupList;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(reqId, groups), null);
-            }
+            DisplayGroupList?.Invoke(reqId, groups);
         }
 
         void IEWrapper.DisplayGroupUpdated(int reqId, string contractInfo)
         {
-            var tmp = DisplayGroupUpdated;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(reqId, contractInfo), null);
-            }
+            DisplayGroupUpdated?.Invoke(reqId, contractInfo);
         }
 
 
@@ -641,22 +348,12 @@ namespace Wikiled.IB.Market.Api.Client
                                      double pos,
                                      double avgCost)
         {
-            var tmp = PositionMulti;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new PositionMultiMessage(reqId, account, modelCode, contract, pos, avgCost)), null);
-            }
+            PositionMulti?.Invoke(new PositionMultiMessage(reqId, account, modelCode, contract, pos, avgCost));
         }
 
         void IEWrapper.PositionMultiEnd(int reqId)
         {
-            var tmp = PositionMultiEnd;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(reqId), null);
-            }
+            PositionMultiEnd?.Invoke(reqId);
         }
 
         void IEWrapper.AccountUpdateMulti(int reqId,
@@ -666,22 +363,12 @@ namespace Wikiled.IB.Market.Api.Client
                                           string value,
                                           string currency)
         {
-            var tmp = AccountUpdateMulti;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new AccountUpdateMultiMessage(reqId, account, modelCode, key, value, currency)), null);
-            }
+            AccountUpdateMulti?.Invoke(new AccountUpdateMultiMessage(reqId, account, modelCode, key, value, currency));
         }
 
         void IEWrapper.AccountUpdateMultiEnd(int reqId)
         {
-            var tmp = AccountUpdateMultiEnd;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(reqId), null);
-            }
+            AccountUpdateMultiEnd?.Invoke(reqId);
         }
 
         void IEWrapper.SecurityDefinitionOptionParameter(int reqId,
@@ -692,70 +379,32 @@ namespace Wikiled.IB.Market.Api.Client
                                                          HashSet<string> expirations,
                                                          HashSet<double> strikes)
         {
-            var tmp = SecurityDefinitionOptionParameter;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new SecurityDefinitionOptionParameterMessage(
-                                     reqId,
-                                     exchange,
-                                     underlyingConId,
-                                     tradingClass,
-                                     multiplier,
-                                     expirations,
-                                     strikes)),
-                        null);
-            }
+            SecurityDefinitionOptionParameter?.Invoke(new SecurityDefinitionOptionParameterMessage(reqId, exchange, underlyingConId, tradingClass, multiplier, expirations, strikes));
         }
 
         void IEWrapper.SecurityDefinitionOptionParameterEnd(int reqId)
         {
-            var tmp = SecurityDefinitionOptionParameterEnd;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(reqId), null);
-            }
+            SecurityDefinitionOptionParameterEnd?.Invoke(reqId);
         }
 
         void IEWrapper.SoftDollarTiers(int reqId, SoftDollarTier[] tiers)
         {
-            var tmp = SoftDollarTiers;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new SoftDollarTiersMessage(reqId, tiers)), null);
-            }
+            SoftDollarTiers?.Invoke(new SoftDollarTiersMessage(reqId, tiers));
         }
 
         void IEWrapper.FamilyCodes(FamilyCode[] familyCodes)
         {
-            var tmp = FamilyCodes;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(familyCodes), null);
-            }
+            FamilyCodes?.Invoke(familyCodes);
         }
 
         void IEWrapper.SymbolSamples(int reqId, ContractDescription[] contractDescriptions)
         {
-            var tmp = SymbolSamples;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new SymbolSamplesMessage(reqId, contractDescriptions)), null);
-            }
+            SymbolSamples?.Invoke(new SymbolSamplesMessage(reqId, contractDescriptions));
         }
 
         void IEWrapper.MktDepthExchanges(DepthMktDataDescription[] depthMktDataDescriptions)
         {
-            var tmp = MktDepthExchanges;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(depthMktDataDescriptions), null);
-            }
+            MktDepthExchanges?.Invoke(depthMktDataDescriptions);
         }
 
         void IEWrapper.TickNews(int tickerId,
@@ -765,54 +414,27 @@ namespace Wikiled.IB.Market.Api.Client
                                 string headline,
                                 string extraData)
         {
-            var tmp = TickNews;
-
-            if (tmp != null)
-            {
-                sc.Post(
-                    t => tmp(new TickNewsMessage(tickerId, timeStamp, providerCode, articleId, headline, extraData)),
-                    null);
-            }
+            TickNews?.Invoke(new TickNewsMessage(tickerId, timeStamp, providerCode, articleId, headline, extraData));
         }
 
         void IEWrapper.SmartComponents(int reqId, Dictionary<int, KeyValuePair<string, char>> theMap)
         {
-            var tmp = SmartComponents;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(reqId, theMap), null);
-            }
+            SmartComponents?.Invoke(reqId, theMap);
         }
 
         void IEWrapper.TickReqParams(int tickerId, double minTick, string bboExchange, int snapshotPermissions)
         {
-            var tmp = TickReqParams;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new TickReqParamsMessage(tickerId, minTick, bboExchange, snapshotPermissions)), null);
-            }
+            TickReqParams?.Invoke(new TickReqParamsMessage(tickerId, minTick, bboExchange, snapshotPermissions));
         }
 
         void IEWrapper.NewsProviders(NewsProvider[] newsProviders)
         {
-            var tmp = NewsProviders;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(newsProviders), null);
-            }
+            NewsProviders?.Invoke(newsProviders);
         }
 
         void IEWrapper.NewsArticle(int requestId, int articleType, string articleText)
         {
-            var tmp = NewsArticle;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new NewsArticleMessage(requestId, articleType, articleText)), null);
-            }
+            NewsArticle?.Invoke(new NewsArticleMessage(requestId, articleType, articleText));
         }
 
         void IEWrapper.HistoricalNews(int requestId,
@@ -821,92 +443,47 @@ namespace Wikiled.IB.Market.Api.Client
                                       string articleId,
                                       string headline)
         {
-            var tmp = HistoricalNews;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new HistoricalNewsMessage(requestId, time, providerCode, articleId, headline)), null);
-            }
+            HistoricalNews?.Invoke(new HistoricalNewsMessage(requestId, time, providerCode, articleId, headline));
         }
 
         void IEWrapper.HistoricalNewsEnd(int requestId, bool hasMore)
         {
-            var tmp = HistoricalNewsEnd;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new HistoricalNewsEndMessage(requestId, hasMore)), null);
-            }
+            HistoricalNewsEnd?.Invoke(new HistoricalNewsEndMessage(requestId, hasMore));
         }
 
         void IEWrapper.HeadTimestamp(int reqId, string headTimestamp)
         {
-            var tmp = HeadTimestamp;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new HeadTimestampMessage(reqId, headTimestamp)), null);
-            }
+            HeadTimestamp?.Invoke(new HeadTimestampMessage(reqId, headTimestamp));
         }
 
         void IEWrapper.HistogramData(int reqId, HistogramEntry[] data)
         {
-            var tmp = HistogramData;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new HistogramDataMessage(reqId, data)), null);
-            }
+            HistogramData?.Invoke(new HistogramDataMessage(reqId, data));
         }
 
         void IEWrapper.HistoricalDataUpdate(int reqId, Bar bar)
         {
-            var tmp = HistoricalDataUpdate;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new HistoricalDataMessage(reqId, bar)), null);
-            }
+            HistoricalDataUpdate?.Invoke(new HistoricalDataMessage(reqId, bar));
         }
 
         void IEWrapper.RerouteMktDataReq(int reqId, int conId, string exchange)
         {
-            var tmp = RerouteMktDataReq;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(reqId, conId, exchange), null);
-            }
+            RerouteMktDataReq?.Invoke(reqId, conId, exchange);
         }
 
         void IEWrapper.RerouteMktDepthReq(int reqId, int conId, string exchange)
         {
-            var tmp = RerouteMktDepthReq;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(reqId, conId, exchange), null);
-            }
+            RerouteMktDepthReq?.Invoke(reqId, conId, exchange);
         }
 
         void IEWrapper.MarketRule(int marketRuleId, PriceIncrement[] priceIncrements)
         {
-            var tmp = MarketRule;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new MarketRuleMessage(marketRuleId, priceIncrements)), null);
-            }
+            MarketRule?.Invoke(new MarketRuleMessage(marketRuleId, priceIncrements));
         }
 
         void IEWrapper.Pnl(int reqId, double dailyPnL, double unrealizedPnL, double realizedPnL)
         {
-            var tmp = pnl;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new PnLMessage(reqId, dailyPnL, unrealizedPnL, realizedPnL)), null);
-            }
+            pnl?.Invoke(new PnLMessage(reqId, dailyPnL, unrealizedPnL, realizedPnL));
         }
 
         void IEWrapper.PnlSingle(int reqId,
@@ -916,65 +493,39 @@ namespace Wikiled.IB.Market.Api.Client
                                  double realizedPnL,
                                  double value)
         {
-            var tmp = pnlSingle;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new PnLSingleMessage(reqId, pos, dailyPnL, unrealizedPnL, realizedPnL, value)), null);
-            }
+            pnlSingle?.Invoke(new PnLSingleMessage(reqId, pos, dailyPnL, unrealizedPnL, realizedPnL, value));
         }
 
         void IEWrapper.HistoricalTicks(int reqId, HistoricalTick[] ticks, bool done)
         {
-            var tmp = historicalTick;
-
-            if (tmp != null)
-            {
-                ticks.ToList()
-                    .ForEach(tick => sc.Post(
-                                 t => tmp(new HistoricalTickMessage(reqId, tick.Time, tick.Price, tick.Size)),
-                                 null));
-            }
+            ticks.ToList()
+                .ForEach(tick => historicalTick?.Invoke(new HistoricalTickMessage(reqId, tick.Time, tick.Price, tick.Size)));
         }
 
         void IEWrapper.HistoricalTicksBidAsk(int reqId, HistoricalTickBidAsk[] ticks, bool done)
         {
-            var tmp = historicalTickBidAsk;
-
-            if (tmp != null)
-            {
-                ticks.ToList()
-                    .ForEach(tick => sc.Post(t =>
-                                                 tmp(new HistoricalTickBidAskMessage(
-                                                         reqId,
-                                                         tick.Time,
-                                                         tick.Mask,
-                                                         tick.PriceBid,
-                                                         tick.PriceAsk,
-                                                         tick.SizeBid,
-                                                         tick.SizeAsk)),
-                                             null));
-            }
+            ticks.ToList()
+                .ForEach(tick => historicalTickBidAsk?.Invoke(new HistoricalTickBidAskMessage(
+                                                     reqId,
+                                                     tick.Time,
+                                                     tick.Mask,
+                                                     tick.PriceBid,
+                                                     tick.PriceAsk,
+                                                     tick.SizeBid,
+                                                     tick.SizeAsk)));
         }
 
         void IEWrapper.HistoricalTicksLast(int reqId, HistoricalTickLast[] ticks, bool done)
         {
-            var tmp = historicalTickLast;
-
-            if (tmp != null)
-            {
-                ticks.ToList()
-                    .ForEach(tick => sc.Post(t =>
-                                                 tmp(new HistoricalTickLastMessage(
-                                                         reqId,
-                                                         tick.Time,
-                                                         tick.Mask,
-                                                         tick.Price,
-                                                         tick.Size,
-                                                         tick.Exchange,
-                                                         tick.SpecialConditions)),
-                                             null));
-            }
+            ticks.ToList()
+                .ForEach(tick => historicalTickLast?.Invoke(new HistoricalTickLastMessage(
+                                                     reqId,
+                                                     tick.Time,
+                                                     tick.Mask,
+                                                     tick.Price,
+                                                     tick.Size,
+                                                     tick.Exchange,
+                                                     tick.SpecialConditions)));
         }
 
         void IEWrapper.TickByTickAllLast(int reqId,
@@ -986,20 +537,7 @@ namespace Wikiled.IB.Market.Api.Client
                                          string exchange,
                                          string specialConditions)
         {
-            var tmp = tickByTickAllLast;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new TickByTickAllLastMessage(reqId,
-                                                              tickType,
-                                                              time,
-                                                              price,
-                                                              size,
-                                                              attribs,
-                                                              exchange,
-                                                              specialConditions)),
-                        null);
-            }
+            tickByTickAllLast?.Invoke(new TickByTickAllLastMessage(reqId, tickType, time, price, size, attribs, exchange, specialConditions));
         }
 
         void IEWrapper.TickByTickBidAsk(int reqId,
@@ -1010,24 +548,12 @@ namespace Wikiled.IB.Market.Api.Client
                                         int askSize,
                                         TickAttrib attribs)
         {
-            var tmp = tickByTickBidAsk;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(
-                            new TickByTickBidAskMessage(reqId, time, bidPrice, askPrice, bidSize, askSize, attribs)),
-                        null);
-            }
+            tickByTickBidAsk?.Invoke(new TickByTickBidAskMessage(reqId, time, bidPrice, askPrice, bidSize, askSize, attribs));
         }
 
         void IEWrapper.TickByTickMidPoint(int reqId, long time, double midPoint)
         {
-            var tmp = tickByTickMidPoint;
-
-            if (tmp != null)
-            {
-                sc.Post(t => tmp(new TickByTickMidPointMessage(reqId, time, midPoint)), null);
-            }
+            tickByTickMidPoint?.Invoke(new TickByTickMidPointMessage(reqId, time, midPoint));
         }
 
         public Task<Contract> ResolveContractAsync(int conId, ExchangeType refExch)

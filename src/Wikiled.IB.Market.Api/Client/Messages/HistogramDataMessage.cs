@@ -2,9 +2,9 @@
 {
     public class HistogramDataMessage
     {
-        public int ReqId { get; private set; }
+        public int ReqId { get; }
 
-        public HistogramEntry[] Data { get; private set; }
+        public HistogramEntry[] Data { get; }
 
         public HistogramDataMessage(int reqId, HistogramEntry[] data)
         {

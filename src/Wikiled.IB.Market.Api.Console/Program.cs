@@ -32,15 +32,15 @@ namespace Wikiled.IB.Market.Api.Console
                 }
             }) { IsBackground = true }.Start();
 
-
+            await Task.Delay(5000).ConfigureAwait(false);
             Contract contract = GetMDContract();
             string endTime = "20130808 23:59:59 GMT";
-            string duration = "10 D";
+            string duration = "2 D";
             string barSize = "1 day";
             string whatToShow = "MIDPOINT";
             int outsideRTH = false ? 1 : 0;
             historicalDataManager.AddRequest(contract, endTime, duration, barSize, whatToShow, outsideRTH, 1, false);
-            await Task.Delay(5000).ConfigureAwait(false);
+            await Task.Delay(500000).ConfigureAwait(false);
             ibClient.ClientSocket.EDisconnect();
             
         }
@@ -50,7 +50,7 @@ namespace Wikiled.IB.Market.Api.Console
             Contract contract = new Contract();
             contract.SecType = SecType.STK;
             contract.Symbol = "AMD";
-            contract.Exchange = ExchangeType.SMART;
+            contract.Exchange = ExchangeType.ISLAND;
             contract.Currency = "USD";
             //contract.LastTradeDateOrContractMonth = null;
             //contract.PrimaryExch = null;

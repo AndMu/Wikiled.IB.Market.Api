@@ -6,7 +6,7 @@ namespace Wikiled.IB.Market.Api.Client.Messages
     {
         public ManagedAccountsMessage(string managedAccounts)
         {
-            this.ManagedAccounts = new List<string>(managedAccounts.Split(','));
+            ManagedAccounts = new List<string>(managedAccounts.Split(','));
         }
 
         public List<string> ManagedAccounts { get; set; }

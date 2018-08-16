@@ -19,7 +19,7 @@ namespace Wikiled.IB.Market.Api.Client.DataManagers
 
         public HistoricalDataManager(IBClient ibClient)
         {
-            this.IbClient = ibClient;
+            IbClient = ibClient;
         }
 
         public IBClient IbClient { get; }

@@ -2,13 +2,13 @@
 {
     public class SoftDollarTiersMessage
     {
-        public int ReqId { get; private set; }
-        public SoftDollarTier[] Tiers { get; private set; }
+        public int ReqId { get; }
+        public SoftDollarTier[] Tiers { get; }
 
         public SoftDollarTiersMessage(int reqId, SoftDollarTier[] tiers)
         {
-            this.ReqId = reqId;
-            this.Tiers = tiers;
+            ReqId = reqId;
+            Tiers = tiers;
         }
     }
 }

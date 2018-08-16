@@ -2,17 +2,17 @@ namespace Wikiled.IB.Market.Api.Client.Messages
 {
     public class NewsArticleMessage
     {
-        public int RequestId { get; private set; }
+        public int RequestId { get; }
 
-        public int ArticleType { get; private set; }
+        public int ArticleType { get; }
 
-        public string ArticleText { get; private set; }
+        public string ArticleText { get; }
 
         public NewsArticleMessage(int requestId, int articleType, string articleText)
         {
-            this.RequestId = requestId;
-            this.ArticleType = articleType;
-            this.ArticleText = articleText;
+            RequestId = requestId;
+            ArticleType = articleType;
+            ArticleText = articleText;
         }
     }
 }

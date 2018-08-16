@@ -5,13 +5,13 @@ namespace Wikiled.IB.Market.Api.Client.Messages
 {
     public class TickReqParamsMessage
     {
-        public int TickerId { get; private set; }
+        public int TickerId { get; }
 
-        public double MinTick { get; private set; }
+        public double MinTick { get; }
 
-        public string BboExchange { get; private set; }
+        public string BboExchange { get; }
 
-        public int SnapshotPermissions { get; private set; }
+        public int SnapshotPermissions { get; }
 
         public TickReqParamsMessage(int tickerId, double minTick, string bboExchange, int snapshotPermissions)
         {

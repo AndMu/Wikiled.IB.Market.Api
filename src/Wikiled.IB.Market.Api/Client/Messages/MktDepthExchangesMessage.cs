@@ -2,11 +2,11 @@
 {
     public class MktDepthExchangesMessage
     {
-        public DepthMktDataDescription[] Descriptions { get; private set; }
+        public DepthMktDataDescription[] Descriptions { get; }
 
         public MktDepthExchangesMessage(DepthMktDataDescription[] descriptions)
         {
-            this.Descriptions = descriptions;
+            Descriptions = descriptions;
         }
     }
 }

@@ -2,17 +2,17 @@
 {
     public class PnLSingleMessage
     {
-        public int ReqId { get; private set; }
+        public int ReqId { get; }
 
-        public int Pos { get; private set; }
+        public int Pos { get; }
 
-        public double DailyPnL { get; private set; }
+        public double DailyPnL { get; }
 
-        public double Value { get; private set; }
+        public double Value { get; }
 
-        public double UnrealizedPnL { get; private set; }
+        public double UnrealizedPnL { get; }
 
-        public double RealizedPnL { get; private set; }
+        public double RealizedPnL { get; }
 
         public PnLSingleMessage(int reqId, int pos, double dailyPnL, double unrealizedPnL, double realizedPnL, double value)
         {

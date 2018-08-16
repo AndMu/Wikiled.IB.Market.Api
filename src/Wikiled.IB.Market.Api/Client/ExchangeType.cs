@@ -4,6 +4,7 @@
     {
         IDEALPRO,
         SMART,
-        BEST
+        BEST,
+        ISLAND // NASDAQ
     }
 }

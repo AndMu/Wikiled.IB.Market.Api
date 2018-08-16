@@ -2,13 +2,13 @@
 {
     public class HeadTimestampMessage
     {
-        public int ReqId { get; private set; }
-        public string HeadTimestamp { get; private set; }
+        public int ReqId { get; }
+        public string HeadTimestamp { get; }
 
         public HeadTimestampMessage(int reqId, string headTimestamp)
         {
-            this.ReqId = reqId;
-            this.HeadTimestamp = headTimestamp;
+            ReqId = reqId;
+            HeadTimestamp = headTimestamp;
         }
     }
 }

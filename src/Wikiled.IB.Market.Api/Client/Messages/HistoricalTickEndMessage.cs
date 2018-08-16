@@ -2,7 +2,7 @@
 {
     public class HistoricalTickEndMessage
     {
-        public int ReqId { get; private set; }
+        public int ReqId { get; }
 
         public HistoricalTickEndMessage(int reqId)
         {

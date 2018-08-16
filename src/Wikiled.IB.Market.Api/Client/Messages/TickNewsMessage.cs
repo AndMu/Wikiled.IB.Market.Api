@@ -2,26 +2,26 @@ namespace Wikiled.IB.Market.Api.Client.Messages
 {
     public class TickNewsMessage
     {
-        public int TickerId { get; private set; }
+        public int TickerId { get; }
 
-        public long TimeStamp { get; private set; }
+        public long TimeStamp { get; }
 
-        public string ProviderCode { get; private set; }
+        public string ProviderCode { get; }
 
-        public string ArticleId { get; private set; }
+        public string ArticleId { get; }
         
-        public string Headline { get; private set; }
+        public string Headline { get; }
 
-        public string ExtraData { get; private set; }
+        public string ExtraData { get; }
 
         public TickNewsMessage(int tickerId, long timeStamp, string providerCode, string articleId, string headline, string extraData)
         {
-            this.TickerId = tickerId;
-            this.TimeStamp = timeStamp;
-            this.ProviderCode = providerCode;
-            this.ArticleId = articleId;
-            this.Headline = headline;
-            this.ExtraData = extraData;
+            TickerId = tickerId;
+            TimeStamp = timeStamp;
+            ProviderCode = providerCode;
+            ArticleId = articleId;
+            Headline = headline;
+            ExtraData = extraData;
         }
     }
 }

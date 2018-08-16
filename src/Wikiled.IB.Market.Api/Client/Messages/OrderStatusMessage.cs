@@ -2,23 +2,23 @@
 {
     public class OrderStatusMessage : OrderMessage
     {
-        public string Status { get; private set; }
+        public string Status { get; }
 
-        public double Filled { get; private set; }
+        public double Filled { get; }
 
-        public double Remaining { get; private set; }
+        public double Remaining { get; }
 
-        public double AvgFillPrice { get; private set; }
+        public double AvgFillPrice { get; }
 
-        public int PermId { get; private set; }
+        public int PermId { get; }
 
-        public int ParentId { get; private set; }
+        public int ParentId { get; }
 
-        public double LastFillPrice { get; private set; }
+        public double LastFillPrice { get; }
 
-        public int ClientId { get; private set; }
+        public int ClientId { get; }
 
-        public string WhyHeld { get; private set; }
+        public string WhyHeld { get; }
 
         public double MktCapPrice { get; private set; }
 

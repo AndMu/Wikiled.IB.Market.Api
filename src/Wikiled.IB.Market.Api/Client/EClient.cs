@@ -40,9 +40,9 @@ namespace Wikiled.IB.Market.Api.Client
          * @param Wrapper EWrapper's implementing class instance. Every message being delivered by IB to the API client will be forwarded to the EWrapper's implementing class.
          * @sa EWrapper
          */
-        protected EClient(IEWrapper Wrapper)
+        protected EClient(IEWrapper wrapper)
         {
-            Wrapper = Wrapper;
+            Wrapper = wrapper;
             ClientId = -1;
             ExtraAuth = false;
             IsConnected = false;

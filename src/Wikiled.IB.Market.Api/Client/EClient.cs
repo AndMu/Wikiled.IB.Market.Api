@@ -2301,12 +2301,7 @@ namespace Wikiled.IB.Market.Api.Client
          * @param useRTH set to 0 to obtain the data which was also generated ourside of the Regular Trading Hours, set to 1 to obtain only the RTH data
          * @sa cancelRealTimeBars, EWrapper::realtimeBar
          */
-        public void ReqRealTimeBars(int tickerId,
-                                    Contract contract,
-                                    int barSize,
-                                    string whatToShow,
-                                    bool useRth,
-                                    List<TagValue> realTimeBarsOptions)
+        public void ReqRealTimeBars(int tickerId, Contract contract, int barSize, WhatToShow whatToShow, bool useRth, List<TagValue> realTimeBarsOptions)
         {
             if (!CheckConnection())
             {
@@ -2320,9 +2315,7 @@ namespace Wikiled.IB.Market.Api.Client
 
             if (!IsEmpty(contract.TradingClass) || contract.ConId > 0)
             {
-                if (!CheckServerVersion(tickerId,
-                                        MinServerVer.TradingClass,
-                                        " It does not support ConId nor TradingClass parameters in reqRealTimeBars."))
+                if (!CheckServerVersion(tickerId, MinServerVer.TradingClass, " It does not support ConId nor TradingClass parameters in reqRealTimeBars."))
                 {
                     return;
                 }
@@ -2359,7 +2352,7 @@ namespace Wikiled.IB.Market.Api.Client
             }
 
             paramsList.AddParameter(barSize); // this parameter is not currently used
-            paramsList.AddParameter(whatToShow);
+            paramsList.AddParameter(whatToShow.ToString());
             paramsList.AddParameter(useRth);
 
             if (ServerVersion >= MinServerVer.Linking)

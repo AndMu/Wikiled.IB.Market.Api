@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Wikiled.IB.Market.Api.Client.Messages;
 
 namespace Wikiled.IB.Market.Api.Client
@@ -22,17 +20,17 @@ namespace Wikiled.IB.Market.Api.Client
 
         void IEWrapper.Error(Exception e)
         {
-            Error?.Invoke(0, 0, null, e);
+            Error?.Invoke(new ErrorDescription(e));
         }
 
         void IEWrapper.Error(string str)
         {
-            Error?.Invoke(0, 0, str, null);
+            Error?.Invoke(new ErrorDescription(0, 0, str));
         }
 
         void IEWrapper.Error(int id, int errorCode, string errorMsg)
         {
-            Error?.Invoke(id, errorCode, errorMsg, null);
+            Error?.Invoke(new ErrorDescription(id, errorCode, errorMsg));
         }
 
         void IEWrapper.ConnectionClosed()
@@ -407,12 +405,7 @@ namespace Wikiled.IB.Market.Api.Client
             MktDepthExchanges?.Invoke(depthMktDataDescriptions);
         }
 
-        void IEWrapper.TickNews(int tickerId,
-                                long timeStamp,
-                                string providerCode,
-                                string articleId,
-                                string headline,
-                                string extraData)
+        void IEWrapper.TickNews(int tickerId, long timeStamp,  string providerCode, string articleId, string headline,  string extraData)
         {
             TickNews?.Invoke(new TickNewsMessage(tickerId, timeStamp, providerCode, articleId, headline, extraData));
         }
@@ -429,7 +422,7 @@ namespace Wikiled.IB.Market.Api.Client
 
         void IEWrapper.NewsProviders(NewsProvider[] newsProviders)
         {
-            NewsProviders?.Invoke(newsProviders);
+            NewsProviders?.Invoke(new NewsProvidersMessage(newsProviders));
         }
 
         void IEWrapper.NewsArticle(int requestId, int articleType, string articleText)
@@ -555,114 +548,8 @@ namespace Wikiled.IB.Market.Api.Client
         {
             tickByTickMidPoint?.Invoke(new TickByTickMidPointMessage(reqId, time, midPoint));
         }
-
-        public Task<Contract> ResolveContractAsync(int conId, ExchangeType refExch)
-        {
-            var reqId = new Random(DateTime.UtcNow.Millisecond).Next();
-            var resolveResult = new TaskCompletionSource<Contract>();
-            var resolveContractError = new Action<int, int, string, Exception>((id, code, msg, ex) =>
-            {
-                if (reqId != id)
-                {
-                    return;
-                }
-
-                resolveResult.SetResult(null);
-            });
-
-            var resolveContract = new Action<ContractDetailsMessage>(msg =>
-            {
-                if (msg.RequestId == reqId)
-                {
-                    resolveResult.SetResult(msg.ContractDetails.Contract);
-                }
-            });
-            var contractDetailsEnd = new Action<int>(id =>
-            {
-                if (reqId == id && !resolveResult.Task.IsCompleted)
-                {
-                    resolveResult.SetResult(null);
-                }
-            });
-
-            var tmpError = Error;
-            var tmpContractDetails = ContractDetails;
-            var tmpContractDetailsEnd = ContractDetailsEnd;
-
-            Error = resolveContractError;
-            ContractDetails = resolveContract;
-            ContractDetailsEnd = contractDetailsEnd;
-
-            resolveResult.Task.ContinueWith(t =>
-            {
-                Error = tmpError;
-                ContractDetails = tmpContractDetails;
-                ContractDetailsEnd = tmpContractDetailsEnd;
-            });
-
-            ClientSocket.ReqContractDetails(reqId, new Contract { ConId = conId, Exchange = refExch });
-            return resolveResult.Task;
-        }
-
-        public Task<Contract[]> ResolveContractAsync(SecType secType, string symbol, string currency, ExchangeType exchange)
-        {
-            var reqId = new Random(DateTime.UtcNow.Millisecond).Next();
-            var res = new TaskCompletionSource<Contract[]>();
-            var contractList = new List<Contract>();
-            var resolveContract_Error = new Action<int, int, string, Exception>((id, code, msg, ex) =>
-            {
-                if (reqId != id)
-                {
-                    return;
-                }
-
-                res.SetResult(new Contract[0]);
-            });
-            var contractDetails = new Action<ContractDetailsMessage>(msg =>
-            {
-                if (reqId != msg.RequestId)
-                {
-                    return;
-                }
-
-                contractList.Add(msg.ContractDetails.Contract);
-            });
-            var contractDetailsEnd = new Action<int>(id =>
-            {
-                if (reqId == id)
-                {
-                    res.SetResult(contractList.ToArray());
-                }
-            });
-
-            var tmpError = Error;
-            var tmpContractDetails = ContractDetails;
-            var tmpContractDetailsEnd = ContractDetailsEnd;
-
-            Error = resolveContract_Error;
-            ContractDetails = contractDetails;
-            ContractDetailsEnd = contractDetailsEnd;
-
-            res.Task.ContinueWith(t =>
-            {
-                Error = tmpError;
-                ContractDetails = tmpContractDetails;
-                ContractDetailsEnd = tmpContractDetailsEnd;
-            });
-
-            ClientSocket.ReqContractDetails(reqId,
-                                            new Contract
-                                            {
-                                                SecType = secType,
-                                                Symbol = symbol,
-                                                Currency = currency,
-                                                Exchange = exchange
-                                            });
-
-            return res.Task;
-        }
-
-        public event Action<int, int, string, Exception> Error;
+     
+        public event Action<ErrorDescription> Error;
 
         public event Action ConnectionClosed;
 
@@ -785,7 +672,7 @@ namespace Wikiled.IB.Market.Api.Client
 
         public event Action<TickReqParamsMessage> TickReqParams;
 
-        public event Action<NewsProvider[]> NewsProviders;
+        public event Action<NewsProvidersMessage> NewsProviders;
 
         public event Action<NewsArticleMessage> NewsArticle;
 

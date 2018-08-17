@@ -1,6 +1,6 @@
 namespace Wikiled.IB.Market.Api.Client.Messages
 {
-    public class NewsProvidersMessage
+    public class NewsProvidersMessage : IMessage
     {
         public NewsProvider[] NewsProviders { get; }
 
@@ -8,5 +8,7 @@ namespace Wikiled.IB.Market.Api.Client.Messages
         {
             NewsProviders = newsProviders;
         }
+
+        public int RequestId => 90020000;
     }
 }

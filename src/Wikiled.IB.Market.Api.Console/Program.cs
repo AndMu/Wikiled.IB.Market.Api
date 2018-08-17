@@ -1,4 +1,5 @@
-﻿using System.Reactive.Linq;
+﻿using System;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Wikiled.IB.Market.Api.Client;
@@ -14,13 +15,19 @@ namespace Wikiled.IB.Market.Api.Console
                 client.Connect("127.0.0.1", 7496, 1);
                 string endTime = "20130808 23:59:59 GMT";
                 string duration = "2 D";
-                string barSize = "1 day";
+                string barSize = "1 min";
                 string whatToShow = "MIDPOINT";
                 int outsideRTH = false ? 1 : 0;
-                var amd = client.GetHistoricalManager().Request(GetMDContract("AMD"), endTime, duration, barSize, whatToShow, outsideRTH, 1, false);
-                var ms = client.GetHistoricalManager().Request(GetMDContract("MSFT"), endTime, duration, barSize, whatToShow, outsideRTH, 1, false);
+                var amd = client.GetHistorical().Request(GetMDContract("AMD"), endTime, duration, barSize, whatToShow, outsideRTH, 1, false);
+                var ms = client.GetHistorical().Request(GetMDContract("MSFT"), endTime, duration, barSize, whatToShow, outsideRTH, 1, false);
                 var dataAmd = await amd.ToArray();
                 var dataMS = await ms.ToArray();
+                var realTime = client.GetRealtime();
+                var stream = realTime.Request(GetMDContract("AMD"), WhatToShow.BID);
+                var subscription = stream.Subscribe(item => { System.Console.WriteLine(item); });
+                await Task.Delay(5000).ConfigureAwait(false);
+                realTime.Cancel();
+                subscription.Dispose();
             }
         }
 

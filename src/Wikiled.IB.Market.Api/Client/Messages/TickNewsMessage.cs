@@ -1,6 +1,6 @@
 namespace Wikiled.IB.Market.Api.Client.Messages
 {
-    public class TickNewsMessage
+    public class TickNewsMessage : IMessage
     {
         public int TickerId { get; }
 
@@ -23,5 +23,7 @@ namespace Wikiled.IB.Market.Api.Client.Messages
             Headline = headline;
             ExtraData = extraData;
         }
+
+        public int RequestId { get; }
     }
 }

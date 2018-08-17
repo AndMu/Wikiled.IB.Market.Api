@@ -1,8 +1,19 @@
 ﻿namespace Wikiled.IB.Market.Api.Client.Messages
 {
-    public class HistoricalDataMessage
+    public class HistoricalDataMessage : IMessage
     {
-        public int RequestId { get; set; }
+        public HistoricalDataMessage(int reqId, Bar bar)
+        {
+            RequestId = reqId;
+            Date = bar.Time;
+            Open = bar.Open;
+            High = bar.High;
+            Low = bar.Low;
+            Close = bar.Close;
+            Volume = bar.Volume;
+            Count = bar.Count;
+            Wap = bar.Wap;
+        }
 
         public string Date { get; }
 
@@ -20,17 +31,6 @@
 
         public double Wap { get; set; }
 
-        public HistoricalDataMessage(int reqId, Bar bar)
-        {
-            RequestId = reqId;
-            Date = bar.Time;
-            Open = bar.Open;
-            High = bar.High;
-            Low = bar.Low;
-            Close = bar.Close;
-            Volume = bar.Volume;
-            Count = bar.Count;
-            Wap = bar.Wap;
-        }
+        public int RequestId { get; }
     }
 }

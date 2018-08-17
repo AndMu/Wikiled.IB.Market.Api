@@ -1,8 +1,15 @@
 namespace Wikiled.IB.Market.Api.Client.Messages
 {
-    public class HistoricalNewsMessage
+    public class HistoricalNewsMessage : IMessage
     {
-        public int RequestId { get; }
+        public HistoricalNewsMessage(int requestId, string time, string providerCode, string articleId, string headline)
+        {
+            RequestId = requestId;
+            Time = time;
+            ProviderCode = providerCode;
+            ArticleId = articleId;
+            Headline = headline;
+        }
 
         public string Time { get; }
 
@@ -12,13 +19,6 @@ namespace Wikiled.IB.Market.Api.Client.Messages
 
         public string Headline { get; }
 
-        public HistoricalNewsMessage(int requestId, string time, string providerCode, string articleId, string headline)
-        {
-            RequestId = requestId;
-            Time = time;
-            ProviderCode = providerCode;
-            ArticleId = articleId;
-            Headline = headline;
-        }
+        public int RequestId { get; }
     }
 }

@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Threading;
-using Microsoft.Extensions.Logging;
 using Wikiled.IB.Market.Api.Client.DataManagers;
 
 namespace Wikiled.IB.Market.Api.Client
@@ -30,16 +30,17 @@ namespace Wikiled.IB.Market.Api.Client
             }
 
             EReaderMonitorSignal signal = new EReaderMonitorSignal();
-            ibClient = new IBClient(signal);
-
-            ibClient.ClientId = clientId;
+            ibClient = new IBClient(signal)
+            {
+                ClientId = clientId
+            };
             ibClient.ClientSocket.EConnect(host, port, clientId);
-            var reader = new EReader(ibClient.ClientSocket, signal);
+            EReader reader = new EReader(ibClient.ClientSocket, signal);
             reader.Start();
 
             processingThread = new Thread(() =>
                 {
-                    while (ibClient.ClientSocket.IsConnected)
+                    while (ibClient?.ClientSocket.IsConnected == true)
                     {
                         signal.WaitForSignal();
                         reader.ProcessMsgs();
@@ -53,16 +54,41 @@ namespace Wikiled.IB.Market.Api.Client
             processingThread.Start();
         }
 
-        public HistoricalDataManager GetHistoricalManager()
+        public HistoricalDataManager GetHistorical()
         {
-            HistoricalDataManager historicalDataManager = new HistoricalDataManager(ibClient, loggerFactory);
-            return historicalDataManager;;
+            return new HistoricalDataManager(ibClient, loggerFactory);
+        }
+
+        public RealTimeBarsManager GetRealtime()
+        {
+            return new RealTimeBarsManager(ibClient, loggerFactory);
+        }
+
+        public HistoricalNewsManager GetHistoricalNews()
+        {
+            return new HistoricalNewsManager(ibClient, loggerFactory);
+        }
+
+        public TickNewsManager GetTickNews()
+        {
+            return new TickNewsManager(ibClient, loggerFactory);
+        }
+
+        public NewsManager GetNews()
+        {
+            return new NewsManager(ibClient, loggerFactory);
+        }
+
+        public NewsProviderManager GetNewsProvider()
+        {
+            return new NewsProviderManager(ibClient, loggerFactory);
         }
 
         public void Disconnect()
         {
             logger.LogDebug("Disconnect");
             ibClient?.ClientSocket?.EDisconnect();
+            processingThread.Join(1000);
             ibClient = null;
         }
 

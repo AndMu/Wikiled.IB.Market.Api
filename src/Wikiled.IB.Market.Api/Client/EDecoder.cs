@@ -807,7 +807,6 @@ namespace Wikiled.IB.Market.Api.Client
             string articleId = ReadString();
             string headline = ReadString();
             string extraData = ReadString();
-
             eWrapper.TickNews(tickerId, timeStamp, providerCode, articleId, headline, extraData);
         }
 

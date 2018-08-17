@@ -141,7 +141,6 @@ namespace Wikiled.IB.Market.Api.Client
                 if (!AsyncEConnect)
                 {
                     var eReader = new EReader(this, eReaderSignal);
-
                     while (ServerVersion == 0 && eReader.PutMessageToQueue())
                     {
                         eReaderSignal.WaitForSignal();

@@ -13,7 +13,6 @@ namespace Wikiled.IB.Market.Api.Client
             lock (cs)
             {
                 open = true;
-
                 Monitor.PulseAll(cs);
             }
         }

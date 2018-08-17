@@ -1,7 +1,7 @@
-﻿using System.Threading;
+﻿using System.Reactive.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Wikiled.IB.Market.Api.Client;
-using Wikiled.IB.Market.Api.Client.DataManagers;
 
 namespace Wikiled.IB.Market.Api.Console
 {
@@ -9,47 +9,26 @@ namespace Wikiled.IB.Market.Api.Console
     {
         public static async Task Main(string[] args)
         {
-            EReaderMonitorSignal signal = new EReaderMonitorSignal();
-            IBClient ibClient = new IBClient(signal);
-            HistoricalDataManager historicalDataManager = new HistoricalDataManager(ibClient);
-            ibClient.HistoricalData += historicalDataManager.UpdateUi;
-            ibClient.HistoricalDataUpdate += historicalDataManager.UpdateUi;
-            ibClient.HistoricalDataEnd += historicalDataManager.UpdateUi;
-
-            int port = 7496;
-            string host = "127.0.0.1";
-            ibClient.ClientId = 1;
-            ibClient.ClientSocket.EConnect(host, port, ibClient.ClientId);
-            var reader = new EReader(ibClient.ClientSocket, signal);
-            reader.Start();
-
-            new Thread(() =>
+            using (var client = new IBClientWrapper(new LoggerFactory()))
             {
-                while (ibClient.ClientSocket.IsConnected)
-                {
-                    signal.WaitForSignal();
-                    reader.ProcessMsgs();
-                }
-            }) { IsBackground = true }.Start();
-
-            await Task.Delay(5000).ConfigureAwait(false);
-            Contract contract = GetMDContract();
-            string endTime = "20130808 23:59:59 GMT";
-            string duration = "2 D";
-            string barSize = "1 day";
-            string whatToShow = "MIDPOINT";
-            int outsideRTH = false ? 1 : 0;
-            historicalDataManager.AddRequest(contract, endTime, duration, barSize, whatToShow, outsideRTH, 1, false);
-            await Task.Delay(500000).ConfigureAwait(false);
-            ibClient.ClientSocket.EDisconnect();
-            
+                client.Connect("127.0.0.1", 7496, 1);
+                string endTime = "20130808 23:59:59 GMT";
+                string duration = "2 D";
+                string barSize = "1 day";
+                string whatToShow = "MIDPOINT";
+                int outsideRTH = false ? 1 : 0;
+                var amd = client.GetHistoricalManager().Request(GetMDContract("AMD"), endTime, duration, barSize, whatToShow, outsideRTH, 1, false);
+                var ms = client.GetHistoricalManager().Request(GetMDContract("MSFT"), endTime, duration, barSize, whatToShow, outsideRTH, 1, false);
+                var dataAmd = await amd.ToArray();
+                var dataMS = await ms.ToArray();
+            }
         }
 
-        private static Contract GetMDContract()
+        private static Contract GetMDContract(string stock)
         {
             Contract contract = new Contract();
             contract.SecType = SecType.STK;
-            contract.Symbol = "AMD";
+            contract.Symbol = stock;
             contract.Exchange = ExchangeType.ISLAND;
             contract.Currency = "USD";
             //contract.LastTradeDateOrContractMonth = null;

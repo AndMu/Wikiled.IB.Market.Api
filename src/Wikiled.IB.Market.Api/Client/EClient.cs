@@ -3883,7 +3883,6 @@ namespace Wikiled.IB.Market.Api.Client
         public byte[] ReadAtLeastNBytes(int msgSize)
         {
             var buf = new byte[msgSize];
-
             return buf.Take(TcpStream.Read(buf, 0, msgSize)).ToArray();
         }
 

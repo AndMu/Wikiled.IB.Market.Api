@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -8,18 +9,27 @@ namespace Wikiled.IB.Market.Api.Client
     /**
     * @brief Captures incoming messages to the API client and places them into a queue.
     */
-    public class EReader
+    public class EReader : IDisposable
     {
         private const int DefaultInBufSize = ushort.MaxValue / 8;
 
-
         private static readonly IEWrapper DefaultWrapper = new DefaultEWrapper();
+
         private readonly EClientSocket eClientSocket;
+
         private readonly IEReaderSignal eReaderSignal;
 
         private readonly List<byte> inBuf = new List<byte>(DefaultInBufSize);
-        private readonly Queue<EMessage> msgQueue = new Queue<EMessage>();
+
+        private readonly ConcurrentQueue<EMessage> msgQueue = new ConcurrentQueue<EMessage>();
+
         private readonly EDecoder processMsgsDecoder;
+
+        private bool isDispossed;
+
+        private Thread processingThread;
+
+        private Thread readerThread;
 
         public EReader(EClientSocket clientSocket, IEReaderSignal signal)
         {
@@ -30,42 +40,48 @@ namespace Wikiled.IB.Market.Api.Client
 
         private bool UseV100Plus => eClientSocket.UseV100Plus;
 
+        public void Dispose()
+        {
+            isDispossed = true;
+            processingThread.Join(2000);
+        }
+
         public void Start()
         {
-            new Thread(() =>
-            {
-                try
+            readerThread = new Thread(() =>
                 {
-                    while (eClientSocket.IsConnected)
+                    try
                     {
-                        if (!PutMessageToQueue())
+                        while (eClientSocket.IsConnected && !isDispossed)
                         {
-                            break;
+                            if (!PutMessageToQueue())
+                            {
+                                break;
+                            }
                         }
                     }
-                }
-                catch (Exception ex)
-                {
-                    eClientSocket.Wrapper.Error(ex);
-                    eClientSocket.EDisconnect();
-                }
+                    catch (Exception ex)
+                    {
+                        eClientSocket.Wrapper.Error(ex);
+                        eClientSocket.EDisconnect();
+                    }
 
-                eReaderSignal.IssueSignal();
-            }) { IsBackground = true }.Start();
+                    eReaderSignal.IssueSignal();
+                })
+            { IsBackground = true };
+            readerThread.Name = "Reader Thread";
+            readerThread.Start();
         }
 
         private EMessage GetMsg()
         {
-            lock (msgQueue)
-            {
-                return msgQueue.Count == 0 ? null : msgQueue.Dequeue();
-            }
+            msgQueue.TryDequeue(out EMessage message);
+            return message;
         }
 
         public void ProcessMsgs()
         {
-            var msg = GetMsg();
-
+            EMessage msg = GetMsg();
             while (msg != null && processMsgsDecoder.ParseAndProcessMsg(msg.GetBuf()) > 0)
             {
                 msg = GetMsg();
@@ -76,17 +92,13 @@ namespace Wikiled.IB.Market.Api.Client
         {
             try
             {
-                var msg = ReadSingleMessage();
-
+                EMessage msg = ReadSingleMessage();
                 if (msg == null)
                 {
                     return false;
                 }
 
-                lock (msgQueue)
-                {
-                    msgQueue.Enqueue(msg);
-                }
+                msgQueue.Enqueue(msg);
 
                 eReaderSignal.IssueSignal();
 
@@ -105,12 +117,11 @@ namespace Wikiled.IB.Market.Api.Client
 
         private EMessage ReadSingleMessage()
         {
-            var msgSize = 0;
+            int msgSize = 0;
 
             if (UseV100Plus)
             {
                 msgSize = eClientSocket.ReadInt();
-
                 if (msgSize > Constants.MaxMsgSize)
                 {
                     throw new EClientException(EClientErrors.BadLength);
@@ -143,8 +154,7 @@ namespace Wikiled.IB.Market.Api.Client
                 }
             }
 
-            var msgBuf = new byte[msgSize];
-
+            byte[] msgBuf = new byte[msgSize];
             inBuf.CopyTo(0, msgBuf, 0, msgSize);
             inBuf.RemoveRange(0, msgSize);
 

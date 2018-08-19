@@ -2,9 +2,9 @@
 {
     public class HistoricalDataMessage : IMessage
     {
-        public HistoricalDataMessage(int reqId, Bar bar)
+        public HistoricalDataMessage(int requestId, Bar bar)
         {
-            RequestId = reqId;
+            RequestId = requestId;
             Date = bar.Time;
             Open = bar.Open;
             High = bar.High;
@@ -17,20 +17,25 @@
 
         public string Date { get; }
 
-        public double Open { get; set; }
+        public double Open { get; }
 
-        public double High { get; set; }
+        public double High { get; }
 
-        public double Low { get; set; }
+        public double Low { get; }
 
-        public double Close { get; set; }
+        public double Close { get; }
 
-        public long Volume { get; set; }
+        public long Volume { get; }
 
-        public int Count { get; set; }
+        public int Count { get; }
 
-        public double Wap { get; set; }
+        public double Wap { get; }
 
         public int RequestId { get; }
+
+        public override string ToString()
+        {
+            return $"Price [{Date}] {Open}:{Close} {High}:{Low} {Volume} {Count} {Wap}";
+        }
     }
 }

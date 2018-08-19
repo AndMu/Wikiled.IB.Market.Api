@@ -4,9 +4,9 @@ namespace Wikiled.IB.Market.Api.Client.Messages
 {
     public class RealTimeBarMessage : HistoricalDataMessage
     {
-        public long LongVolume { get; set; }
+        public long LongVolume { get; }
 
-        public long Timestamp { get; set; }
+        public long Timestamp { get; }
 
         public DateTime TimeStamp
         {
@@ -17,8 +17,8 @@ namespace Wikiled.IB.Market.Api.Client.Messages
             }
         }
 
-        public RealTimeBarMessage(int reqId, long date, double open, double high, double low, double close, long volume, double WAP, int count)
-            : base(reqId, new Bar(UnixTimestampToDateTime(date).ToString("yyyyMMdd hh:mm:ss"), open, high, low, close, -1, count, WAP))
+        public RealTimeBarMessage(int requestId, long date, double open, double high, double low, double close, long volume, double WAP, int count)
+            : base(requestId, new Bar(UnixTimestampToDateTime(date).ToString("yyyyMMdd hh:mm:ss"), open, high, low, close, -1, count, WAP))
         {
             Timestamp = date;
             LongVolume = volume;

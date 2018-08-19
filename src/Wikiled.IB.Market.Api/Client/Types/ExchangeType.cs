@@ -5,6 +5,7 @@
         IDEALPRO,
         SMART,
         BEST,
+        CFE,
         ISLAND // NASDAQ
     }
 }

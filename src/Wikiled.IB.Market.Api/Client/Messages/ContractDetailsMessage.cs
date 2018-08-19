@@ -1,6 +1,6 @@
 ﻿namespace Wikiled.IB.Market.Api.Client.Messages
 {
-    public class ContractDetailsMessage
+    public class ContractDetailsMessage : IMessage
     {
         public ContractDetailsMessage(int requestId, ContractDetails contractDetails)
         {
@@ -8,8 +8,8 @@
             ContractDetails = contractDetails;
         }
 
-        public ContractDetails ContractDetails { get; set; }
+        public ContractDetails ContractDetails { get; }
 
-        public int RequestId { get; set; }
+        public int RequestId { get; }
     }
 }

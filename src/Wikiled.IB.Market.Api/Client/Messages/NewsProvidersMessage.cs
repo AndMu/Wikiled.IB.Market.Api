@@ -1,3 +1,5 @@
+using Wikiled.IB.Market.Api.Client.DataManagers;
+
 namespace Wikiled.IB.Market.Api.Client.Messages
 {
     public class NewsProvidersMessage : IMessage
@@ -9,6 +11,6 @@ namespace Wikiled.IB.Market.Api.Client.Messages
             NewsProviders = newsProviders;
         }
 
-        public int RequestId => 90020000;
+        public int RequestId => MessageIdConstants.NewsProvider;
     }
 }

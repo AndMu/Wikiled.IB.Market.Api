@@ -14,7 +14,7 @@ namespace Wikiled.IB.Market.Api.Client.DataManagers
             ibClient.HistoricalNewsEnd += OnCompleted;
         }
 
-        protected override int RequestOffset => 90020000;
+        protected override int RequestOffset => MessageIdConstants.HistoricalNews;
 
         public IObservable<HistoricalNewsMessage> Request(int conId, string providerCodes, string startDateTime, string endDateTime, int totalResults)
         {

@@ -1,17 +1,16 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Reactive.Subjects;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 using Wikiled.IB.Market.Api.Client.Messages;
 
 namespace Wikiled.IB.Market.Api.Client.DataManagers
 {
-    public abstract class BaseDataManager<T> : IDisposable
-        where T : IMessage
+    public abstract class BaseDataManager<T> : IDataManager where T : IMessage
     {
         private static int currentTicker = 1;
 
-        private readonly ReplaySubject<ErrorDescription> errors = new ReplaySubject<ErrorDescription>();
+        private readonly ReplaySubject<IErrorDescription> errors = new ReplaySubject<IErrorDescription>();
 
         private readonly int requestId;
 
@@ -25,17 +24,22 @@ namespace Wikiled.IB.Market.Api.Client.DataManagers
             IbClient.Error += IbClientOnError;
         }
 
-        protected ILogger Logger { get; }
+        public virtual int RequestId => RequestOffset + requestId;
 
-        public int RequestId => RequestOffset + requestId;
-
-        protected abstract int RequestOffset { get; }
+        public IObservable<IErrorDescription> Errors => errors;
 
         public IBClient IbClient { get; }
 
-        public ErrorDescription LastErrors { get; private set; }
+        public IErrorDescription LastErrors { get; private set; }
 
-        public IObservable<ErrorDescription> Errors => errors;
+        protected abstract int RequestOffset { get; }
+
+        protected ILogger Logger { get; }
+
+        public virtual void Cancel()
+        {
+            stream?.OnCompleted();
+        }
 
         public virtual void Dispose()
         {
@@ -44,15 +48,9 @@ namespace Wikiled.IB.Market.Api.Client.DataManagers
             errors.Dispose();
         }
 
-        public virtual void Cancel()
-        {
-            stream?.OnCompleted();
-        }
-
         protected virtual void OnMessage(T message)
         {
-            Logger.LogDebug("OnMessage: {0}", message.RequestId);
-            GetStream(message).OnNext(message);
+            GetStream(message)?.OnNext(message);
         }
 
         protected Subject<T> Construct()
@@ -66,27 +64,32 @@ namespace Wikiled.IB.Market.Api.Client.DataManagers
             return stream;
         }
 
-        protected Subject<T> GetStream(T message)
+        protected void OnCompleted(IMessage message)
+        {
+            OnCompleted(message.RequestId);
+        }
+
+        protected void OnCompleted(int id)
+        {
+            if (id == RequestId)
+            {
+                Logger.LogDebug("OnCompleted message: {0}", id);
+                stream.OnCompleted();
+            }
+        }
+
+        private Subject<T> GetStream(T message)
         {
             if (message.RequestId == RequestId)
             {
-                Logger.LogDebug("Received message: {0}", message.RequestId);
+                Logger.LogTrace("Received message: {0}", message.RequestId);
                 return stream;
             }
 
             return null;
         }
 
-        protected void OnCompleted(IMessage message)
-        {
-            if (message.RequestId == RequestId)
-            {
-                Logger.LogDebug("OnCompleted message: {0}", message.RequestId);
-                stream.OnCompleted();
-            }
-        }
-
-        private void IbClientOnError(ErrorDescription obj)
+        private void IbClientOnError(IErrorDescription obj)
         {
             if (obj.Id == RequestId)
             {

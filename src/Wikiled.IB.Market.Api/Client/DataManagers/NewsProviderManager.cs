@@ -12,7 +12,9 @@ namespace Wikiled.IB.Market.Api.Client.DataManagers
             ibClient.NewsProviders += OnMessage;
         }
 
-        protected override int RequestOffset => 90020000;
+        public override int RequestId => RequestOffset;
+
+        protected override int RequestOffset => MessageIdConstants.NewsProvider;
 
         public IObservable<NewsProvidersMessage> Request()
         {

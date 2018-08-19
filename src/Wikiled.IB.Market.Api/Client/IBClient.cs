@@ -20,7 +20,7 @@ namespace Wikiled.IB.Market.Api.Client
 
         void IEWrapper.Error(Exception e)
         {
-            Error?.Invoke(new ErrorDescription(e));
+            Error?.Invoke(new ExceptionDescription(e));
         }
 
         void IEWrapper.Error(string str)
@@ -210,9 +210,9 @@ namespace Wikiled.IB.Market.Api.Client
             FundamentalData?.Invoke(new FundamentalsMessage(data));
         }
 
-        void IEWrapper.HistoricalData(int reqId, Bar bar)
+        void IEWrapper.HistoricalData(int requestId, Bar bar)
         {
-            HistoricalData?.Invoke(new HistoricalDataMessage(reqId, bar));
+            HistoricalData?.Invoke(new HistoricalDataMessage(requestId, bar));
         }
 
         void IEWrapper.HistoricalDataEnd(int reqId, string startDate, string endDate)
@@ -549,7 +549,7 @@ namespace Wikiled.IB.Market.Api.Client
             tickByTickMidPoint?.Invoke(new TickByTickMidPointMessage(reqId, time, midPoint));
         }
      
-        public event Action<ErrorDescription> Error;
+        public event Action<IErrorDescription> Error;
 
         public event Action ConnectionClosed;
 

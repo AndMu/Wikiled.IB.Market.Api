@@ -1,8 +1,16 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using NLog.Extensions.Logging;
+using System;
+using System.IO;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using Wikiled.IB.Market.Api.Client;
+using Wikiled.IB.Market.Api.Client.DataManagers;
+using Wikiled.IB.Market.Api.Client.Helpers;
+using Wikiled.IB.Market.Api.Client.Messages;
+using Wikiled.IB.Market.Api.Client.Request;
+using Wikiled.IB.Market.Api.Client.Serialization;
+using Wikiled.IB.Market.Api.Client.Types;
 
 namespace Wikiled.IB.Market.Api.Console
 {
@@ -10,34 +18,68 @@ namespace Wikiled.IB.Market.Api.Console
     {
         public static async Task Main(string[] args)
         {
-            using (var client = new IBClientWrapper(new LoggerFactory()))
+            //configure NLog
+            LoggerFactory factory = new LoggerFactory();
+            factory.AddNLog(new NLogProviderOptions { CaptureMessageTemplates = true, CaptureMessageProperties = true });
+            NLog.LogManager.LoadConfiguration("nlog.config");
+
+            using (IBClientWrapper client = new IBClientWrapper(factory))
             {
                 client.Connect("127.0.0.1", 7496, 1);
-                string endTime = "20130808 23:59:59 GMT";
-                string duration = "2 D";
-                string barSize = "1 min";
-                string whatToShow = "MIDPOINT";
-                int outsideRTH = false ? 1 : 0;
-                var amd = client.GetHistorical().Request(GetMDContract("AMD"), endTime, duration, barSize, whatToShow, outsideRTH, 1, false);
-                var ms = client.GetHistorical().Request(GetMDContract("MSFT"), endTime, duration, barSize, whatToShow, outsideRTH, 1, false);
-                var dataAmd = await amd.ToArray();
-                var dataMS = await ms.ToArray();
-                var realTime = client.GetRealtime();
-                var stream = realTime.Request(GetMDContract("AMD"), WhatToShow.BID);
-                var subscription = stream.Subscribe(item => { System.Console.WriteLine(item); });
-                await Task.Delay(5000).ConfigureAwait(false);
-                realTime.Cancel();
-                subscription.Dispose();
+                IObservable<HistoricalDataMessage> amd = client.GetManager<HistoricalDataManager>()
+                                .Request(
+                                    new MarketDataRequest(
+                                        GetMDContract("VXX"),
+                                        new DateTime(2016, 01, 01).ToUtc(client.TimeZone),
+                                        new Duration(5, DurationType.Years),
+                                        BarSize.Day,
+                                        WhatToShow.ASK));
+                HistoricalDataMessage[] data = await amd.ToArray();
+                var date = data[0].Date.StrToDate(client.TimeZone);
+                var serializer = new CsvSerializer(client);
+                serializer.Save("price.csv", data);
+                System.Console.ReadLine();
             }
+
+            NLog.LogManager.Shutdown();
+        }
+
+      
+
+        private void Old()
+        {
+        //    IObservable<HistoricalDataMessage> amd = client.GetManager<HistoricalDataManager>()
+        //                                                   .Request(
+        //                                                       new MarketDataRequest(
+        //                                                           GetMDContract("SVXY"),
+        //                                                           new DateTime(2013, 08, 08, 23, 59, 59, DateTimeKind.Utc),
+        //                                                           new Duration(2, DurationType.Days),
+        //                                                           BarSize.Min,
+        //                                                           WhatToShow.MIDPOINT));
+        //    HistoricalDataMessage[] data = await amd.ToArray();
+
+            //var realTime = client.GetManager<RealTimeBarsManager>();
+            //var providers = await client.GetManager<NewsProviderManager>().Request().FirstOrDefaultAsync();
+            //var contract = await client.GetManager<ContractManager>().Request(GetMDContract("AMD")).FirstOrDefaultAsync();
+            //var news = client.GetManager<HistoricalNewsManager>()
+            //                 .Request(contract.ContractDetails.Contract.ConId, providers.NewsProviders[2].ProviderCode, "20170708 23:59:59 GMT", "20180808 23:59:59 GMT", 100);
+            //var newsData = await news.ToArray();
+            //var stream = realTime.Request(GetMDContract("AMD"), WhatToShow.BID);
+            //var subscription = stream.Subscribe(item => { System.Console.WriteLine(item.Close); });
+            //await Task.Delay(50000).ConfigureAwait(false);
+            //realTime.Cancel();
+            //subscription.Dispose();
         }
 
         private static Contract GetMDContract(string stock)
         {
-            Contract contract = new Contract();
-            contract.SecType = SecType.STK;
-            contract.Symbol = stock;
-            contract.Exchange = ExchangeType.ISLAND;
-            contract.Currency = "USD";
+            Contract contract = new Contract
+            {
+                SecType = SecType.STK,
+                Symbol = stock,
+                Exchange = ExchangeType.ISLAND,
+                Currency = "USD"
+            };
             //contract.LastTradeDateOrContractMonth = null;
             //contract.PrimaryExch = null;
             //contract.IncludeExpired = includeExpired.Checked;

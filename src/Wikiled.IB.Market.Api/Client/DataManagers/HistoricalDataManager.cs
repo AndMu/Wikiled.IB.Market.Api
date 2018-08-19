@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Reactive.Subjects;
 using Wikiled.IB.Market.Api.Client.Messages;
+using Wikiled.IB.Market.Api.Client.Request;
 
 namespace Wikiled.IB.Market.Api.Client.DataManagers
 {
@@ -16,7 +16,7 @@ namespace Wikiled.IB.Market.Api.Client.DataManagers
             ibClient.HistoricalDataEnd += OnCompleted;
         }
 
-        protected override int RequestOffset => 30000000;
+        protected override int RequestOffset => MessageIdConstants.HistoricalData;
 
         public override void Dispose()
         {
@@ -26,11 +26,11 @@ namespace Wikiled.IB.Market.Api.Client.DataManagers
             base.Dispose();
         }
 
-        public IObservable<HistoricalDataMessage> Request(Contract contract, string endDateTime, string durationString, string barSizeSetting, string whatToShow, int useRth, int dateFormat, bool keepUpToDate)
+        public IObservable<HistoricalDataMessage> Request(MarketDataRequest request)
         {
             Logger.LogDebug("Request: {0}", RequestId);
             Subject<HistoricalDataMessage> stream = Construct();
-            IbClient.ClientSocket.ReqHistoricalData(RequestId, contract, endDateTime, durationString, barSizeSetting, whatToShow, useRth, 1, keepUpToDate, new List<TagValue>());
+            IbClient.ClientSocket.ReqHistoricalData(RequestId, request);
             return stream;
         }
     }

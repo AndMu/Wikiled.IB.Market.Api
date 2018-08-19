@@ -91,9 +91,7 @@ namespace Wikiled.IB.Market.Api.Client
         public string ReadString()
         {
             byte b = dataReader.ReadByte();
-
             nDecodedLen++;
-
             if (b == 0)
             {
                 return null;
@@ -113,7 +111,6 @@ namespace Wikiled.IB.Market.Api.Client
             }
 
             nDecodedLen += strBuilder.Length;
-
             return strBuilder.ToString();
         }
 

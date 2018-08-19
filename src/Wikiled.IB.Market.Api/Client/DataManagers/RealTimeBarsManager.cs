@@ -12,7 +12,7 @@ namespace Wikiled.IB.Market.Api.Client.DataManagers
             ibClient.RealtimeBar += OnMessage;
         }
 
-        protected override int RequestOffset => 40000000;
+        protected override int RequestOffset => MessageIdConstants.RealTime;
 
         public override void Dispose()
         {

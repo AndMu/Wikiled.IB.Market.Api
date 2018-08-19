@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>NET472</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Moq" Version="4.9.0" />
+    <PackageReference Include="NUnit" Version="3.10.1" />
+    <packagereference Include="Microsoft.NET.Test.Sdk" Version="15.8.0"></packagereference>
+    <packagereference Include="NUnit3TestAdapter" Version="3.10.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Wikiled.IB.Market.Api\Wikiled.IB.Market.Api.csproj" />
+  </ItemGroup>
+
+</Project>

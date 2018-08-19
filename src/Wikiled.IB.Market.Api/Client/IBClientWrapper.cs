@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Autofac;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using Wikiled.IB.Market.Api.Client.DataManagers;
@@ -15,10 +16,35 @@ namespace Wikiled.IB.Market.Api.Client
 
         private readonly ILogger logger;
 
+        private ErrorManager errorManager;
+
         public IBClientWrapper(ILoggerFactory loggerFactory)
         {
             this.loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
             logger = loggerFactory.CreateLogger<IBClientWrapper>();
+            Container = Construct();
+            TimeZone = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
+        }
+
+        public IContainer Container { get; }
+
+        public TimeZoneInfo TimeZone { get; set; }
+
+        private IContainer Construct()
+        {
+            logger.LogDebug("Construct");
+            ContainerBuilder builder = new ContainerBuilder();
+            builder.RegisterInstance(loggerFactory);
+            builder.Register(cnt => ibClient);
+            builder.RegisterType<HistoricalDataManager>();
+            builder.RegisterType<ContractManager>();
+            builder.RegisterType<HistoricalNewsManager>();
+            builder.RegisterType<NewsManager>();
+            builder.RegisterType<NewsProviderManager>();
+            builder.RegisterType<RealTimeBarsManager>();
+            builder.RegisterType<TickNewsManager>();
+            builder.RegisterType<ErrorManager>();
+            return builder.Build();
         }
 
         public void Connect(string host, int port, int clientId)
@@ -34,6 +60,8 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 ClientId = clientId
             };
+
+            errorManager = Container.Resolve<ErrorManager>();
             ibClient.ClientSocket.EConnect(host, port, clientId);
             EReader reader = new EReader(ibClient.ClientSocket, signal);
             reader.Start();
@@ -54,34 +82,9 @@ namespace Wikiled.IB.Market.Api.Client
             processingThread.Start();
         }
 
-        public HistoricalDataManager GetHistorical()
+        public T GetManager<T>() where T : IDataManager
         {
-            return new HistoricalDataManager(ibClient, loggerFactory);
-        }
-
-        public RealTimeBarsManager GetRealtime()
-        {
-            return new RealTimeBarsManager(ibClient, loggerFactory);
-        }
-
-        public HistoricalNewsManager GetHistoricalNews()
-        {
-            return new HistoricalNewsManager(ibClient, loggerFactory);
-        }
-
-        public TickNewsManager GetTickNews()
-        {
-            return new TickNewsManager(ibClient, loggerFactory);
-        }
-
-        public NewsManager GetNews()
-        {
-            return new NewsManager(ibClient, loggerFactory);
-        }
-
-        public NewsProviderManager GetNewsProvider()
-        {
-            return new NewsProviderManager(ibClient, loggerFactory);
+            return Container.Resolve<T>();
         }
 
         public void Disconnect()
@@ -96,6 +99,7 @@ namespace Wikiled.IB.Market.Api.Client
         {
             logger.LogDebug("Dispose");
             Disconnect();
+            errorManager.Dispose();
         }
     }
 }

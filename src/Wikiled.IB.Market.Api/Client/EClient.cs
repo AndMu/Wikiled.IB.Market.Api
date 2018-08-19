@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using Wikiled.IB.Market.Api.Client.Helpers;
+using Wikiled.IB.Market.Api.Client.Request;
 
 namespace Wikiled.IB.Market.Api.Client
 {
@@ -1790,16 +1792,7 @@ namespace Wikiled.IB.Market.Api.Client
 		 * @param keepUpToDate set to True to received continuous updates on most recent bar data. If True, and endDateTime cannot be specified.
          * @sa EWrapper::historicalData
          */
-        public void ReqHistoricalData(int tickerId,
-                                      Contract contract,
-                                      string endDateTime,
-                                      string durationString,
-                                      string barSizeSetting,
-                                      string whatToShow,
-                                      int useRth,
-                                      int formatDate,
-                                      bool keepUpToDate,
-                                      List<TagValue> chartOptions)
+        public void ReqHistoricalData(int tickerId, MarketDataRequest request, List<TagValue> chartOptions=null)
         {
             if (!CheckConnection())
             {
@@ -1811,12 +1804,14 @@ namespace Wikiled.IB.Market.Api.Client
                 return;
             }
 
-            if (!IsEmpty(contract.TradingClass) || contract.ConId > 0)
+            if (chartOptions == null)
             {
-                if (!CheckServerVersion(tickerId,
-                                        MinServerVer.TradingClass,
-                                        " It does not support conId nor trading class parameters when requesting historical data.")
-                )
+                chartOptions = new List<TagValue>();
+            }
+
+            if (!IsEmpty(request.Contract.TradingClass) || request.Contract.ConId > 0)
+            {
+                if (!CheckServerVersion(tickerId, MinServerVer.TradingClass, " It does not support conId nor trading class parameters when requesting historical data."))
                 {
                     return;
                 }
@@ -1837,51 +1832,46 @@ namespace Wikiled.IB.Market.Api.Client
 
             if (ServerVersion >= MinServerVer.TradingClass)
             {
-                paramsList.AddParameter(contract.ConId);
+                paramsList.AddParameter(request.Contract.ConId);
             }
 
-            paramsList.AddParameter(contract.Symbol);
-            paramsList.AddParameter(contract.SecType.ToString());
-            paramsList.AddParameter(contract.LastTradeDateOrContractMonth);
-            paramsList.AddParameter(contract.Strike);
-            paramsList.AddParameter(contract.Right);
-            paramsList.AddParameter(contract.Multiplier);
-            paramsList.AddParameter(contract.Exchange.ToString());
-            paramsList.AddParameter(contract.PrimaryExch);
-            paramsList.AddParameter(contract.Currency);
-            paramsList.AddParameter(contract.LocalSymbol);
+            paramsList.AddParameter(request.Contract.Symbol);
+            paramsList.AddParameter(request.Contract.SecType.ToString());
+            paramsList.AddParameter(request.Contract.LastTradeDateOrContractMonth);
+            paramsList.AddParameter(request.Contract.Strike);
+            paramsList.AddParameter(request.Contract.Right);
+            paramsList.AddParameter(request.Contract.Multiplier);
+            paramsList.AddParameter(request.Contract.Exchange.ToString());
+            paramsList.AddParameter(request.Contract.PrimaryExch);
+            paramsList.AddParameter(request.Contract.Currency);
+            paramsList.AddParameter(request.Contract.LocalSymbol);
 
             if (ServerVersion >= MinServerVer.TradingClass)
             {
-                paramsList.AddParameter(contract.TradingClass);
+                paramsList.AddParameter(request.Contract.TradingClass);
             }
 
-            paramsList.AddParameter(contract.IncludeExpired ? 1 : 0);
+            paramsList.AddParameter(request.Contract.IncludeExpired ? 1 : 0);
+            paramsList.AddParameter(request.EndDateTime.DateToStr());
+            paramsList.AddParameter(request.BarSize.BarToStr());
+            paramsList.AddParameter(request.Duration.ToString());
+            paramsList.AddParameter(request.Rth);
+            paramsList.AddParameter(request.WhatToShow.ToString());
+            paramsList.AddParameter(request.DateFormat);
 
-
-            paramsList.AddParameter(endDateTime);
-            paramsList.AddParameter(barSizeSetting);
-
-            paramsList.AddParameter(durationString);
-            paramsList.AddParameter(useRth);
-            paramsList.AddParameter(whatToShow);
-
-            paramsList.AddParameter(formatDate);
-
-            if (contract.SecType == SecType.BAG)
+            if (request.Contract.SecType == SecType.BAG)
             {
-                if (contract.ComboLegs == null)
+                if (request.Contract.ComboLegs == null)
                 {
                     paramsList.AddParameter(0);
                 }
                 else
                 {
-                    paramsList.AddParameter(contract.ComboLegs.Count);
+                    paramsList.AddParameter(request.Contract.ComboLegs.Count);
 
-                    ComboLeg comboLeg;
-                    for (var i = 0; i < contract.ComboLegs.Count; i++)
+                    for (var i = 0; i < request.Contract.ComboLegs.Count; i++)
                     {
-                        comboLeg = contract.ComboLegs[i];
+                        var comboLeg = request.Contract.ComboLegs[i];
                         paramsList.AddParameter(comboLeg.ConId);
                         paramsList.AddParameter(comboLeg.Ratio);
                         paramsList.AddParameter(comboLeg.Action);
@@ -1892,7 +1882,7 @@ namespace Wikiled.IB.Market.Api.Client
 
             if (ServerVersion >= MinServerVer.SyntRealtimeBars)
             {
-                paramsList.AddParameter(keepUpToDate);
+                paramsList.AddParameter(request.KeepUpToDate);
             }
 
             if (ServerVersion >= MinServerVer.Linking)
@@ -2550,9 +2540,7 @@ namespace Wikiled.IB.Market.Api.Client
 
             if (!ExtraAuth)
             {
-                ReportError(IncomingMessage.NotValid,
-                            EClientErrors.FailSendVerifyandauthmessage,
-                            " Intent to authenticate needs to be expressed during initial connect request.");
+                ReportError(IncomingMessage.NotValid, EClientErrors.FailSendVerifyandauthmessage, " Intent to authenticate needs to be expressed during initial connect request.");
                 return;
             }
 
@@ -2809,8 +2797,7 @@ namespace Wikiled.IB.Market.Api.Client
                 return;
             }
 
-            if (!CheckServerVersion(MinServerVer.ModelsSupport,
-                                    " It does not support account updates multi cancellation."))
+            if (!CheckServerVersion(MinServerVer.ModelsSupport, " It does not support account updates multi cancellation."))
             {
                 return;
             }
@@ -2834,11 +2821,7 @@ namespace Wikiled.IB.Market.Api.Client
          * @param underlyingConId the contract ID of the underlying security
          * @sa EWrapper::securityDefinitionOptionParameter
          */
-        public void ReqSecDefOptParams(int reqId,
-                                       string underlyingSymbol,
-                                       string futFopExchange,
-                                       string underlyingSecType,
-                                       int underlyingConId)
+        public void ReqSecDefOptParams(int reqId, string underlyingSymbol, string futFopExchange, string underlyingSecType, int underlyingConId)
         {
             if (!CheckConnection())
             {
@@ -2899,8 +2882,7 @@ namespace Wikiled.IB.Market.Api.Client
                 return;
             }
 
-            if (!CheckServerVersion(MinServerVer.ReqFamilyCodes,
-                                    " It does not support family codes requests."))
+            if (!CheckServerVersion(MinServerVer.ReqFamilyCodes, " It does not support family codes requests."))
             {
                 return;
             }
@@ -2951,8 +2933,7 @@ namespace Wikiled.IB.Market.Api.Client
                 return;
             }
 
-            if (!CheckServerVersion(MinServerVer.ReqMktDepthExchanges,
-                                    " It does not support market depth exchanges requests."))
+            if (!CheckServerVersion(MinServerVer.ReqMktDepthExchanges, " It does not support market depth exchanges requests."))
             {
                 return;
             }
@@ -2977,8 +2958,7 @@ namespace Wikiled.IB.Market.Api.Client
                 return;
             }
 
-            if (!CheckServerVersion(MinServerVer.ReqMktDepthExchanges,
-                                    " It does not support smart components request."))
+            if (!CheckServerVersion(MinServerVer.ReqMktDepthExchanges, " It does not support smart components request."))
             {
                 return;
             }
@@ -3024,18 +3004,13 @@ namespace Wikiled.IB.Market.Api.Client
 		 * @param newsArticleOptions reserved for internal use. Should be defined as null.
          * @sa EWrapper::newsArticle, 
          */
-        public void ReqNewsArticle(int requestId,
-                                   string providerCode,
-                                   string articleId,
-                                   List<TagValue> newsArticleOptions)
-        {
+        public void ReqNewsArticle(int requestId, string providerCode, string articleId, List<TagValue> newsArticleOptions) {
             if (!CheckConnection())
             {
                 return;
             }
 
-            if (!CheckServerVersion(MinServerVer.ReqNewsArticle,
-                                    " It does not support news article requests."))
+            if (!CheckServerVersion(MinServerVer.ReqNewsArticle, " It does not support news article requests."))
             {
                 return;
             }
@@ -3067,21 +3042,14 @@ namespace Wikiled.IB.Market.Api.Client
 		* @param historicalNewsOptions reserved for internal use. Should be defined as null.
         * @sa EWrapper::historicalNews, EWrapper::historicalNewsEnd
         */
-        public void ReqHistoricalNews(int requestId,
-                                      int conId,
-                                      string providerCodes,
-                                      string startDateTime,
-                                      string endDateTime,
-                                      int totalResults,
-                                      List<TagValue> historicalNewsOptions)
+        public void ReqHistoricalNews(int requestId, int conId, string providerCodes, string startDateTime, string endDateTime, int totalResults, List<TagValue> historicalNewsOptions)
         {
             if (!CheckConnection())
             {
                 return;
             }
 
-            if (!CheckServerVersion(MinServerVer.ReqHistoricalNews,
-                                    " It does not support historical news requests."))
+            if (!CheckServerVersion(MinServerVer.ReqHistoricalNews, " It does not support historical news requests."))
             {
                 return;
             }

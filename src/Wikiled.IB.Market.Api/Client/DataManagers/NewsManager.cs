@@ -13,7 +13,7 @@ namespace Wikiled.IB.Market.Api.Client.DataManagers
             ibClient.NewsArticle += OnCompleted;
         }
 
-        protected override int RequestOffset => 90010000;
+        protected override int RequestOffset => MessageIdConstants.News;
 
         public IObservable<NewsArticleMessage> Request(string providerCode, string articleId)
         {

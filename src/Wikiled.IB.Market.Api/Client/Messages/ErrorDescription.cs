@@ -2,7 +2,7 @@
 
 namespace Wikiled.IB.Market.Api.Client.Messages
 {
-    public class ErrorDescription
+    public class ErrorDescription : IErrorDescription
     {
         public ErrorDescription(int id, int errorCode, string errorMsg)
         {
@@ -11,17 +11,15 @@ namespace Wikiled.IB.Market.Api.Client.Messages
             ErrorMsg = errorMsg;
         }
 
-        public ErrorDescription(Exception exception)
-        {
-            Exception = exception ?? throw new ArgumentNullException(nameof(exception));
-        }
-
         public int Id { get; }
 
         public int ErrorCode { get; }
 
         public string ErrorMsg { get; }
 
-        public Exception Exception { get; }
+        public override string ToString()
+        {
+            return $"Error: {Id}:{ErrorCode}:{ErrorMsg}";
+        }
     }
 }

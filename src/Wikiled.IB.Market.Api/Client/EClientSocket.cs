@@ -104,9 +104,9 @@ namespace Wikiled.IB.Market.Api.Client
         /**
         * Creates socket connection to TWS/IBG. This earlier version of eConnect does not have extraAuth parameter.
         */
-        public void EConnect(string host, int port, int clientId)
+        public bool EConnect(string host, int port, int clientId)
         {
-            EConnect(host, port, clientId, false);
+            return EConnect(host, port, clientId, false);
         }
 
         protected virtual Stream CreateClientStream(string host, int port)
@@ -117,14 +117,14 @@ namespace Wikiled.IB.Market.Api.Client
         /**
         * @brief Creates socket connection to TWS/IBG.
         */
-        public void EConnect(string host, int port, int clientId, bool extraAuth)
+        public bool EConnect(string host, int port, int clientId, bool extraAuth)
         {
             if (IsConnected)
             {
                 Wrapper.Error(IncomingMessage.NotValid,
                               EClientErrors.AlreadyConnected.Code,
                               EClientErrors.AlreadyConnected.Message);
-                return;
+                return true;
             }
 
             try
@@ -147,6 +147,8 @@ namespace Wikiled.IB.Market.Api.Client
                         eReader.ProcessMsgs();
                     }
                 }
+
+                return true;
             }
             catch (ArgumentNullException ane)
             {
@@ -165,6 +167,8 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 Wrapper.Error(e);
             }
+
+            return false;
         }
 
         protected override uint PrepareBuffer(BinaryWriter paramsList)

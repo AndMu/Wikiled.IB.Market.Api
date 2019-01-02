@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Wikiled.IB.Market.Api.Console": {
+      "commandName": "Project",
+      "commandLineArgs": "history -Stock=VXX -Out=price.csv"
+    }
+  }
+}

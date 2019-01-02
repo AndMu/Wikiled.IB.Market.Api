@@ -5,7 +5,7 @@ using Wikiled.IB.Market.Api.Client.Messages;
 
 namespace Wikiled.IB.Market.Api.Client
 {
-    public class IBClient : IEWrapper
+    public class IBClient : IIBClient
     {
         public IBClient(IEReaderSignal signal)
         {

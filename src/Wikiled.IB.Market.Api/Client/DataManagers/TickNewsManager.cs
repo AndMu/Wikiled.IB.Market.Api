@@ -13,7 +13,7 @@ namespace Wikiled.IB.Market.Api.Client.DataManagers
             ibClient.TickNews += OnMessage;
         }
 
-        protected override int RequestOffset => 90000000;
+        protected override int RequestOffset => MessageIdConstants.TickNews;
 
         public IObservable<TickNewsMessage> Request(Contract contract)
         {

@@ -29,7 +29,7 @@ namespace Wikiled.IB.Market.Api.Client.DataManagers
         public IObservable<HistoricalDataMessage> Request(MarketDataRequest request)
         {
             Logger.LogDebug("Request: {0}", RequestId);
-            Subject<HistoricalDataMessage> stream = Construct();
+            var stream = Construct();
             IbClient.ClientSocket.ReqHistoricalData(RequestId, request);
             return stream;
         }

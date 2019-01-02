@@ -43,5 +43,10 @@
 
             return true;
         }
+
+        public override int GetHashCode()
+        {
+            return -814345894 + Price.GetHashCode();
+        }
     }
 }

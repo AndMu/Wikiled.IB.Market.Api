@@ -25,9 +25,7 @@ namespace Wikiled.IB.Market.Api.Client
 
         private readonly EDecoder processMsgsDecoder;
 
-        private bool isDispossed;
-
-        private Thread processingThread;
+        private bool isDisposed;
 
         private Thread readerThread;
 
@@ -42,46 +40,48 @@ namespace Wikiled.IB.Market.Api.Client
 
         public void Dispose()
         {
-            isDispossed = true;
-            processingThread.Join(2000);
+            isDisposed = true;
         }
 
         public void Start()
         {
-            readerThread = new Thread(() =>
-                {
-                    try
-                    {
-                        while (eClientSocket.IsConnected && !isDispossed)
-                        {
-                            if (!PutMessageToQueue())
-                            {
-                                break;
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        eClientSocket.Wrapper.Error(ex);
-                        eClientSocket.EDisconnect();
-                    }
+            readerThread = new Thread(
+                               () =>
+                               {
+                                   try
+                                   {
+                                       while (eClientSocket.IsConnected && !isDisposed)
+                                       {
+                                           if (!PutMessageToQueue())
+                                           {
+                                               break;
+                                           }
+                                       }
+                                   }
+                                   catch (Exception ex)
+                                   {
+                                       eClientSocket.Wrapper.Error(ex);
+                                       eClientSocket.EDisconnect();
+                                   }
 
-                    eReaderSignal.IssueSignal();
-                })
-            { IsBackground = true };
+                                   eReaderSignal.IssueSignal();
+                               })
+                           {
+                               IsBackground = true
+                           };
             readerThread.Name = "Reader Thread";
             readerThread.Start();
         }
 
         private EMessage GetMsg()
         {
-            msgQueue.TryDequeue(out EMessage message);
+            msgQueue.TryDequeue(out var message);
             return message;
         }
 
         public void ProcessMsgs()
         {
-            EMessage msg = GetMsg();
+            var msg = GetMsg();
             while (msg != null && processMsgsDecoder.ParseAndProcessMsg(msg.GetBuf()) > 0)
             {
                 msg = GetMsg();
@@ -92,7 +92,7 @@ namespace Wikiled.IB.Market.Api.Client
         {
             try
             {
-                EMessage msg = ReadSingleMessage();
+                var msg = ReadSingleMessage();
                 if (msg == null)
                 {
                     return false;
@@ -117,7 +117,7 @@ namespace Wikiled.IB.Market.Api.Client
 
         private EMessage ReadSingleMessage()
         {
-            int msgSize = 0;
+            var msgSize = 0;
 
             if (UseV100Plus)
             {
@@ -154,7 +154,7 @@ namespace Wikiled.IB.Market.Api.Client
                 }
             }
 
-            byte[] msgBuf = new byte[msgSize];
+            var msgBuf = new byte[msgSize];
             inBuf.CopyTo(0, msgBuf, 0, msgSize);
             inBuf.RemoveRange(0, msgSize);
 

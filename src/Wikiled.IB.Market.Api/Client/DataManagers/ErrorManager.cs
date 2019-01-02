@@ -6,14 +6,14 @@ namespace Wikiled.IB.Market.Api.Client.DataManagers
 {
     public class ErrorManager : IDisposable
     {
-        private readonly ILogger logger;
+        private readonly ILogger<ErrorManager> logger;
 
         private readonly IBClient ibClient;
 
-        public ErrorManager(IBClient ibClient, ILoggerFactory loggerFactory)
+        public ErrorManager(ILogger<ErrorManager> logger, IBClient ibClient)
         {
             this.ibClient = ibClient ?? throw new ArgumentNullException(nameof(ibClient));
-            logger = loggerFactory?.CreateLogger(GetType()) ?? throw new ArgumentNullException(nameof(logger));
+            this.logger = logger;
             ibClient.Error += ErrorHandler;
         }
 

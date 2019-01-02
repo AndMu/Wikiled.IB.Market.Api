@@ -12,7 +12,7 @@ namespace Wikiled.IB.Market.Api.Client.Messages
         {
             get
             {
-                DateTime start = new DateTime(1970, 1, 1, 0, 0, 0);
+                var start = new DateTime(1970, 1, 1, 0, 0, 0);
                 return start.AddMilliseconds(Timestamp * 1000).ToLocalTime();
             }
         }
@@ -26,7 +26,7 @@ namespace Wikiled.IB.Market.Api.Client.Messages
 
         static DateTime UnixTimestampToDateTime(long unixTimestamp)
         {
-            DateTime unixBaseTime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
+            var unixBaseTime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
             return unixBaseTime.AddSeconds(unixTimestamp);
         }
     }

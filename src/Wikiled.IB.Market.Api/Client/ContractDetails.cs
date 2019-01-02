@@ -59,13 +59,7 @@ namespace Wikiled.IB.Market.Api.Client
         /**
          * @brief A fully-defined Contract object.
          */
-        public Contract Contract
-        {
-            //! @cond
-            get;
-            set;
-            //! @endcond
-        }
+        public Contract Contract { get; }
 
         /**
         * @brief The market name for this product.

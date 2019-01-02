@@ -1,4 +1,6 @@
-﻿namespace Wikiled.IB.Market.Api.Client
+﻿using System.Collections.Generic;
+
+namespace Wikiled.IB.Market.Api.Client
 {
     /**
      * @class CommissionReport
@@ -64,6 +66,18 @@
             }
 
             return retVal;
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCode = -2052112293;
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ExecId);
+            hashCode = hashCode * -1521134295 + Commission.GetHashCode();
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Currency);
+            hashCode = hashCode * -1521134295 + RealizedPnl.GetHashCode();
+            hashCode = hashCode * -1521134295 + Yield.GetHashCode();
+            hashCode = hashCode * -1521134295 + YieldRedemptionDate.GetHashCode();
+            return hashCode;
         }
     }
 }

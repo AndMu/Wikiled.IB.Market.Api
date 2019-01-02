@@ -76,8 +76,6 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 return false;
             }
-
-            return true;
         }
     }
 }

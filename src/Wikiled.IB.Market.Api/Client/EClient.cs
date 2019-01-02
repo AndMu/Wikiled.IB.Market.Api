@@ -1666,20 +1666,14 @@ namespace Wikiled.IB.Market.Api.Client
                 - CalendarReport: Company calendar from Wall Street Horizons
          * @sa EWrapper::fundamentalData
          */
-        public void ReqFundamentalData(int reqId,
-                                       Contract contract,
-                                       string reportType,
-                                       //reserved for future use, must be blank
-                                       List<TagValue> fundamentalDataOptions)
+        public void ReqFundamentalData(int reqId, Contract contract, string reportType, List<TagValue> fundamentalDataOptions)
         {
             if (!CheckConnection())
             {
                 return;
             }
 
-            if (!CheckServerVersion(reqId,
-                                    MinServerVer.FundamentalData,
-                                    " It does not support Fundamental Data requests."))
+            if (!CheckServerVersion(reqId, MinServerVer.FundamentalData, " It does not support Fundamental Data requests."))
             {
                 return;
             }
@@ -1973,34 +1967,22 @@ namespace Wikiled.IB.Market.Api.Client
                 return;
             }
 
-            if (snapshot &&
-                !CheckServerVersion(tickerId,
-                                    MinServerVer.SnapshotMktData,
-                                    "It does not support snapshot market data requests."))
+            if (snapshot && !CheckServerVersion(tickerId, MinServerVer.SnapshotMktData, "It does not support snapshot market data requests."))
             {
                 return;
             }
 
-            if (contract.DeltaNeutralContract != null &&
-                !CheckServerVersion(tickerId,
-                                    MinServerVer.DeltaNeutral,
-                                    " It does not support delta-neutral orders"))
+            if (contract.DeltaNeutralContract != null && !CheckServerVersion(tickerId, MinServerVer.DeltaNeutral, " It does not support delta-neutral orders"))
             {
                 return;
             }
 
-            if (contract.ConId > 0 &&
-                !CheckServerVersion(tickerId,
-                                    MinServerVer.ContractConid,
-                                    " It does not support ConId parameter"))
+            if (contract.ConId > 0 && !CheckServerVersion(tickerId, MinServerVer.ContractConid, " It does not support ConId parameter"))
             {
                 return;
             }
 
-            if (!Util.StringIsEmpty(contract.TradingClass) &&
-                !CheckServerVersion(tickerId,
-                                    MinServerVer.TradingClass,
-                                    " It does not support trading class parameter in reqMktData."))
+            if (!Util.StringIsEmpty(contract.TradingClass) && !CheckServerVersion(tickerId, MinServerVer.TradingClass, " It does not support trading class parameter in reqMktData."))
             {
                 return;
             }
@@ -2155,9 +2137,7 @@ namespace Wikiled.IB.Market.Api.Client
 
             if (!IsEmpty(contract.TradingClass) || contract.ConId > 0)
             {
-                if (!CheckServerVersion(tickerId,
-                                        MinServerVer.TradingClass,
-                                        " It does not support ConId nor TradingClass parameters in reqMktDepth."))
+                if (!CheckServerVersion(tickerId, MinServerVer.TradingClass, " It does not support ConId nor TradingClass parameters in reqMktDepth."))
                 {
                     return;
                 }
@@ -2380,9 +2360,7 @@ namespace Wikiled.IB.Market.Api.Client
          * @param subscription summary of the scanner subscription including its filters.
          * @sa reqScannerParameters, ScannerSubscription, EWrapper::scannerData
          */
-        public void ReqScannerSubscription(int reqId,
-                                           ScannerSubscription subscription,
-                                           List<TagValue> scannerSubscriptionOptions)
+        public void ReqScannerSubscription(int reqId, ScannerSubscription subscription, List<TagValue> scannerSubscriptionOptions)
         {
             if (!CheckConnection())
             {
@@ -2481,9 +2459,7 @@ namespace Wikiled.IB.Market.Api.Client
 
             if (!ExtraAuth)
             {
-                ReportError(IncomingMessage.NotValid,
-                            EClientErrors.FailSendVerifymessage,
-                            " Intent to authenticate needs to be expressed during initial connect request.");
+                ReportError(IncomingMessage.NotValid, EClientErrors.FailSendVerifymessage, " Intent to authenticate needs to be expressed during initial connect request.");
                 return;
             }
 
@@ -3004,7 +2980,8 @@ namespace Wikiled.IB.Market.Api.Client
 		 * @param newsArticleOptions reserved for internal use. Should be defined as null.
          * @sa EWrapper::newsArticle, 
          */
-        public void ReqNewsArticle(int requestId, string providerCode, string articleId, List<TagValue> newsArticleOptions) {
+        public void ReqNewsArticle(int requestId, string providerCode, string articleId, List<TagValue> newsArticleOptions)
+        {
             if (!CheckConnection())
             {
                 return;
@@ -3396,12 +3373,12 @@ namespace Wikiled.IB.Market.Api.Client
 
         protected bool CheckServerVersion(int requiredVersion)
         {
-            return CheckServerVersion(requiredVersion, "");
+            return CheckServerVersion(requiredVersion, string.Empty);
         }
 
-        protected bool CheckServerVersion(int requestId, int requiredVersion)
+        private bool CheckServerVersion(int requestId, int requiredVersion)
         {
-            return CheckServerVersion(requestId, requiredVersion, "");
+            return CheckServerVersion(requestId, requiredVersion, string.Empty);
         }
 
         protected bool CheckServerVersion(int requiredVersion, string updatetail)
@@ -3420,7 +3397,7 @@ namespace Wikiled.IB.Market.Api.Client
             return true;
         }
 
-        protected void CloseAndSend(BinaryWriter paramsList, uint lengthPos, CodeMsgPair error)
+        private void CloseAndSend(BinaryWriter paramsList, uint lengthPos, CodeMsgPair error)
         {
             CloseAndSend(IncomingMessage.NotValid, paramsList, lengthPos, error);
         }
@@ -3538,9 +3515,7 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 if (contract.DeltaNeutralContract != null)
                 {
-                    ReportError(id,
-                                EClientErrors.UpdateTws,
-                                "  It does not support delta-neutral orders.");
+                    ReportError(id, EClientErrors.UpdateTws, "  It does not support delta-neutral orders.");
                     return false;
                 }
             }
@@ -3549,9 +3524,7 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 if (contract.ConId > 0)
                 {
-                    ReportError(id,
-                                EClientErrors.UpdateTws,
-                                "  It does not support conId parameter.");
+                    ReportError(id, EClientErrors.UpdateTws, "  It does not support conId parameter.");
                     return false;
                 }
             }
@@ -3560,9 +3533,7 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 if (!IsEmpty(contract.SecIdType) || !IsEmpty(contract.SecId))
                 {
-                    ReportError(id,
-                                EClientErrors.UpdateTws,
-                                "  It does not support secIdType and secId parameters.");
+                    ReportError(id, EClientErrors.UpdateTws, "  It does not support secIdType and secId parameters.");
                     return false;
                 }
             }
@@ -3577,9 +3548,7 @@ namespace Wikiled.IB.Market.Api.Client
                         comboLeg = contract.ComboLegs[i];
                         if (comboLeg.ExemptCode != -1)
                         {
-                            ReportError(id,
-                                        EClientErrors.UpdateTws,
-                                        "  It does not support exemptCode parameter.");
+                            ReportError(id, EClientErrors.UpdateTws, "  It does not support exemptCode parameter.");
                             return false;
                         }
                     }
@@ -3590,9 +3559,7 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 if (!IsEmpty(contract.TradingClass))
                 {
-                    ReportError(id,
-                                EClientErrors.UpdateTws,
-                                "  It does not support tradingClass parameters in placeOrder.");
+                    ReportError(id, EClientErrors.UpdateTws, "  It does not support tradingClass parameters in placeOrder.");
                     return false;
                 }
             }
@@ -3607,9 +3574,7 @@ namespace Wikiled.IB.Market.Api.Client
                 if (order.ScaleInitLevelSize != int.MaxValue ||
                     order.ScalePriceIncrement != double.MaxValue)
                 {
-                    ReportError(id,
-                                EClientErrors.UpdateTws,
-                                "  It does not support Scale orders.");
+                    ReportError(id, EClientErrors.UpdateTws, "  It does not support Scale orders.");
                     return false;
                 }
             }
@@ -3618,9 +3583,7 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 if (order.WhatIf)
                 {
-                    ReportError(id,
-                                EClientErrors.UpdateTws,
-                                "  It does not support what-if orders.");
+                    ReportError(id, EClientErrors.UpdateTws, "  It does not support what-if orders.");
                     return false;
                 }
             }
@@ -3629,9 +3592,7 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 if (order.ScaleSubsLevelSize != int.MaxValue)
                 {
-                    ReportError(id,
-                                EClientErrors.UpdateTws,
-                                "  It does not support Subsequent Level Size for Scale orders.");
+                    ReportError(id, EClientErrors.UpdateTws, "  It does not support Subsequent Level Size for Scale orders.");
                     return false;
                 }
             }
@@ -3640,9 +3601,7 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 if (!IsEmpty(order.AlgoStrategy))
                 {
-                    ReportError(id,
-                                EClientErrors.UpdateTws,
-                                "  It does not support algo orders.");
+                    ReportError(id, EClientErrors.UpdateTws, "  It does not support algo orders.");
                     return false;
                 }
             }
@@ -3651,9 +3610,7 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 if (order.NotHeld)
                 {
-                    ReportError(id,
-                                EClientErrors.UpdateTws,
-                                "  It does not support notHeld parameter.");
+                    ReportError(id, EClientErrors.UpdateTws, "  It does not support notHeld parameter.");
                     return false;
                 }
             }
@@ -3662,9 +3619,7 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 if (order.ExemptCode != -1)
                 {
-                    ReportError(id,
-                                EClientErrors.UpdateTws,
-                                "  It does not support exemptCode parameter.");
+                    ReportError(id, EClientErrors.UpdateTws, "  It does not support exemptCode parameter.");
                     return false;
                 }
             }
@@ -3674,9 +3629,7 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 if (!IsEmpty(order.HedgeType))
                 {
-                    ReportError(id,
-                                EClientErrors.UpdateTws,
-                                "  It does not support hedge orders.");
+                    ReportError(id, EClientErrors.UpdateTws, "  It does not support hedge orders.");
                     return false;
                 }
             }
@@ -3685,9 +3638,7 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 if (order.OptOutSmartRouting)
                 {
-                    ReportError(id,
-                                EClientErrors.UpdateTws,
-                                "  It does not support optOutSmartRouting parameter.");
+                    ReportError(id, EClientErrors.UpdateTws, "  It does not support optOutSmartRouting parameter.");
                     return false;
                 }
             }
@@ -3699,9 +3650,7 @@ namespace Wikiled.IB.Market.Api.Client
                     !IsEmpty(order.DeltaNeutralClearingAccount) ||
                     !IsEmpty(order.DeltaNeutralClearingIntent))
                 {
-                    ReportError(id,
-                                EClientErrors.UpdateTws,
-                                "  It does not support deltaNeutral parameters: ConId, SettlingFirm, ClearingAccount, ClearingIntent");
+                    ReportError(id, EClientErrors.UpdateTws, "  It does not support deltaNeutral parameters: ConId, SettlingFirm, ClearingAccount, ClearingIntent");
                     return false;
                 }
             }
@@ -3714,9 +3663,7 @@ namespace Wikiled.IB.Market.Api.Client
                     !IsEmpty(order.DeltaNeutralDesignatedLocation)
                 )
                 {
-                    ReportError(id,
-                                EClientErrors.UpdateTws,
-                                "  It does not support deltaNeutral parameters: OpenClose, ShortSale, ShortSaleSlot, DesignatedLocation");
+                    ReportError(id, EClientErrors.UpdateTws, "  It does not support deltaNeutral parameters: OpenClose, ShortSale, ShortSaleSlot, DesignatedLocation");
                     return false;
                 }
             }
@@ -3733,10 +3680,8 @@ namespace Wikiled.IB.Market.Api.Client
                         order.ScaleInitFillQty != int.MaxValue ||
                         order.ScaleRandomPercent)
                     {
-                        ReportError(id,
-                                    EClientErrors.UpdateTws,
-                                    "  It does not support Scale order parameters: PriceAdjustValue, PriceAdjustInterval, " +
-                                    "ProfitOffset, AutoReset, InitPosition, InitFillQty and RandomPercent");
+                        ReportError(id, EClientErrors.UpdateTws, "  It does not support Scale order parameters: PriceAdjustValue, PriceAdjustInterval, " + 
+                                                                 "ProfitOffset, AutoReset, InitPosition, InitFillQty and RandomPercent");
                         return false;
                     }
                 }
@@ -3752,9 +3697,7 @@ namespace Wikiled.IB.Market.Api.Client
                         orderComboLeg = order.OrderComboLegs[i];
                         if (orderComboLeg.Price != double.MaxValue)
                         {
-                            ReportError(id,
-                                        EClientErrors.UpdateTws,
-                                        "  It does not support per-leg prices for order combo legs.");
+                            ReportError(id, EClientErrors.UpdateTws, "  It does not support per-leg prices for order combo legs.");
                             return false;
                         }
                     }
@@ -3765,9 +3708,7 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 if (order.TrailingPercent != double.MaxValue)
                 {
-                    ReportError(id,
-                                EClientErrors.UpdateTws,
-                                "  It does not support trailing percent parameter.");
+                    ReportError(id, EClientErrors.UpdateTws, "  It does not support trailing percent parameter.");
                     return false;
                 }
             }
@@ -3783,9 +3724,7 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 if (!IsEmpty(order.ScaleTable) || !IsEmpty(order.ActiveStartTime) || !IsEmpty(order.ActiveStopTime))
                 {
-                    ReportError(id,
-                                EClientErrors.UpdateTws,
-                                "  It does not support scaleTable, activeStartTime nor activeStopTime parameters.");
+                    ReportError(id, EClientErrors.UpdateTws, "  It does not support scaleTable, activeStartTime nor activeStopTime parameters.");
                     return false;
                 }
             }
@@ -3818,9 +3757,7 @@ namespace Wikiled.IB.Market.Api.Client
 
             if (ServerVersion < MinServerVer.AutoPriceForHedge && order.DontUseAutoPriceForHedge)
             {
-                ReportError(id,
-                            EClientErrors.UpdateTws,
-                            " It does not support don't use auto price for hedge parameter");
+                ReportError(id, EClientErrors.UpdateTws, " It does not support don't use auto price for hedge parameter");
             }
 
             return true;
@@ -3829,11 +3766,6 @@ namespace Wikiled.IB.Market.Api.Client
         private bool IsEmpty(string str)
         {
             return Util.StringIsEmpty(str);
-        }
-
-        private bool StringsAreEqual(string a, string b)
-        {
-            return string.Compare(a, b, true) == 0;
         }
 
         public int ReadInt()

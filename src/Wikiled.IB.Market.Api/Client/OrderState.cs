@@ -1,4 +1,6 @@
-﻿namespace Wikiled.IB.Market.Api.Client
+﻿using System.Collections.Generic;
+
+namespace Wikiled.IB.Market.Api.Client
 {
     /**
      * @class OrderState
@@ -171,6 +173,27 @@
             }
 
             return true;
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCode = 1936142708;
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Status);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(InitMarginBefore);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(MaintMarginBefore);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(EquityWithLoanBefore);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(InitMarginChange);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(MaintMarginChange);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(EquityWithLoanChange);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(InitMarginAfter);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(MaintMarginAfter);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(EquityWithLoanAfter);
+            hashCode = hashCode * -1521134295 + Commission.GetHashCode();
+            hashCode = hashCode * -1521134295 + MinCommission.GetHashCode();
+            hashCode = hashCode * -1521134295 + MaxCommission.GetHashCode();
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(CommissionCurrency);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(WarningText);
+            return hashCode;
         }
     }
 }

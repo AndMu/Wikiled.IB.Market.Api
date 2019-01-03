@@ -64,7 +64,7 @@ namespace Wikiled.IB.Market.Api.Client
         public static void AddParameter(this BinaryWriter source, List<TagValue> options)
         {
             var tagValuesStr = new StringBuilder();
-            var tagValuesCount = options == null ? 0 : options.Count;
+            var tagValuesCount = options?.Count ?? 0;
 
             for (var i = 0; i < tagValuesCount; i++)
             {

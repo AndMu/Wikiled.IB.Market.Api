@@ -1,11 +1,13 @@
-﻿namespace Wikiled.IB.Market.Api.Client
+﻿using Wikiled.IB.Market.Api.Client.Messages;
+
+namespace Wikiled.IB.Market.Api.Client
 {
     /**
      * @class Bar
      * @brief The historical data bar's description.
      * @sa EClient, EWrapper
      */
-    public class Bar
+    public class Bar : IPriceData
     {
         public Bar(string time, double open, double high, double low, double close, long volume, int count, double wap)
         {

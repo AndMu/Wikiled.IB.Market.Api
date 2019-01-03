@@ -6,6 +6,7 @@ using System.Net;
 using System.Text;
 using Wikiled.IB.Market.Api.Client.Helpers;
 using Wikiled.IB.Market.Api.Client.Request;
+using Wikiled.IB.Market.Api.Client.Types;
 
 namespace Wikiled.IB.Market.Api.Client
 {
@@ -934,7 +935,7 @@ namespace Wikiled.IB.Market.Api.Client
             if (ServerVersion >= MinServerVer.SmartComboRoutingParams && isBag)
             {
                 var smartComboRoutingParams = order.SmartComboRoutingParams;
-                var smartComboRoutingParamsCount = smartComboRoutingParams == null ? 0 : smartComboRoutingParams.Count;
+                var smartComboRoutingParamsCount = smartComboRoutingParams?.Count ?? 0;
                 paramsList.AddParameter(smartComboRoutingParamsCount);
                 if (smartComboRoutingParamsCount > 0)
                 {
@@ -1169,7 +1170,7 @@ namespace Wikiled.IB.Market.Api.Client
                 if (!IsEmpty(order.AlgoStrategy))
                 {
                     var algoParams = order.AlgoParams;
-                    var algoParamsCount = algoParams == null ? 0 : algoParams.Count;
+                    var algoParamsCount = algoParams?.Count ?? 0;
                     paramsList.AddParameter(algoParamsCount);
                     if (algoParamsCount > 0)
                     {

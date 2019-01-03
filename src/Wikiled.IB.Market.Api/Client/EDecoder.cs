@@ -123,7 +123,6 @@ namespace Wikiled.IB.Market.Api.Client
             if (serverVersion == 0)
             {
                 ProcessConnectAck();
-
                 return nDecodedLen;
             }
 
@@ -2509,7 +2508,7 @@ namespace Wikiled.IB.Market.Api.Client
         public char ReadChar()
         {
             var str = ReadString();
-            return str == null ? '\0' : str[0];
+            return str?[0] ?? '\0';
         }
 
         private void ReadLastTradeDate(ContractDetails contract, bool isBond)

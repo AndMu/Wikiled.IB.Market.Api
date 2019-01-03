@@ -13,7 +13,7 @@ namespace Wikiled.IB.Market.Api.Client
 
         public static string NormalizeString(string str)
         {
-            return str != null ? str : "";
+            return str ?? "";
         }
 
         public static int StringCompare(string lhs, string rhs)
@@ -35,8 +35,8 @@ namespace Wikiled.IB.Market.Api.Client
                 return true;
             }
 
-            var lhsCount = lhs == null ? 0 : lhs.Count;
-            var rhsCount = rhs == null ? 0 : rhs.Count;
+            var lhsCount = lhs?.Count ?? 0;
+            var rhsCount = rhs?.Count ?? 0;
 
             if (lhsCount != rhsCount)
             {

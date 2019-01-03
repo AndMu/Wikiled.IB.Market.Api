@@ -73,7 +73,7 @@ namespace Wikiled.IB.Market.Api.Client
                                double dividendImpact,
                                double dividendsToLastTradeDate)
         {
-            TickEFP?.Invoke(tickerId,
+            OnTickEFP?.Invoke(tickerId,
                              tickType,
                              basisPoints,
                              formattedBasisPoints,
@@ -115,7 +115,7 @@ namespace Wikiled.IB.Market.Api.Client
                                              double theta,
                                              double undPrice)
         {
-            TickOptionCommunication?.Invoke(new TickOptionMessage(tickerId, field, impliedVolatility, delta, optPrice, pvDividend, gamma, vega, theta, undPrice));
+            OnTickOptionCommunication?.Invoke(new TickOptionMessage(tickerId, field, impliedVolatility, delta, optPrice, pvDividend, gamma, vega, theta, undPrice));
         }
 
         void IEWrapper.AccountSummary(int reqId, string account, string tag, string value, string currency)
@@ -292,7 +292,7 @@ namespace Wikiled.IB.Market.Api.Client
 
         void IEWrapper.ReceiveFa(int faDataType, string faXmlData)
         {
-            ReceiveFA?.Invoke(new AdvisorDataMessage(faDataType, faXmlData));
+            OnReceiveFA?.Invoke(new AdvisorDataMessage(faDataType, faXmlData));
         }
 
         void IEWrapper.BondContractDetails(int requestId, ContractDetails contractDetails)
@@ -476,7 +476,7 @@ namespace Wikiled.IB.Market.Api.Client
 
         void IEWrapper.Pnl(int reqId, double dailyPnL, double unrealizedPnL, double realizedPnL)
         {
-            pnl?.Invoke(new PnLMessage(reqId, dailyPnL, unrealizedPnL, realizedPnL));
+            OnPnl?.Invoke(new PnLMessage(reqId, dailyPnL, unrealizedPnL, realizedPnL));
         }
 
         void IEWrapper.PnlSingle(int reqId,
@@ -486,19 +486,19 @@ namespace Wikiled.IB.Market.Api.Client
                                  double realizedPnL,
                                  double value)
         {
-            pnlSingle?.Invoke(new PnLSingleMessage(reqId, pos, dailyPnL, unrealizedPnL, realizedPnL, value));
+            OnPnlSingle?.Invoke(new PnLSingleMessage(reqId, pos, dailyPnL, unrealizedPnL, realizedPnL, value));
         }
 
         void IEWrapper.HistoricalTicks(int reqId, HistoricalTick[] ticks, bool done)
         {
             ticks.ToList()
-                .ForEach(tick => historicalTick?.Invoke(new HistoricalTickMessage(reqId, tick.Time, tick.Price, tick.Size)));
+                .ForEach(tick => OnHistoricalTick?.Invoke(new HistoricalTickMessage(reqId, tick.Time, tick.Price, tick.Size)));
         }
 
         void IEWrapper.HistoricalTicksBidAsk(int reqId, HistoricalTickBidAsk[] ticks, bool done)
         {
             ticks.ToList()
-                .ForEach(tick => historicalTickBidAsk?.Invoke(new HistoricalTickBidAskMessage(
+                .ForEach(tick => OnHistoricalTickBidAsk?.Invoke(new HistoricalTickBidAskMessage(
                                                      reqId,
                                                      tick.Time,
                                                      tick.Mask,
@@ -511,7 +511,7 @@ namespace Wikiled.IB.Market.Api.Client
         void IEWrapper.HistoricalTicksLast(int reqId, HistoricalTickLast[] ticks, bool done)
         {
             ticks.ToList()
-                .ForEach(tick => historicalTickLast?.Invoke(new HistoricalTickLastMessage(
+                .ForEach(tick => OnHistoricalTickLast?.Invoke(new HistoricalTickLastMessage(
                                                      reqId,
                                                      tick.Time,
                                                      tick.Mask,
@@ -530,7 +530,7 @@ namespace Wikiled.IB.Market.Api.Client
                                          string exchange,
                                          string specialConditions)
         {
-            tickByTickAllLast?.Invoke(new TickByTickAllLastMessage(reqId, tickType, time, price, size, attribs, exchange, specialConditions));
+            OnTickByTickAllLast?.Invoke(new TickByTickAllLastMessage(reqId, tickType, time, price, size, attribs, exchange, specialConditions));
         }
 
         void IEWrapper.TickByTickBidAsk(int reqId,
@@ -541,12 +541,12 @@ namespace Wikiled.IB.Market.Api.Client
                                         int askSize,
                                         TickAttrib attribs)
         {
-            tickByTickBidAsk?.Invoke(new TickByTickBidAskMessage(reqId, time, bidPrice, askPrice, bidSize, askSize, attribs));
+            OnTickByTickBidAsk?.Invoke(new TickByTickBidAskMessage(reqId, time, bidPrice, askPrice, bidSize, askSize, attribs));
         }
 
         void IEWrapper.TickByTickMidPoint(int reqId, long time, double midPoint)
         {
-            tickByTickMidPoint?.Invoke(new TickByTickMidPointMessage(reqId, time, midPoint));
+            OnTickByTickMidPoint?.Invoke(new TickByTickMidPointMessage(reqId, time, midPoint));
         }
      
         public event Action<IErrorDescription> Error;
@@ -563,7 +563,7 @@ namespace Wikiled.IB.Market.Api.Client
 
         public event Action<int, int, double> TickGeneric;
 
-        public event Action<int, int, double, string, double, int, string, double, double> TickEFP;
+        public event Action<int, int, double, string, double, int, string, double, double> OnTickEFP;
 
         public event Action<int> TickSnapshotEnd;
 
@@ -573,7 +573,7 @@ namespace Wikiled.IB.Market.Api.Client
 
         public event Action<ManagedAccountsMessage> ManagedAccounts;
 
-        public event Action<TickOptionMessage> TickOptionCommunication;
+        public event Action<TickOptionMessage> OnTickOptionCommunication;
 
         public event Action<AccountSummaryMessage> AccountSummary;
 
@@ -629,7 +629,7 @@ namespace Wikiled.IB.Market.Api.Client
 
         public event Action<int> ScannerDataEnd;
 
-        public event Action<AdvisorDataMessage> ReceiveFA;
+        public event Action<AdvisorDataMessage> OnReceiveFA;
 
         public event Action<BondContractDetailsMessage> BondContractDetails;
 
@@ -692,20 +692,20 @@ namespace Wikiled.IB.Market.Api.Client
 
         public event Action<MarketRuleMessage> MarketRule;
 
-        public event Action<PnLMessage> pnl;
+        public event Action<PnLMessage> OnPnl;
 
-        public event Action<PnLSingleMessage> pnlSingle;
+        public event Action<PnLSingleMessage> OnPnlSingle;
 
-        public event Action<HistoricalTickMessage> historicalTick;
+        public event Action<HistoricalTickMessage> OnHistoricalTick;
 
-        public event Action<HistoricalTickBidAskMessage> historicalTickBidAsk;
+        public event Action<HistoricalTickBidAskMessage> OnHistoricalTickBidAsk;
 
-        public event Action<HistoricalTickLastMessage> historicalTickLast;
+        public event Action<HistoricalTickLastMessage> OnHistoricalTickLast;
 
-        public event Action<TickByTickAllLastMessage> tickByTickAllLast;
+        public event Action<TickByTickAllLastMessage> OnTickByTickAllLast;
 
-        public event Action<TickByTickBidAskMessage> tickByTickBidAsk;
+        public event Action<TickByTickBidAskMessage> OnTickByTickBidAsk;
 
-        public event Action<TickByTickMidPointMessage> tickByTickMidPoint;
+        public event Action<TickByTickMidPointMessage> OnTickByTickMidPoint;
     }
 }

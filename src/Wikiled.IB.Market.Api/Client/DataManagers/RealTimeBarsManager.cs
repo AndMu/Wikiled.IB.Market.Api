@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.Logging;
 using Wikiled.IB.Market.Api.Client.Messages;
+using Wikiled.IB.Market.Api.Client.Types;
 
 namespace Wikiled.IB.Market.Api.Client.DataManagers
 {

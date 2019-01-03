@@ -99,9 +99,7 @@ namespace Wikiled.IB.Market.Api.Client
                 }
 
                 msgQueue.Enqueue(msg);
-
                 eReaderSignal.IssueSignal();
-
                 return true;
             }
             catch (Exception ex)
@@ -139,8 +137,7 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 try
                 {
-                    msgSize =
-                        new EDecoder(eClientSocket.ServerVersion, DefaultWrapper).ParseAndProcessMsg(inBuf.ToArray());
+                    msgSize = new EDecoder(eClientSocket.ServerVersion, DefaultWrapper).ParseAndProcessMsg(inBuf.ToArray());
                     break;
                 }
                 catch (EndOfStreamException)

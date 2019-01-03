@@ -6,7 +6,6 @@ using Wikiled.Console.Arguments;
 using Wikiled.IB.Market.Api.Client;
 using Wikiled.IB.Market.Api.Client.DataManagers;
 using Wikiled.IB.Market.Api.Client.Helpers;
-using Wikiled.IB.Market.Api.Client.Request;
 using Wikiled.IB.Market.Api.Client.Serialization;
 using Wikiled.IB.Market.Api.Client.Types;
 using Wikiled.IB.Market.Api.Console.Commands.Config;
@@ -14,30 +13,30 @@ using Wikiled.IB.Market.Api.Console.Commands.Config;
 namespace Wikiled.IB.Market.Api.Console.Commands
 {
     /// <summary>
-    /// historic -Stock=VXX -Out=price.csv
+    /// realtime -Stock=VXX -Out=price.csv
     /// </summary>
-    public class HistoricCommand : Command
+    public class RealtimeCommand : Command
     {
-        private readonly ILogger<HistoricCommand> log;
+        private readonly ILogger<RealtimeCommand> log;
 
-        private readonly HistoricConfig config;
+        private readonly RealtimeConfig config;
 
         private readonly IClientWrapper client;
 
-        private readonly HistoricalDataManager historicalDataManager;
+        private readonly RealTimeBarsManager realTimeBarsManager;
 
         private readonly ICsvSerializer serializer;
 
-        public HistoricCommand(ILogger<HistoricCommand> log,
+        public RealtimeCommand(ILogger<RealtimeCommand> log,
                                IClientWrapper client,
-                               HistoricalDataManager historicalDataManager,
-                               HistoricConfig config,
+                               RealTimeBarsManager realTimeBarsManager,
+                               RealtimeConfig config,
                                ICsvSerializer serializer)
         {
             this.log = log ?? throw new ArgumentNullException(nameof(log));
             this.client = client ?? throw new ArgumentNullException(nameof(client));
-            this.historicalDataManager =
-                historicalDataManager ?? throw new ArgumentNullException(nameof(historicalDataManager));
+            this.realTimeBarsManager =
+                realTimeBarsManager ?? throw new ArgumentNullException(nameof(realTimeBarsManager));
             this.config = config ?? throw new ArgumentNullException(nameof(config));
             this.serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
         }
@@ -51,15 +50,9 @@ namespace Wikiled.IB.Market.Api.Console.Commands
                 return;
             }
 
-            var request = historicalDataManager
-                            .Request(
-                                new MarketDataRequest(
-                                    ContractHelper.GetContract(config.Stock),
-                                    DateTime.Today.Date.ToUtc(client.TimeZone),
-                                    new Duration(5, DurationType.Years),
-                                    BarSize.Day,
-                                    WhatToShow.BID_ASK));
-            await serializer.Save(config.Stock, request, token).ConfigureAwait(false);
+            var stream = realTimeBarsManager.Request(ContractHelper.GetContract(config.Stock), WhatToShow.BID_ASK);
+            await serializer.Save(config.Stock, stream, token).ConfigureAwait(false);
         }
+        
     }
 }

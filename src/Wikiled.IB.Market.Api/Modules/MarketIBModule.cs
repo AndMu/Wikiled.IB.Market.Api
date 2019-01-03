@@ -2,6 +2,7 @@
 using Autofac;
 using Wikiled.IB.Market.Api.Client;
 using Wikiled.IB.Market.Api.Client.DataManagers;
+using Wikiled.IB.Market.Api.Client.Serialization;
 
 namespace Wikiled.IB.Market.Api.Modules
 {
@@ -20,6 +21,7 @@ namespace Wikiled.IB.Market.Api.Modules
             builder.RegisterType<IBClient>().As<IIBClient>().AsSelf().SingleInstance();
             builder.RegisterType<ClientWrapper>().As<IClientWrapper>().SingleInstance();
             builder.RegisterType<EReaderMonitorSignal>().As<IEReaderSignal>().AsSelf().SingleInstance();
+            builder.RegisterType<CsvSerializer>().As<ICsvSerializer>();
             builder.RegisterType<HistoricalDataManager>();
             builder.RegisterType<ContractManager>();
             builder.RegisterType<HistoricalNewsManager>();

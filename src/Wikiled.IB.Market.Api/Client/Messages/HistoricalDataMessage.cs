@@ -1,41 +1,38 @@
-﻿namespace Wikiled.IB.Market.Api.Client.Messages
+﻿using System;
+
+namespace Wikiled.IB.Market.Api.Client.Messages
 {
-    public class HistoricalDataMessage : IMessage
+    public class HistoricalDataMessage : IMessage, IPriceData
     {
+        private readonly Bar bar;
+
         public HistoricalDataMessage(int requestId, Bar bar)
         {
+            this.bar = bar ?? throw new ArgumentNullException(nameof(bar));
             RequestId = requestId;
-            Date = bar.Time;
-            Open = bar.Open;
-            High = bar.High;
-            Low = bar.Low;
-            Close = bar.Close;
-            Volume = bar.Volume;
-            Count = bar.Count;
-            Wap = bar.Wap;
         }
 
-        public string Date { get; }
+        public string Time => bar.Time;
 
-        public double Open { get; }
+        public double Open => bar.Open;
 
-        public double High { get; }
+        public double High => bar.High;
 
-        public double Low { get; }
+        public double Low => bar.Low;
 
-        public double Close { get; }
+        public double Close => bar.Close;
 
-        public long Volume { get; }
+        public long Volume => bar.Volume;
 
-        public int Count { get; }
+        public int Count => bar.Count;
 
-        public double Wap { get; }
+        public double Wap => bar.Wap;
 
         public int RequestId { get; }
 
         public override string ToString()
         {
-            return $"Price [{Date}] {Open}:{Close} {High}:{Low} {Volume} {Count} {Wap}";
+            return $"Price [{Time}] {Open}:{Close} {High}:{Low} {Volume} {Count} {Wap}";
         }
     }
 }

@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Reactive.Testing" Version="4.1.2" />
     <PackageReference Include="Moq" Version="4.10.1" />
     <PackageReference Include="NUnit" Version="3.11.0" />
     <packagereference Include="Microsoft.NET.Test.Sdk" Version="15.9.0"></packagereference>

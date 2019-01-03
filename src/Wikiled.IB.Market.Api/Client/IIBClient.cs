@@ -11,16 +11,26 @@ namespace Wikiled.IB.Market.Api.Client
 
         int NextOrderId { get; set; }
         
-        event Action<HistoricalTickMessage> historicalTick;
-        event Action<HistoricalTickBidAskMessage> historicalTickBidAsk;
-        event Action<HistoricalTickLastMessage> historicalTickLast;
-        event Action<PnLMessage> pnl;
-        event Action<PnLSingleMessage> pnlSingle;
-        event Action<AdvisorDataMessage> ReceiveFA;
-        event Action<TickByTickAllLastMessage> tickByTickAllLast;
-        event Action<TickByTickBidAskMessage> tickByTickBidAsk;
-        event Action<TickByTickMidPointMessage> tickByTickMidPoint;
-        event Action<int, int, double, string, double, int, string, double, double> TickEFP;
-        event Action<TickOptionMessage> TickOptionCommunication;
+        event Action<HistoricalTickMessage> OnHistoricalTick;
+
+        event Action<HistoricalTickBidAskMessage> OnHistoricalTickBidAsk;
+
+        event Action<HistoricalTickLastMessage> OnHistoricalTickLast;
+
+        event Action<PnLMessage> OnPnl;
+
+        event Action<PnLSingleMessage> OnPnlSingle;
+
+        event Action<AdvisorDataMessage> OnReceiveFA;
+
+        event Action<TickByTickAllLastMessage> OnTickByTickAllLast;
+
+        event Action<TickByTickBidAskMessage> OnTickByTickBidAsk;
+
+        event Action<TickByTickMidPointMessage> OnTickByTickMidPoint;
+
+        event Action<int, int, double, string, double, int, string, double, double> OnTickEFP;
+
+        event Action<TickOptionMessage> OnTickOptionCommunication;
     }
 }

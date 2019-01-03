@@ -1,4 +1,4 @@
-﻿namespace Wikiled.IB.Market.Api.Client
+﻿namespace Wikiled.IB.Market.Api.Client.Types
 {
     public enum WhatToShow
     {

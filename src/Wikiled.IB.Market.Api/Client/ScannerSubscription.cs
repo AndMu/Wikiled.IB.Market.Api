@@ -99,7 +99,7 @@
         /**
          * @brief Filters out Convertible bonds
          */
-        public string ExcludeConvertible { get; set; }
+        public bool ExcludeConvertible { get; set; }
 
         /**
          * @brief For example, a pairing "Annual, true" used on the "top Option Implied Vol % Gainers" scan would return annualized volatilities.

@@ -14,7 +14,7 @@ using Wikiled.IB.Market.Api.Console.Commands.Config;
 namespace Wikiled.IB.Market.Api.Console.Commands
 {
     /// <summary>
-    /// historic -Stock=VXX -Out=price.csv
+    /// historic -Stock=VXX
     /// </summary>
     public class HistoricCommand : Command
     {
@@ -55,11 +55,12 @@ namespace Wikiled.IB.Market.Api.Console.Commands
                             .Request(
                                 new MarketDataRequest(
                                     ContractHelper.GetContract(config.Stock),
-                                    DateTime.Today.Date.ToUtc(client.TimeZone),
+                                    DateTime.UtcNow.Date,
                                     new Duration(5, DurationType.Years),
                                     BarSize.Day,
                                     WhatToShow.BID_ASK));
-            await serializer.Save(config.Stock, request, token).ConfigureAwait(false);
+            await serializer.Save($"{config.Stock}_historic.csv", request, token).ConfigureAwait(false);
+            log.LogInformation("History request completed");
         }
     }
 }

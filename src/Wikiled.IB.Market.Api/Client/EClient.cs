@@ -233,7 +233,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(OutgoingMessages.CancelTickByTickData);
             paramsList.AddParameter(requestId);
 
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendCanceltickbytickdata);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_CANCELTICKBYTICKDATA);
         }
 
         /**
@@ -295,7 +295,7 @@ namespace Wikiled.IB.Market.Api.Client
                 paramsList.AddParameter(ignoreSize);
             }
 
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendReqtickbytickdata);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_REQTICKBYTICKDATA);
         }
 
         /**
@@ -320,7 +320,7 @@ namespace Wikiled.IB.Market.Api.Client
             SendCancelRequest(OutgoingMessages.CancelHistoricalData,
                               version,
                               reqId,
-                              EClientErrors.FailSendCanhistdata);
+                              EClientErrors.FAIL_SEND_CANHISTDATA);
         }
 
         /**
@@ -387,7 +387,7 @@ namespace Wikiled.IB.Market.Api.Client
                 paramsList.AddParameter(impliedVolatilityOptions);
             }
 
-            CloseAndSend(reqId, paramsList, lengthPos, EClientErrors.FailSendReqcalcimpliedvolat);
+            CloseAndSend(reqId, paramsList, lengthPos, EClientErrors.FAIL_SEND_REQCALCIMPLIEDVOLAT);
         }
 
         /**
@@ -456,7 +456,7 @@ namespace Wikiled.IB.Market.Api.Client
                 paramsList.AddParameter(optionPriceOptions);
             }
 
-            CloseAndSend(reqId, paramsList, lengthPos, EClientErrors.FailSendReqcalcoptionprice);
+            CloseAndSend(reqId, paramsList, lengthPos, EClientErrors.FAIL_SEND_REQCALCOPTIONPRICE);
         }
 
         /**
@@ -478,7 +478,7 @@ namespace Wikiled.IB.Market.Api.Client
                 return;
             }
 
-            SendCancelRequest(OutgoingMessages.CancelAccountSummary, 1, reqId, EClientErrors.FailSendCanaccountdata);
+            SendCancelRequest(OutgoingMessages.CancelAccountSummary, 1, reqId, EClientErrors.FAIL_SEND_CANACCOUNTDATA);
         }
 
         /**
@@ -502,7 +502,7 @@ namespace Wikiled.IB.Market.Api.Client
             SendCancelRequest(OutgoingMessages.CancelImpliedVolatility,
                               1,
                               reqId,
-                              EClientErrors.FailSendCancalcimpliedvolat);
+                              EClientErrors.FAIL_SEND_CANCALCIMPLIEDVOLAT);
         }
 
         /**
@@ -523,7 +523,7 @@ namespace Wikiled.IB.Market.Api.Client
                 return;
             }
 
-            SendCancelRequest(OutgoingMessages.CancelOptionPrice, 1, reqId, EClientErrors.FailSendCancalcoptionprice);
+            SendCancelRequest(OutgoingMessages.CancelOptionPrice, 1, reqId, EClientErrors.FAIL_SEND_CANCALCOPTIONPRICE);
         }
 
         /**
@@ -544,7 +544,7 @@ namespace Wikiled.IB.Market.Api.Client
                 return;
             }
 
-            SendCancelRequest(OutgoingMessages.CancelFundamentalData, 1, reqId, EClientErrors.FailSendCanfunddata);
+            SendCancelRequest(OutgoingMessages.CancelFundamentalData, 1, reqId, EClientErrors.FAIL_SEND_CANFUNDDATA);
         }
 
 
@@ -560,7 +560,7 @@ namespace Wikiled.IB.Market.Api.Client
                 return;
             }
 
-            SendCancelRequest(OutgoingMessages.CancelMarketData, 1, tickerId, EClientErrors.FailSendCanmkt);
+            SendCancelRequest(OutgoingMessages.CancelMarketData, 1, tickerId, EClientErrors.FAIL_SEND_CANMKT);
         }
 
         /**
@@ -568,17 +568,33 @@ namespace Wikiled.IB.Market.Api.Client
          * @param tickerId request's identifier.
          * @sa reqMarketDepth
          */
-        public void CancelMktDepth(int tickerId)
+        public void CancelMktDepth(int tickerId, bool isSmartDepth)
         {
             if (!CheckConnection())
-            {
                 return;
+
+            if (isSmartDepth)
+            {
+                if (!CheckServerVersion(tickerId, MinServerVer.SMART_DEPTH, " It does not support SMART depth cancel."))
+                {
+                    return;
+                }
             }
 
-            SendCancelRequest(OutgoingMessages.CancelMarketDepth,
-                              1,
-                              tickerId,
-                              EClientErrors.FailSendCanmktdepth);
+            const int VERSION = 1;
+            var paramsList = new BinaryWriter(new MemoryStream());
+            var lengthPos = PrepareBuffer(paramsList);
+
+            paramsList.AddParameter(OutgoingMessages.CancelMarketDepth);
+            paramsList.AddParameter(VERSION);
+            paramsList.AddParameter(tickerId);
+
+            if (ServerVersion >= MinServerVer.SMART_DEPTH)
+            {
+                paramsList.AddParameter(isSmartDepth);
+            }
+
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_CANMKTDEPTH);
         }
 
         /**
@@ -594,7 +610,7 @@ namespace Wikiled.IB.Market.Api.Client
 
             SendCancelRequest(OutgoingMessages.CancelNewsBulletin,
                               1,
-                              EClientErrors.FailSendCorder);
+                              EClientErrors.FAIL_SEND_CORDER);
         }
 
         /**
@@ -613,7 +629,7 @@ namespace Wikiled.IB.Market.Api.Client
             SendCancelRequest(OutgoingMessages.CancelOrder,
                               1,
                               orderId,
-                              EClientErrors.FailSendCorder);
+                              EClientErrors.FAIL_SEND_CORDER);
         }
 
         /**
@@ -633,7 +649,7 @@ namespace Wikiled.IB.Market.Api.Client
                 return;
             }
 
-            SendCancelRequest(OutgoingMessages.CancelPositions, 1, EClientErrors.FailSendCanpositions);
+            SendCancelRequest(OutgoingMessages.CancelPositions, 1, EClientErrors.FAIL_SEND_CANPOSITIONS);
         }
 
         /**
@@ -648,7 +664,7 @@ namespace Wikiled.IB.Market.Api.Client
                 return;
             }
 
-            SendCancelRequest(OutgoingMessages.CancelRealTimeBars, 1, tickerId, EClientErrors.FailSendCanrtbars);
+            SendCancelRequest(OutgoingMessages.CancelRealTimeBars, 1, tickerId, EClientErrors.FAIL_SEND_CANRTBARS);
         }
 
         /**
@@ -666,7 +682,7 @@ namespace Wikiled.IB.Market.Api.Client
             SendCancelRequest(OutgoingMessages.CancelScannerSubscription,
                               1,
                               tickerId,
-                              EClientErrors.FailSendCanscanner);
+                              EClientErrors.FAIL_SEND_CANSCANNER);
         }
 
         /**
@@ -737,7 +753,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(account);
             paramsList.AddParameter(ovrd);
 
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailGeneric);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_GENERIC);
         }
 
         /**
@@ -770,7 +786,11 @@ namespace Wikiled.IB.Market.Api.Client
 
 
             paramsList.AddParameter(OutgoingMessages.PlaceOrder);
-            paramsList.AddParameter(msgVersion);
+            if (ServerVersion < MinServerVer.ORDER_CONTAINER)
+            {
+                paramsList.AddParameter(msgVersion);
+            }
+
             paramsList.AddParameter(id);
 
             if (ServerVersion >= MinServerVer.PlaceOrderConid)
@@ -1277,7 +1297,17 @@ namespace Wikiled.IB.Market.Api.Client
                 paramsList.AddParameter(order.DontUseAutoPriceForHedge);
             }
 
-            CloseAndSend(id, paramsList, lengthPos, EClientErrors.FailSendOrder);
+            if (ServerVersion >= MinServerVer.ORDER_CONTAINER)
+            {
+                paramsList.AddParameter(order.IsOmsContainer);
+            }
+
+            if (ServerVersion >= MinServerVer.D_PEG_ORDERS)
+            {
+                paramsList.AddParameter(order.DiscretionaryUpToLimitPrice);
+            }
+
+            CloseAndSend(id, paramsList, lengthPos, EClientErrors.FAIL_SEND_ORDER);
         }
 
         /**
@@ -1305,7 +1335,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(1);
             paramsList.AddParameter(faDataType);
             paramsList.AddParameter(xml);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendFaReplace);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_FA_REPLACE);
         }
 
         /**
@@ -1332,7 +1362,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(OutgoingMessages.RequestFa);
             paramsList.AddParameter(version);
             paramsList.AddParameter(faDataType);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendFaRequest);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_FA_REQUEST);
         }
 
         /**
@@ -1399,7 +1429,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(reqId);
             paramsList.AddParameter(group);
             paramsList.AddParameter(tags);
-            CloseAndSend(reqId, paramsList, lengthPos, EClientErrors.FailSendReqaccountdata);
+            CloseAndSend(reqId, paramsList, lengthPos, EClientErrors.FAIL_SEND_REQACCOUNTDATA);
         }
 
         /**
@@ -1429,7 +1459,7 @@ namespace Wikiled.IB.Market.Api.Client
                 paramsList.AddParameter(acctCode);
             }
 
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendReqaccountdata);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_REQACCOUNTDATA);
         }
 
         /**
@@ -1450,7 +1480,7 @@ namespace Wikiled.IB.Market.Api.Client
 
             paramsList.AddParameter(OutgoingMessages.RequestAllOpenOrders);
             paramsList.AddParameter(version);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendOorder);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_OORDER);
         }
 
         /**
@@ -1472,7 +1502,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(OutgoingMessages.RequestAutoOpenOrders);
             paramsList.AddParameter(version);
             paramsList.AddParameter(autoBind);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendOorder);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_OORDER);
         }
 
         /**
@@ -1581,7 +1611,7 @@ namespace Wikiled.IB.Market.Api.Client
                 paramsList.AddParameter(contract.SecId);
             }
 
-            CloseAndSend(reqId, paramsList, lengthPos, EClientErrors.FailSendReqcontract);
+            CloseAndSend(reqId, paramsList, lengthPos, EClientErrors.FAIL_SEND_REQCONTRACT);
         }
 
         /**
@@ -1606,7 +1636,7 @@ namespace Wikiled.IB.Market.Api.Client
 
             paramsList.AddParameter(OutgoingMessages.RequestCurrentTime);
             paramsList.AddParameter(version); //version
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendReqcurrtime);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_REQCURRTIME);
         }
 
         /**
@@ -1650,12 +1680,12 @@ namespace Wikiled.IB.Market.Api.Client
                 paramsList.AddParameter(filter.Side);
             }
 
-            CloseAndSend(reqId, paramsList, lengthPos, EClientErrors.FailSendExec);
+            CloseAndSend(reqId, paramsList, lengthPos, EClientErrors.FAIL_SEND_EXEC);
         }
 
         /**
-         * @brief Requests the contract's Reuters or Wall Street Horizons fundamental data.
-         * Fundalmental data is returned at EWrapper::fundamentalData
+          * @brief Requests the contract's fundamental or Wall Street Horizons data.
+         * Fundamental data is returned at EWrapper::fundamentalData
          * @param reqId the request's unique identifier.
          * @param contract the contract's description for which the data will be returned.
          * @param reportType there are three available report types: 
@@ -1714,7 +1744,7 @@ namespace Wikiled.IB.Market.Api.Client
                 paramsList.AddParameter(fundamentalDataOptions);
             }
 
-            CloseAndSend(reqId, paramsList, lengthPos, EClientErrors.FailSendReqfunddata);
+            CloseAndSend(reqId, paramsList, lengthPos, EClientErrors.FAIL_SEND_REQFUNDDATA);
         }
 
         /**
@@ -1741,7 +1771,7 @@ namespace Wikiled.IB.Market.Api.Client
 
             paramsList.AddParameter(OutgoingMessages.RequestGlobalCancel);
             paramsList.AddParameter(version);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendReqglobalcancel);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_REQGLOBALCANCEL);
         }
 
         /**
@@ -1885,7 +1915,7 @@ namespace Wikiled.IB.Market.Api.Client
                 paramsList.AddParameter(chartOptions);
             }
 
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendReqhistdata);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_REQHISTDATA);
         }
 
         /**
@@ -1908,7 +1938,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(OutgoingMessages.RequestIds);
             paramsList.AddParameter(version);
             paramsList.AddParameter(numIds);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailGeneric);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_GENERIC);
         }
 
         /**
@@ -1928,7 +1958,7 @@ namespace Wikiled.IB.Market.Api.Client
 
             paramsList.AddParameter(OutgoingMessages.RequestManagedAccounts);
             paramsList.AddParameter(version);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailGeneric);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_GENERIC);
         }
 
         /**
@@ -2086,7 +2116,7 @@ namespace Wikiled.IB.Market.Api.Client
                 paramsList.AddParameter(mktDataOptions);
             }
 
-            CloseAndSend(tickerId, paramsList, lengthPos, EClientErrors.FailSendReqmkt);
+            CloseAndSend(tickerId, paramsList, lengthPos, EClientErrors.FAIL_SEND_REQMKT);
         }
 
         /**
@@ -2119,7 +2149,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(OutgoingMessages.RequestMarketDataType);
             paramsList.AddParameter(version);
             paramsList.AddParameter(marketDataType);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendReqmarketdatatype);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_REQMARKETDATATYPE);
         }
 
         /**
@@ -2127,9 +2157,10 @@ namespace Wikiled.IB.Market.Api.Client
          * @param tickerId the request's identifier
          * @param contract the Contract for which the depth is being requested
          * @param numRows the number of rows on each side of the order book
+         * @param isSmartDepth flag indicates that this is smart depth request
          * @sa cancelMktDepth, EWrapper::updateMktDepth, EWrapper::updateMktDepthL2
          */
-        public void ReqMarketDepth(int tickerId, Contract contract, int numRows, List<TagValue> mktDepthOptions)
+        public void ReqMarketDepth(int tickerId, Contract contract, int numRows, bool isSmartDepth, List<TagValue> mktDepthOptions)
         {
             if (!CheckConnection())
             {
@@ -2139,6 +2170,14 @@ namespace Wikiled.IB.Market.Api.Client
             if (!IsEmpty(contract.TradingClass) || contract.ConId > 0)
             {
                 if (!CheckServerVersion(tickerId, MinServerVer.TradingClass, " It does not support ConId nor TradingClass parameters in reqMktDepth."))
+                {
+                    return;
+                }
+            }
+
+            if (isSmartDepth)
+            {
+                if (!CheckServerVersion(tickerId, MinServerVer.SMART_DEPTH, " It does not support SMART depth request."))
                 {
                     return;
                 }
@@ -2183,12 +2222,17 @@ namespace Wikiled.IB.Market.Api.Client
                 paramsList.AddParameter(numRows);
             }
 
+            if (ServerVersion >= MinServerVer.SMART_DEPTH)
+            {
+                paramsList.AddParameter(isSmartDepth);
+            }
+
             if (ServerVersion >= MinServerVer.Linking)
             {
                 paramsList.AddParameter(mktDepthOptions);
             }
 
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendReqmktdepth);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_REQMKTDEPTH);
         }
 
         /**
@@ -2210,7 +2254,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(OutgoingMessages.RequestNewsBulletins);
             paramsList.AddParameter(version);
             paramsList.AddParameter(allMessages);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailGeneric);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_GENERIC);
         }
 
         /**
@@ -2230,7 +2274,7 @@ namespace Wikiled.IB.Market.Api.Client
 
             paramsList.AddParameter(OutgoingMessages.RequestOpenOrders);
             paramsList.AddParameter(version);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendOorder);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_OORDER);
         }
 
         /**
@@ -2255,7 +2299,7 @@ namespace Wikiled.IB.Market.Api.Client
 
             paramsList.AddParameter(OutgoingMessages.RequestPositions);
             paramsList.AddParameter(version);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendReqpositions);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_REQPOSITIONS);
         }
 
         /**
@@ -2331,7 +2375,7 @@ namespace Wikiled.IB.Market.Api.Client
                 paramsList.AddParameter(realTimeBarsOptions);
             }
 
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendReqrtbars);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_REQRTBARS);
         }
 
         /**
@@ -2352,7 +2396,7 @@ namespace Wikiled.IB.Market.Api.Client
 
             paramsList.AddParameter(OutgoingMessages.RequestScannerParameters);
             paramsList.AddParameter(version);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendReqscannerparameters);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_REQSCANNERPARAMETERS);
         }
 
         /**
@@ -2361,9 +2405,14 @@ namespace Wikiled.IB.Market.Api.Client
          * @param subscription summary of the scanner subscription including its filters.
          * @sa reqScannerParameters, ScannerSubscription, EWrapper::scannerData
          */
-        public void ReqScannerSubscription(int reqId, ScannerSubscription subscription, List<TagValue> scannerSubscriptionOptions)
+        public void ReqScannerSubscription(int reqId, ScannerSubscription subscription, List<TagValue> scannerSubscriptionOptions, List<TagValue> scannerSubscriptionFilterOptions)
         {
             if (!CheckConnection())
+            {
+                return;
+            }
+
+            if (scannerSubscriptionFilterOptions != null && !CheckServerVersion(MinServerVer.SCANNER_GENERIC_OPTS, " It does not support API scanner subscription generic filter options"))
             {
                 return;
             }
@@ -2373,7 +2422,10 @@ namespace Wikiled.IB.Market.Api.Client
             var lengthPos = PrepareBuffer(paramsList);
 
             paramsList.AddParameter(OutgoingMessages.RequestScannerSubscription);
-            paramsList.AddParameter(version);
+            if (ServerVersion < MinServerVer.SCANNER_GENERIC_OPTS)
+            {
+                paramsList.AddParameter(version);
+            }
             paramsList.AddParameter(reqId);
             paramsList.AddParameterMax(subscription.NumberOfRows);
             paramsList.AddParameter(subscription.Instrument);
@@ -2405,12 +2457,17 @@ namespace Wikiled.IB.Market.Api.Client
                 paramsList.AddParameter(subscription.StockTypeFilter);
             }
 
+            if (ServerVersion >= MinServerVer.SCANNER_GENERIC_OPTS)
+            {
+                paramsList.AddParameter(scannerSubscriptionFilterOptions);
+            }
+
             if (ServerVersion >= MinServerVer.Linking)
             {
                 paramsList.AddParameter(scannerSubscriptionOptions);
             }
 
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendReqscanner);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_REQSCANNER);
         }
 
         /**
@@ -2440,7 +2497,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(version);
             paramsList.AddParameter(logLevel);
 
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendServerLogLevel);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_SERVER_LOG_LEVEL);
         }
 
         /**
@@ -2460,7 +2517,7 @@ namespace Wikiled.IB.Market.Api.Client
 
             if (!ExtraAuth)
             {
-                ReportError(IncomingMessage.NotValid, EClientErrors.FailSendVerifymessage, " Intent to authenticate needs to be expressed during initial connect request.");
+                ReportError(IncomingMessage.NotValid, EClientErrors.FAIL_SEND_VERIFYMESSAGE, " Intent to authenticate needs to be expressed during initial connect request.");
                 return;
             }
 
@@ -2472,7 +2529,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(version);
             paramsList.AddParameter(apiName);
             paramsList.AddParameter(apiVersion);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendVerifyrequest);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_VERIFYREQUEST);
         }
 
         /**
@@ -2497,7 +2554,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(OutgoingMessages.VerifyMessage);
             paramsList.AddParameter(version);
             paramsList.AddParameter(apiData);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendVerifymessage);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_VERIFYMESSAGE);
         }
 
         /**
@@ -2517,7 +2574,7 @@ namespace Wikiled.IB.Market.Api.Client
 
             if (!ExtraAuth)
             {
-                ReportError(IncomingMessage.NotValid, EClientErrors.FailSendVerifyandauthmessage, " Intent to authenticate needs to be expressed during initial connect request.");
+                ReportError(IncomingMessage.NotValid, EClientErrors.FAIL_SEND_VERIFYANDAUTHMESSAGE, " Intent to authenticate needs to be expressed during initial connect request.");
                 return;
             }
 
@@ -2529,7 +2586,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(apiName);
             paramsList.AddParameter(apiVersion);
             paramsList.AddParameter(opaqueIsvKey);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendVerifyandauthrequest);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_VERIFYANDAUTHREQUEST);
         }
 
         /**
@@ -2554,7 +2611,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(version);
             paramsList.AddParameter(apiData);
             paramsList.AddParameter(xyzResponse);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendVerifyandauthmessage);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_VERIFYANDAUTHMESSAGE);
         }
 
         /**
@@ -2580,7 +2637,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(OutgoingMessages.QueryDisplayGroups);
             paramsList.AddParameter(version);
             paramsList.AddParameter(requestId);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendQuerydisplaygroups);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_QUERYDISPLAYGROUPS);
         }
 
         /**
@@ -2608,7 +2665,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(version);
             paramsList.AddParameter(requestId);
             paramsList.AddParameter(groupId);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendSubscribetogroupevents);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_SUBSCRIBETOGROUPEVENTS);
         }
 
         /**
@@ -2640,7 +2697,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(version);
             paramsList.AddParameter(requestId);
             paramsList.AddParameter(contractInfo);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendUpdatedisplaygroup);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_UPDATEDISPLAYGROUP);
         }
 
         /**
@@ -2665,7 +2722,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(OutgoingMessages.UnsubscribeFromGroupEvents);
             paramsList.AddParameter(version);
             paramsList.AddParameter(requestId);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendUnsubscribefromgroupevents);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_UNSUBSCRIBEFROMGROUPEVENTS);
         }
 
         /**
@@ -2697,7 +2754,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(requestId);
             paramsList.AddParameter(account);
             paramsList.AddParameter(modelCode);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendReqpositionsmulti);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_REQPOSITIONSMULTI);
         }
 
         /**
@@ -2725,7 +2782,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(OutgoingMessages.CancelPositionsMulti);
             paramsList.AddParameter(version);
             paramsList.AddParameter(requestId);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendCanpositionsmulti);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_CANPOSITIONSMULTI);
         }
 
         /**
@@ -2759,7 +2816,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(account);
             paramsList.AddParameter(modelCode);
             paramsList.AddParameter(ledgerAndNlv);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendReqaccountupdatesmulti);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_REQACCOUNTUPDATESMULTI);
         }
 
         /**
@@ -2786,7 +2843,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(OutgoingMessages.CancelAccountUpdatesMulti);
             paramsList.AddParameter(version);
             paramsList.AddParameter(requestId);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendCanaccountupdatesmulti);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_CANACCOUNTUPDATESMULTI);
         }
 
         /**
@@ -2820,7 +2877,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(futFopExchange);
             paramsList.AddParameter(underlyingSecType);
             paramsList.AddParameter(underlyingConId);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendReqsecdefoptparams);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_REQSECDEFOPTPARAMS);
         }
 
         /**
@@ -2845,7 +2902,7 @@ namespace Wikiled.IB.Market.Api.Client
 
             paramsList.AddParameter(OutgoingMessages.RequestSoftDollarTiers);
             paramsList.AddParameter(reqId);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendReqsoftdollartiers);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_REQSOFTDOLLARTIERS);
         }
 
         /**
@@ -2868,7 +2925,7 @@ namespace Wikiled.IB.Market.Api.Client
             var lengthPos = PrepareBuffer(paramsList);
 
             paramsList.AddParameter(OutgoingMessages.RequestFamilyCodes);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendReqfamilycodes);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_REQFAMILYCODES);
         }
 
         /**
@@ -2896,7 +2953,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(OutgoingMessages.RequestMatchingSymbols);
             paramsList.AddParameter(reqId);
             paramsList.AddParameter(pattern);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendReqmatchingsymbols);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_REQMATCHINGSYMBOLS);
         }
 
         /**
@@ -2919,7 +2976,7 @@ namespace Wikiled.IB.Market.Api.Client
             var lengthPos = PrepareBuffer(paramsList);
 
             paramsList.AddParameter(OutgoingMessages.RequestMktDepthExchanges);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendReqmktdepthexchanges);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_REQMKTDEPTHEXCHANGES);
         }
 
         /**
@@ -2946,7 +3003,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(OutgoingMessages.RequestSmartComponents);
             paramsList.AddParameter(reqId);
             paramsList.AddParameter(bboExchange);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendReqsmartcomponents);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_REQSMARTCOMPONENTS);
         }
 
         /**
@@ -2970,7 +3027,7 @@ namespace Wikiled.IB.Market.Api.Client
             var lengthPos = PrepareBuffer(paramsList);
 
             paramsList.AddParameter(OutgoingMessages.RequestNewsProviders);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendReqnewsproviders);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_REQNEWSPROVIDERS);
         }
 
         /**
@@ -3006,7 +3063,7 @@ namespace Wikiled.IB.Market.Api.Client
                 paramsList.AddParameter(newsArticleOptions);
             }
 
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendReqnewsarticle);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_REQNEWSARTICLE);
         }
 
         /**
@@ -3048,7 +3105,7 @@ namespace Wikiled.IB.Market.Api.Client
                 paramsList.AddParameter(historicalNewsOptions);
             }
 
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendReqhistoricalnews);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_REQHISTORICALNEWS);
         }
 
         /**
@@ -3083,7 +3140,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(useRth);
             paramsList.AddParameter(whatToShow);
             paramsList.AddParameter(formatDate);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendReqheadtimestamp);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_REQHEADTIMESTAMP);
         }
 
         /**
@@ -3109,7 +3166,7 @@ namespace Wikiled.IB.Market.Api.Client
 
             paramsList.AddParameter(OutgoingMessages.CancelHeadTimestamp);
             paramsList.AddParameter(tickerId);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendCancelheadtimestamp);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_CANCELHEADTIMESTAMP);
         }
 
 
@@ -3143,7 +3200,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(contract);
             paramsList.AddParameter(useRth);
             paramsList.AddParameter(period);
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendReqhistogramdata);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_REQHISTOGRAMDATA);
         }
 
         /**
@@ -3171,7 +3228,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(OutgoingMessages.CancelHistogramData);
             paramsList.AddParameter(tickerId);
 
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendCancelhistogramdata);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_CANCELHISTOGRAMDATA);
         }
 
         /**
@@ -3200,7 +3257,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(OutgoingMessages.RequestMarketRule);
             paramsList.AddParameter(marketRuleId);
 
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendReqmarketrule);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_REQMARKETRULE);
         }
 
         /**
@@ -3230,7 +3287,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(account);
             paramsList.AddParameter(modelCode);
 
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendReqpnl);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_REQPNL);
         }
 
         /** 
@@ -3257,7 +3314,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(OutgoingMessages.CancelPnL);
             paramsList.AddParameter(reqId);
 
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendCancelpnl);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_CANCELPNL);
         }
 
         /**
@@ -3291,7 +3348,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(modelCode);
             paramsList.AddParameter(conId);
 
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendReqpnlsingle);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_REQPNLSINGLE);
         }
 
         /** 
@@ -3318,7 +3375,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(OutgoingMessages.CancelPnLSingle);
             paramsList.AddParameter(reqId);
 
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendReqpnlsingle);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_REQPNLSINGLE);
         }
 
         /**
@@ -3369,7 +3426,7 @@ namespace Wikiled.IB.Market.Api.Client
             paramsList.AddParameter(ignoreSize);
             paramsList.AddParameter(miscOptions);
 
-            CloseAndSend(paramsList, lengthPos, EClientErrors.FailSendReqhistoricalticks);
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_REQHISTORICALTICKS);
         }
 
         protected bool CheckServerVersion(int requiredVersion)
@@ -3423,8 +3480,8 @@ namespace Wikiled.IB.Market.Api.Client
             if (!IsConnected)
             {
                 Wrapper.Error(IncomingMessage.NotValid,
-                              EClientErrors.NotConnected.Code,
-                              EClientErrors.NotConnected.Message);
+                              EClientErrors.NOT_CONNECTED.Code,
+                              EClientErrors.NOT_CONNECTED.Message);
                 return false;
             }
 
@@ -3438,14 +3495,14 @@ namespace Wikiled.IB.Market.Api.Client
 
         protected void ReportUpdateTws(int reqId, string tail)
         {
-            ReportError(reqId, EClientErrors.UpdateTws.Code, EClientErrors.UpdateTws.Message + tail);
+            ReportError(reqId, EClientErrors.UPDATE_TWS.Code, EClientErrors.UPDATE_TWS.Message + tail);
         }
 
         protected void ReportUpdateTws(string tail)
         {
             ReportError(IncomingMessage.NotValid,
-                        EClientErrors.UpdateTws.Code,
-                        EClientErrors.UpdateTws.Message + tail);
+                        EClientErrors.UPDATE_TWS.Code,
+                        EClientErrors.UPDATE_TWS.Message + tail);
         }
 
         protected void ReportError(int reqId, int code, string message)
@@ -3504,7 +3561,7 @@ namespace Wikiled.IB.Market.Api.Client
                             !IsEmpty(comboLeg.DesignatedLocation))
                         {
                             ReportError(id,
-                                        EClientErrors.UpdateTws,
+                                        EClientErrors.UPDATE_TWS,
                                         "  It does not support SSHORT flag for combo legs.");
                             return false;
                         }
@@ -3516,7 +3573,7 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 if (contract.DeltaNeutralContract != null)
                 {
-                    ReportError(id, EClientErrors.UpdateTws, "  It does not support delta-neutral orders.");
+                    ReportError(id, EClientErrors.UPDATE_TWS, "  It does not support delta-neutral orders.");
                     return false;
                 }
             }
@@ -3525,7 +3582,7 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 if (contract.ConId > 0)
                 {
-                    ReportError(id, EClientErrors.UpdateTws, "  It does not support conId parameter.");
+                    ReportError(id, EClientErrors.UPDATE_TWS, "  It does not support conId parameter.");
                     return false;
                 }
             }
@@ -3534,7 +3591,7 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 if (!IsEmpty(contract.SecIdType) || !IsEmpty(contract.SecId))
                 {
-                    ReportError(id, EClientErrors.UpdateTws, "  It does not support secIdType and secId parameters.");
+                    ReportError(id, EClientErrors.UPDATE_TWS, "  It does not support secIdType and secId parameters.");
                     return false;
                 }
             }
@@ -3549,7 +3606,7 @@ namespace Wikiled.IB.Market.Api.Client
                         comboLeg = contract.ComboLegs[i];
                         if (comboLeg.ExemptCode != -1)
                         {
-                            ReportError(id, EClientErrors.UpdateTws, "  It does not support exemptCode parameter.");
+                            ReportError(id, EClientErrors.UPDATE_TWS, "  It does not support exemptCode parameter.");
                             return false;
                         }
                     }
@@ -3560,7 +3617,7 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 if (!IsEmpty(contract.TradingClass))
                 {
-                    ReportError(id, EClientErrors.UpdateTws, "  It does not support tradingClass parameters in placeOrder.");
+                    ReportError(id, EClientErrors.UPDATE_TWS, "  It does not support tradingClass parameters in placeOrder.");
                     return false;
                 }
             }
@@ -3575,7 +3632,7 @@ namespace Wikiled.IB.Market.Api.Client
                 if (order.ScaleInitLevelSize != int.MaxValue ||
                     order.ScalePriceIncrement != double.MaxValue)
                 {
-                    ReportError(id, EClientErrors.UpdateTws, "  It does not support Scale orders.");
+                    ReportError(id, EClientErrors.UPDATE_TWS, "  It does not support Scale orders.");
                     return false;
                 }
             }
@@ -3584,7 +3641,7 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 if (order.WhatIf)
                 {
-                    ReportError(id, EClientErrors.UpdateTws, "  It does not support what-if orders.");
+                    ReportError(id, EClientErrors.UPDATE_TWS, "  It does not support what-if orders.");
                     return false;
                 }
             }
@@ -3593,7 +3650,7 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 if (order.ScaleSubsLevelSize != int.MaxValue)
                 {
-                    ReportError(id, EClientErrors.UpdateTws, "  It does not support Subsequent Level Size for Scale orders.");
+                    ReportError(id, EClientErrors.UPDATE_TWS, "  It does not support Subsequent Level Size for Scale orders.");
                     return false;
                 }
             }
@@ -3602,7 +3659,7 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 if (!IsEmpty(order.AlgoStrategy))
                 {
-                    ReportError(id, EClientErrors.UpdateTws, "  It does not support algo orders.");
+                    ReportError(id, EClientErrors.UPDATE_TWS, "  It does not support algo orders.");
                     return false;
                 }
             }
@@ -3611,7 +3668,7 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 if (order.NotHeld)
                 {
-                    ReportError(id, EClientErrors.UpdateTws, "  It does not support notHeld parameter.");
+                    ReportError(id, EClientErrors.UPDATE_TWS, "  It does not support notHeld parameter.");
                     return false;
                 }
             }
@@ -3620,7 +3677,7 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 if (order.ExemptCode != -1)
                 {
-                    ReportError(id, EClientErrors.UpdateTws, "  It does not support exemptCode parameter.");
+                    ReportError(id, EClientErrors.UPDATE_TWS, "  It does not support exemptCode parameter.");
                     return false;
                 }
             }
@@ -3630,7 +3687,7 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 if (!IsEmpty(order.HedgeType))
                 {
-                    ReportError(id, EClientErrors.UpdateTws, "  It does not support hedge orders.");
+                    ReportError(id, EClientErrors.UPDATE_TWS, "  It does not support hedge orders.");
                     return false;
                 }
             }
@@ -3639,7 +3696,7 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 if (order.OptOutSmartRouting)
                 {
-                    ReportError(id, EClientErrors.UpdateTws, "  It does not support optOutSmartRouting parameter.");
+                    ReportError(id, EClientErrors.UPDATE_TWS, "  It does not support optOutSmartRouting parameter.");
                     return false;
                 }
             }
@@ -3651,7 +3708,7 @@ namespace Wikiled.IB.Market.Api.Client
                     !IsEmpty(order.DeltaNeutralClearingAccount) ||
                     !IsEmpty(order.DeltaNeutralClearingIntent))
                 {
-                    ReportError(id, EClientErrors.UpdateTws, "  It does not support deltaNeutral parameters: ConId, SettlingFirm, ClearingAccount, ClearingIntent");
+                    ReportError(id, EClientErrors.UPDATE_TWS, "  It does not support deltaNeutral parameters: ConId, SettlingFirm, ClearingAccount, ClearingIntent");
                     return false;
                 }
             }
@@ -3664,7 +3721,7 @@ namespace Wikiled.IB.Market.Api.Client
                     !IsEmpty(order.DeltaNeutralDesignatedLocation)
                 )
                 {
-                    ReportError(id, EClientErrors.UpdateTws, "  It does not support deltaNeutral parameters: OpenClose, ShortSale, ShortSaleSlot, DesignatedLocation");
+                    ReportError(id, EClientErrors.UPDATE_TWS, "  It does not support deltaNeutral parameters: OpenClose, ShortSale, ShortSaleSlot, DesignatedLocation");
                     return false;
                 }
             }
@@ -3681,7 +3738,7 @@ namespace Wikiled.IB.Market.Api.Client
                         order.ScaleInitFillQty != int.MaxValue ||
                         order.ScaleRandomPercent)
                     {
-                        ReportError(id, EClientErrors.UpdateTws, "  It does not support Scale order parameters: PriceAdjustValue, PriceAdjustInterval, " + 
+                        ReportError(id, EClientErrors.UPDATE_TWS, "  It does not support Scale order parameters: PriceAdjustValue, PriceAdjustInterval, " + 
                                                                  "ProfitOffset, AutoReset, InitPosition, InitFillQty and RandomPercent");
                         return false;
                     }
@@ -3698,7 +3755,7 @@ namespace Wikiled.IB.Market.Api.Client
                         orderComboLeg = order.OrderComboLegs[i];
                         if (orderComboLeg.Price != double.MaxValue)
                         {
-                            ReportError(id, EClientErrors.UpdateTws, "  It does not support per-leg prices for order combo legs.");
+                            ReportError(id, EClientErrors.UPDATE_TWS, "  It does not support per-leg prices for order combo legs.");
                             return false;
                         }
                     }
@@ -3709,14 +3766,14 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 if (order.TrailingPercent != double.MaxValue)
                 {
-                    ReportError(id, EClientErrors.UpdateTws, "  It does not support trailing percent parameter.");
+                    ReportError(id, EClientErrors.UPDATE_TWS, "  It does not support trailing percent parameter.");
                     return false;
                 }
             }
 
             if (ServerVersion < MinServerVer.AlgoId && !IsEmpty(order.AlgoId))
             {
-                ReportError(id, EClientErrors.UpdateTws, " It does not support algoId parameter");
+                ReportError(id, EClientErrors.UPDATE_TWS, " It does not support algoId parameter");
 
                 return false;
             }
@@ -3725,21 +3782,21 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 if (!IsEmpty(order.ScaleTable) || !IsEmpty(order.ActiveStartTime) || !IsEmpty(order.ActiveStopTime))
                 {
-                    ReportError(id, EClientErrors.UpdateTws, "  It does not support scaleTable, activeStartTime nor activeStopTime parameters.");
+                    ReportError(id, EClientErrors.UPDATE_TWS, "  It does not support scaleTable, activeStartTime nor activeStopTime parameters.");
                     return false;
                 }
             }
 
             if (ServerVersion < MinServerVer.ExtOperator && !IsEmpty(order.ExtOperator))
             {
-                ReportError(id, EClientErrors.UpdateTws, " It does not support extOperator parameter");
+                ReportError(id, EClientErrors.UPDATE_TWS, " It does not support extOperator parameter");
 
                 return false;
             }
 
             if (ServerVersion < MinServerVer.CashQty && order.CashQty != double.MaxValue)
             {
-                ReportError(id, EClientErrors.UpdateTws, " It does not support cashQty parameter");
+                ReportError(id, EClientErrors.UPDATE_TWS, " It does not support cashQty parameter");
 
                 return false;
             }
@@ -3747,18 +3804,28 @@ namespace Wikiled.IB.Market.Api.Client
             if (ServerVersion < MinServerVer.DecisionMaker &&
                 (!IsEmpty(order.Mifid2DecisionMaker) || !IsEmpty(order.Mifid2DecisionAlgo)))
             {
-                ReportError(id, EClientErrors.UpdateTws, " It does not support MIFID II decision maker parameters");
+                ReportError(id, EClientErrors.UPDATE_TWS, " It does not support MIFID II decision maker parameters");
             }
 
             if (ServerVersion < MinServerVer.DecisionMaker &&
                 (!IsEmpty(order.Mifid2ExecutionTrader) || !IsEmpty(order.Mifid2ExecutionAlgo)))
             {
-                ReportError(id, EClientErrors.UpdateTws, " It does not support MIFID II execution parameters");
+                ReportError(id, EClientErrors.UPDATE_TWS, " It does not support MIFID II execution parameters");
             }
 
             if (ServerVersion < MinServerVer.AutoPriceForHedge && order.DontUseAutoPriceForHedge)
             {
-                ReportError(id, EClientErrors.UpdateTws, " It does not support don't use auto price for hedge parameter");
+                ReportError(id, EClientErrors.UPDATE_TWS, " It does not support don't use auto price for hedge parameter");
+            }
+
+            if (ServerVersion < MinServerVer.ORDER_CONTAINER && order.IsOmsContainer)
+            {
+                ReportError(id, EClientErrors.UPDATE_TWS, " It does not support oms container parameter.");
+            }
+
+            if (ServerVersion < MinServerVer.D_PEG_ORDERS && order.DiscretionaryUpToLimitPrice)
+            {
+                ReportError(id, EClientErrors.UPDATE_TWS, " It does not support D-Peg orders.");
             }
 
             return true;

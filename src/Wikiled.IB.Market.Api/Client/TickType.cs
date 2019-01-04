@@ -94,6 +94,7 @@
         public const int FuturesOpenInterest = 86;
         public const int AvgOptVolume = 87;
         public const int DelayedLastTimestamp = 88;
+        public const int SHORTABLE_SHARES = 89;
 
         public static string GetField(int tickType)
         {
@@ -188,6 +189,7 @@
                 case FuturesOpenInterest: return "futuresOpenInterest";
                 case AvgOptVolume: return "avgOptVolume";
                 case DelayedLastTimestamp: return "delayedLastTimestamp";
+                case SHORTABLE_SHARES: return "shortableShares";
 
                 default: return "unknown";
             }

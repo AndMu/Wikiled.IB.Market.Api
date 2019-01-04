@@ -14,9 +14,9 @@ namespace Wikiled.IB.Market.Api.Client.Messages
 
         public long AskSize { get; }
 
-        public TickAttrib Attribs { get; }
+        public TickAttribBidAsk TickAttribBidAsk { get; }
 
-        public TickByTickBidAskMessage(int reqId, long time, double bidPrice, double askPrice, long bidSize, long askSize, TickAttrib attribs)
+        public TickByTickBidAskMessage(int reqId, long time, double bidPrice, double askPrice, long bidSize, long askSize, TickAttribBidAsk tickAttribBidAsk)
         {
             ReqId = reqId;
             Time = time;
@@ -24,7 +24,7 @@ namespace Wikiled.IB.Market.Api.Client.Messages
             AskPrice = askPrice;
             BidSize = bidSize;
             AskSize = askSize;
-            Attribs = attribs;
+            TickAttribBidAsk = tickAttribBidAsk;
         }
     }
 }

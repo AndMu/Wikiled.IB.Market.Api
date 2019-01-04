@@ -12,7 +12,7 @@ using Wikiled.IB.Market.Api.Console.Commands.Config;
 namespace Wikiled.IB.Market.Api.Console.Commands
 {
     /// <summary>
-    /// historic -Stock=VXX -Out=price.csv
+    /// news -Stock=VXX
     /// </summary>
     public class NewsCommand : Command
     {
@@ -60,7 +60,7 @@ namespace Wikiled.IB.Market.Api.Console.Commands
                                            StringFormater.StrToDate(config.To, client.TimeZone).DateToStr(),
                                            100);
             var newsData = await news.ToArray();
+            log.LogInformation("News request completed");
         }
-
     }
 }

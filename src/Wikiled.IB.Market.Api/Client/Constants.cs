@@ -10,7 +10,7 @@ namespace Wikiled.IB.Market.Api.Client
         public const int FaProfiles = 2;
         public const int FaAliases = 3;
         public const int MinVersion = 100;
-        public const int MaxVersion = MinServerVer.WhatIfExtFields;
+        public const int MaxVersion = MinServerVer.D_PEG_ORDERS;
         public const int MaxMsgSize = 0x00FFFFFF;
     }
 }

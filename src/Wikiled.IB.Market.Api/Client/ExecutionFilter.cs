@@ -14,13 +14,7 @@ namespace Wikiled.IB.Market.Api.Client
             ClientId = 0;
         }
 
-        public ExecutionFilter(int clientId,
-                               string acctCode,
-                               string time,
-                               string symbol,
-                               string secType,
-                               string exchange,
-                               string side)
+        public ExecutionFilter(int clientId, string acctCode, string time, string symbol, string secType, string exchange, string side)
         {
             ClientId = clientId;
             AcctCode = acctCode;
@@ -42,9 +36,9 @@ namespace Wikiled.IB.Market.Api.Client
         public string AcctCode { get; set; }
 
         /**
-         * @brief Time from which the executions will be brough yyyymmdd hh:mm:ss
-         * Only those executions reported after the specified time will be returned.
-         */
+        * @brief Time from which the executions will be returned yyyymmdd hh:mm:ss
+        * Only those executions reported after the specified time will be returned.
+        */
         public string Time { get; set; }
 
         /**
@@ -63,8 +57,8 @@ namespace Wikiled.IB.Market.Api.Client
         public string Exchange { get; set; }
 
         /**
-        * @brief The Contract's side (Put or Call).
-        */
+       * @brief The Contract's side (BUY or SELL)
+       */
         public string Side { get; set; }
 
         public override bool Equals(object other)

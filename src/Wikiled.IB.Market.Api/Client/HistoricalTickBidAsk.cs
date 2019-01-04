@@ -10,10 +10,14 @@ namespace Wikiled.IB.Market.Api.Client
     [ComVisible(true)]
     public class HistoricalTickBidAsk
     {
-        public HistoricalTickBidAsk(long time, int mask, double priceBid, double priceAsk, long sizeBid, long sizeAsk)
+        public HistoricalTickBidAsk()
+        {
+        }
+
+        public HistoricalTickBidAsk(long time, TickAttribBidAsk tickAttribBidAsk, double priceBid, double priceAsk, long sizeBid, long sizeAsk)
         {
             Time = time;
-            Mask = mask;
+            TickAttribBidAsk = tickAttribBidAsk;
             PriceBid = priceBid;
             PriceAsk = priceAsk;
             SizeBid = sizeBid;
@@ -26,9 +30,9 @@ namespace Wikiled.IB.Market.Api.Client
         public long Time { [return: MarshalAs(UnmanagedType.I8)] get; }
 
         /**
-         * @brief Mask
+         * @brief Tick attribs of historical bid/ask tick
          */
-        public int Mask { get; }
+        public TickAttribBidAsk TickAttribBidAsk { get; private set; }
 
         /**
          * @brief The bid price of the historical tick

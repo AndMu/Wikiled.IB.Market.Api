@@ -1,72 +1,34 @@
-# *pSenti* Sentiment Analysis Library (C#)
+# Interactive Brockers API C#
+
+9.74
+
+Ported from official IB library and updated to support RX TPL and AutoFac
+
 
 Nuget library
 
-![nuget](https://img.shields.io/nuget/v/Wikiled.Sentiment.Analysis.svg)
+![nuget](https://img.shields.io/nuget/v/Wikiled.IB.Market.Api.svg)
 
 ```
-Install-Package Wikiled.Sentiment
+Install-Package Wikiled.IB.Market.Api
 ```
 
-## Standalone application - *pSenti*
+## Configure AutoFac
 
-### To test using lexicon based model 
-```
-Wikiled.Sentiment.ConsoleApp.exe test -Out=[OutPut] -Input=[Folder/File]
-Wikiled.Sentiment.ConsoleApp.exe test -Out=[OutPut] -Positive=[Folder/File] -Negative=[Folder/File]
-```
-
-### To override lexicon
-```
-Wikiled.Sentiment.ConsoleApp.exe test -Out=[OutPut] -Input=[Folder/File] -Weights[WeightsFile] -FullWeightReset
-```
-
-### To train with non default lexicon
-```
-Wikiled.Sentiment.ConsoleApp.exe train -Positive=[Folder/File] -Negative=[Folder/File] [-Weights=c:\out\trumpWeights.csv] [-FullWeightReset] -Model=[Path to Model]
-```
-
-### To Test with trained model
-```
-Wikiled.Sentiment.ConsoleApp.exe test -Out=[OutPut] -Input=[Folder/File] -Model=[Path to Trained Model]
-```
-## Linux support
-
-[Supported OS](https://github.com/dotnet/core/blob/master/release-notes/2.0/2.0-supported-os.md)
-
-* Install [dotnet core](https://www.microsoft.com/net/download/)
-* Retrieve GIT repository source
-* dotnet build src/Utilities/Wikiled.Sentiment.ConsoleApp --configuration Release
-* dotnet src/Utilities/Wikiled.Sentiment.ConsoleApp/bit/Release/netcoreapp2.0/Wikiled.Sentiment.ConsoleApp.dll test -Input=[path to files] -out=Result -ExtractStyle]
-
-## C# Library 
-
-## Resources
+## Receive Historical Data
 
 ```
-<appSettings>
-<add key="resources" value="Resources" />
-</appSettings>
-```
-
-### Training model
-
-```
-ICacheFactory cacheFactory = new LocalCacheFactory();
-IObservable<IParsedDocumentHolder> reviews = GetReviews();
-var localCache = new LocalCacheFactory();
-var splitterHelper = new MainSplitterFactory(localCache, configuration).Create(POSTaggerType.SharpNLP);
-ProcessingPipeline pipeline = new ProcessingPipeline(TaskPoolScheduler.Default, splitterHelper, reviews, new ParsedReviewManagerFactory());
-TrainingClient trainingClient = new TrainingClient(pipeline, @".\Model");
-			
-await client.Train();
-```
-
-### Testing model
-
-```
-client = new TestingClient(pipeline, Trained);
-client.Init();
-await client.Process();
-client.Save(Out);
+using (var client = new IBClientWrapper(factory))
+{
+	client.Connect("127.0.0.1", 7496, 1);
+	IObservable<HistoricalDataMessage> amd = client.GetManager<HistoricalDataManager>()
+					.Request(
+						new MarketDataRequest(
+							GetMDContract("VXX"),
+							new DateTime(2016, 01, 01).ToUtc(client.TimeZone),
+							new Duration(5, DurationType.Years),
+							BarSize.Day,
+							WhatToShow.ASK));
+	HistoricalDataMessage[] data = await amd.ToArray();                
+}
 ```

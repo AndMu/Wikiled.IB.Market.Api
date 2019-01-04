@@ -13,9 +13,6 @@ namespace Wikiled.IB.Market.Api.Console.Commands.Config
         [Required]
         public string Stock { get; set; }
 
-        [Required]
-        public string Out { get; set; }
-
         public virtual void Build(ContainerBuilder builder)
         {
             var json = File.ReadAllText("server.json");

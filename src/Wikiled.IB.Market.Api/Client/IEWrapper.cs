@@ -533,13 +533,7 @@ namespace Wikiled.IB.Market.Api.Client
          * @param size the order's size
          * @sa updateMktDepth, EClientSocket::reqMarketDepth
          */
-        void UpdateMktDepthL2(int tickerId,
-                              int position,
-                              string marketMaker,
-                              int operation,
-                              int side,
-                              double price,
-                              int size);
+        void UpdateMktDepthL2(int tickerId, int position, string marketMaker, int operation, int side, double price, int size, bool isSmartDepth);
 
         /**
          * @brief provides IB's bulletins
@@ -946,14 +940,7 @@ namespace Wikiled.IB.Market.Api.Client
         * @param specialConditions - tick-by-tick real-time tick special conditions
         * @sa EClient::reqTickByTickData
         */
-        void TickByTickAllLast(int reqId,
-                               int tickType,
-                               long time,
-                               double price,
-                               int size,
-                               TickAttrib attribs,
-                               string exchange,
-                               string specialConditions);
+        void TickByTickAllLast(int reqId, int tickType, long time, double price, int size, TickAttribLast tickAttribLast, string exchange, string specialConditions);
 
         /**
         * @brief returns "BidAsk" tick-by-tick real-time tick
@@ -966,13 +953,7 @@ namespace Wikiled.IB.Market.Api.Client
         * @param attribs - tick-by-tick real-time tick attribs (bit 0 - bid past low, bit 1 - ask past high)
         * @sa EClient::reqTickByTickData
         */
-        void TickByTickBidAsk(int reqId,
-                              long time,
-                              double bidPrice,
-                              double askPrice,
-                              int bidSize,
-                              int askSize,
-                              TickAttrib attribs);
+        void TickByTickBidAsk(int reqId, long time, double bidPrice, double askPrice, int bidSize, int askSize, TickAttribBidAsk tickAttribBidAsk);
 
         /**
         * @brief returns "MidPoint" tick-by-tick real-time tick
@@ -982,5 +963,7 @@ namespace Wikiled.IB.Market.Api.Client
         * @sa EClient::reqTickByTickData
         */
         void TickByTickMidPoint(int reqId, long time, double midPoint);
+
+        void OrderBound(long orderId, int apiClientId, int apiOrderId);
     }
 }

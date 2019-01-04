@@ -6,6 +6,11 @@
      */
     public class SoftDollarTier
     {
+        public SoftDollarTier()
+            : this(null, null, null)
+        {
+        }
+
         public SoftDollarTier(string name, string value, string displayName)
         {
             Name = name;

@@ -4,21 +4,20 @@ namespace Wikiled.IB.Market.Api.Client
 {
     /**
      * @class HistoricalTickLast
-     * @brief The historical tick's description. Used when requesting historical tick data with whatToShow = TRADES
+     * @brief The historical last tick's description. Used when requesting historical tick data with whatToShow = TRADES
      * @sa EClient, EWrapper
      */
     [ComVisible(true)]
     public class HistoricalTickLast
     {
-        public HistoricalTickLast(long time,
-                                  int mask,
-                                  double price,
-                                  long size,
-                                  string exchange,
-                                  string specialConditions)
+        public HistoricalTickLast()
+        {
+        }
+
+        public HistoricalTickLast(long time, TickAttribLast tickAttribLast, double price, long size, string exchange, string specialConditions)
         {
             Time = time;
-            Mask = mask;
+            TickAttribLast = tickAttribLast;
             Price = price;
             Size = size;
             Exchange = exchange;
@@ -31,9 +30,9 @@ namespace Wikiled.IB.Market.Api.Client
         public long Time { [return: MarshalAs(UnmanagedType.I8)] get; }
 
         /**
-         * @brief Mask
+         * @brief Tick attribs of historical last tick
          */
-        public int Mask { get; }
+        public TickAttribLast TickAttribLast { get; private set; }
 
         /**
          * @brief The last price of the historical tick 

@@ -10,6 +10,10 @@ namespace Wikiled.IB.Market.Api.Client
     [ComVisible(true)]
     public class HistoricalTick
     {
+        public HistoricalTick()
+        {
+        }
+
         public HistoricalTick(long time, double price, long size)
         {
             Time = time;

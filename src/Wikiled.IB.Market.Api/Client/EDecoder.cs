@@ -464,14 +464,27 @@ namespace Wikiled.IB.Market.Api.Client
                     TickByTickEvent();
                     break;
 
+                case IncomingMessage.OrderBound:
+                    OrderBoundEvent();
+                    break;
+
                 default:
                     eWrapper.Error(IncomingMessage.NotValid,
-                                   EClientErrors.UnknownId.Code,
-                                   EClientErrors.UnknownId.Message);
+                                   EClientErrors.UNKNOWN_ID.Code,
+                                   EClientErrors.UNKNOWN_ID.Message);
                     return false;
             }
 
             return true;
+        }
+
+        private void OrderBoundEvent()
+        {
+            long orderId = ReadLong();
+            int apiClientId = ReadInt();
+            int apiOrderId = ReadInt();
+
+            eWrapper.OrderBound(orderId, apiClientId, apiOrderId);
         }
 
         private void TickByTickEvent()
@@ -480,7 +493,6 @@ namespace Wikiled.IB.Market.Api.Client
             var tickType = ReadInt();
             var time = ReadLong();
             BitMask mask;
-            TickAttrib attribs;
 
             switch (tickType)
             {
@@ -488,37 +500,26 @@ namespace Wikiled.IB.Market.Api.Client
                     break;
                 case 1: // Last
                 case 2: // AllLast
-                    var price = ReadDouble();
-                    var size = ReadInt();
+                    double price = ReadDouble();
+                    int size = ReadInt();
                     mask = new BitMask(ReadInt());
-                    attribs = new TickAttrib
-                    {
-                        PastLimit = mask[0],
-                        Unreported = mask[1]
-                    };
-                    var exchange = ReadString();
-                    var specialConditions = ReadString();
-                    eWrapper.TickByTickAllLast(reqId,
-                                               tickType,
-                                               time,
-                                               price,
-                                               size,
-                                               attribs,
-                                               exchange,
-                                               specialConditions);
+                    TickAttribLast tickAttribLast = new TickAttribLast();
+                    tickAttribLast.PastLimit = mask[0];
+                    tickAttribLast.Unreported = mask[1];
+                    String exchange = ReadString();
+                    String specialConditions = ReadString();
+                    eWrapper.TickByTickAllLast(reqId, tickType, time, price, size, tickAttribLast, exchange, specialConditions);
                     break;
                 case 3: // BidAsk
-                    var bidPrice = ReadDouble();
-                    var askPrice = ReadDouble();
-                    var bidSize = ReadInt();
-                    var askSize = ReadInt();
+                    double bidPrice = ReadDouble();
+                    double askPrice = ReadDouble();
+                    int bidSize = ReadInt();
+                    int askSize = ReadInt();
                     mask = new BitMask(ReadInt());
-                    attribs = new TickAttrib
-                    {
-                        BidPastLow = mask[0],
-                        AskPastHigh = mask[1]
-                    };
-                    eWrapper.TickByTickBidAsk(reqId, time, bidPrice, askPrice, bidSize, askSize, attribs);
+                    TickAttribBidAsk tickAttribBidAsk = new TickAttribBidAsk();
+                    tickAttribBidAsk.BidPastLow = mask[0];
+                    tickAttribBidAsk.AskPastHigh = mask[1];
+                    eWrapper.TickByTickBidAsk(reqId, time, bidPrice, askPrice, bidSize, askSize, tickAttribBidAsk);
                     break;
                 case 4: // MidPoint
                     var midPoint = ReadDouble();
@@ -533,16 +534,19 @@ namespace Wikiled.IB.Market.Api.Client
             var nTicks = ReadInt();
             var ticks = new HistoricalTickLast[nTicks];
 
-            for (var i = 0; i < nTicks; i++)
+            for (int i = 0; i < nTicks; i++)
             {
                 var time = ReadLong();
-                var mask = ReadInt();
+                BitMask mask = new BitMask(ReadInt());
+                TickAttribLast tickAttribLast = new TickAttribLast();
+                tickAttribLast.PastLimit = mask[0];
+                tickAttribLast.Unreported = mask[1];
                 var price = ReadDouble();
                 var size = ReadLong();
                 var exchange = ReadString();
                 var specialConditions = ReadString();
 
-                ticks[i] = new HistoricalTickLast(time, mask, price, size, exchange, specialConditions);
+                ticks[i] = new HistoricalTickLast(time, tickAttribLast, price, size, exchange, specialConditions);
             }
 
             var done = ReadBoolFromInt();
@@ -559,13 +563,16 @@ namespace Wikiled.IB.Market.Api.Client
             for (var i = 0; i < nTicks; i++)
             {
                 var time = ReadLong();
-                var mask = ReadInt();
+                BitMask mask = new BitMask(ReadInt());
+                TickAttribBidAsk tickAttribBidAsk = new TickAttribBidAsk();
+                tickAttribBidAsk.AskPastHigh = mask[0];
+                tickAttribBidAsk.BidPastLow = mask[1];
                 var priceBid = ReadDouble();
                 var priceAsk = ReadDouble();
                 var sizeBid = ReadLong();
                 var sizeAsk = ReadLong();
 
-                ticks[i] = new HistoricalTickBidAsk(time, mask, priceBid, priceAsk, sizeBid, sizeAsk);
+                ticks[i] = new HistoricalTickBidAsk(time, tickAttribBidAsk, priceBid, priceAsk, sizeBid, sizeAsk);
             }
 
             var done = ReadBoolFromInt();
@@ -1530,7 +1537,7 @@ namespace Wikiled.IB.Market.Api.Client
 
         private void OpenOrderEvent()
         {
-            var msgVersion = ReadInt();
+            int msgVersion = serverVersion < MinServerVer.ORDER_CONTAINER ? ReadInt() : serverVersion;
             // read order id
             var order = new Order
             {
@@ -1991,6 +1998,17 @@ namespace Wikiled.IB.Market.Api.Client
                 order.DontUseAutoPriceForHedge = ReadBoolFromInt();
             }
 
+            if (serverVersion >= MinServerVer.ORDER_CONTAINER)
+            {
+                order.IsOmsContainer = ReadBoolFromInt();
+            }
+
+            if (serverVersion >= MinServerVer.D_PEG_ORDERS)
+            {
+                order.DiscretionaryUpToLimitPrice = ReadBoolFromInt();
+            }
+
+
             eWrapper.OpenOrder(order.OrderId, contract, order, orderState);
         }
 
@@ -2328,7 +2346,14 @@ namespace Wikiled.IB.Market.Api.Client
             var side = ReadInt();
             var price = ReadDouble();
             var size = ReadInt();
-            eWrapper.UpdateMktDepthL2(requestId, position, marketMaker, operation, side, price, size);
+
+            bool isSmartDepth = false;
+            if (serverVersion >= MinServerVer.SMART_DEPTH)
+            {
+                isSmartDepth = ReadBoolFromInt();
+            }
+
+            eWrapper.UpdateMktDepthL2(requestId, position, marketMaker, operation, side, price, size, isSmartDepth);
         }
 
         private void NewsBulletinsEvent()

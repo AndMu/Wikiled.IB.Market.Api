@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Reactive;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Reactive.Testing;
 using Moq;
@@ -53,7 +54,7 @@ namespace Wikiled.IB.Market.Api.Tests.Client.Serialization
                                                     new Bar("20170101", 2, 2, 1, 3, 100, 10, 2))),
                 new Recorded<Notification<Bar>>(400,
                                                 Notification.CreateOnCompleted<Bar>()));
-            var saveTask = instance.Save(fileName, stream);
+            var saveTask = instance.Save(fileName, stream, CancellationToken.None);
 
             for (int i = 0; i < 4; i++)
             {

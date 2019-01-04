@@ -20,17 +20,22 @@ namespace Wikiled.IB.Market.Api.Client
 
         void IEWrapper.Error(Exception e)
         {
-            Error?.Invoke(new ExceptionDescription(e));
+            OnError(new ExceptionDescription(e));
         }
 
         void IEWrapper.Error(string str)
         {
-            Error?.Invoke(new ErrorDescription(0, 0, str));
+            OnError(new ErrorDescription(0, 0, str));
         }
 
         void IEWrapper.Error(int id, int errorCode, string errorMsg)
         {
-            Error?.Invoke(new ErrorDescription(id, errorCode, errorMsg));
+            OnError(new ErrorDescription(id, errorCode, errorMsg));
+        }
+
+        private void OnError(IErrorDescription description)
+        {
+            Error?.Invoke(description);
         }
 
         void IEWrapper.ConnectionClosed()
@@ -63,25 +68,18 @@ namespace Wikiled.IB.Market.Api.Client
             TickGeneric?.Invoke(tickerId, field, value);
         }
 
-        void IEWrapper.TickEfp(int tickerId,
-                               int tickType,
-                               double basisPoints,
-                               string formattedBasisPoints,
-                               double impliedFuture,
-                               int holdDays,
-                               string futureLastTradeDate,
-                               double dividendImpact,
-                               double dividendsToLastTradeDate)
+        void IEWrapper.TickEfp(
+            int tickerId,
+            int tickType,
+            double basisPoints,
+            string formattedBasisPoints,
+            double impliedFuture,
+            int holdDays,
+            string futureLastTradeDate,
+            double dividendImpact,
+            double dividendsToLastTradeDate)
         {
-            OnTickEFP?.Invoke(tickerId,
-                             tickType,
-                             basisPoints,
-                             formattedBasisPoints,
-                             impliedFuture,
-                             holdDays,
-                             futureLastTradeDate,
-                             dividendImpact,
-                             dividendsToLastTradeDate);
+            OnTickEFP?.Invoke(tickerId, tickType, basisPoints, formattedBasisPoints, impliedFuture, holdDays, futureLastTradeDate, dividendImpact, dividendsToLastTradeDate);
         }
 
         void IEWrapper.TickSnapshotEnd(int tickerId)
@@ -104,16 +102,17 @@ namespace Wikiled.IB.Market.Api.Client
             ManagedAccounts?.Invoke(new ManagedAccountsMessage(accountsList));
         }
 
-        void IEWrapper.TickOptionComputation(int tickerId,
-                                             int field,
-                                             double impliedVolatility,
-                                             double delta,
-                                             double optPrice,
-                                             double pvDividend,
-                                             double gamma,
-                                             double vega,
-                                             double theta,
-                                             double undPrice)
+        void IEWrapper.TickOptionComputation(
+            int tickerId,
+            int field,
+            double impliedVolatility,
+            double delta,
+            double optPrice,
+            double pvDividend,
+            double gamma,
+            double vega,
+            double theta,
+            double undPrice)
         {
             OnTickOptionCommunication?.Invoke(new TickOptionMessage(tickerId, field, impliedVolatility, delta, optPrice, pvDividend, gamma, vega, theta, undPrice));
         }
@@ -133,14 +132,7 @@ namespace Wikiled.IB.Market.Api.Client
             UpdateAccountValue?.Invoke(new AccountValueMessage(key, value, currency, accountName));
         }
 
-        void IEWrapper.UpdatePortfolio(Contract contract,
-                                       double position,
-                                       double marketPrice,
-                                       double marketValue,
-                                       double averageCost,
-                                       double unrealizedPNL,
-                                       double realizedPNL,
-                                       string accountName)
+        void IEWrapper.UpdatePortfolio(Contract contract, double position, double marketPrice, double marketValue, double averageCost, double unrealizedPNL, double realizedPNL, string accountName)
         {
             UpdatePortfolio?.Invoke(new UpdatePortfolioMessage(contract, position, marketPrice, marketValue, averageCost, unrealizedPNL, realizedPNL, accountName));
         }
@@ -155,17 +147,18 @@ namespace Wikiled.IB.Market.Api.Client
             AccountDownloadEnd?.Invoke(new AccountDownloadEndMessage(account));
         }
 
-        void IEWrapper.OrderStatus(int orderId,
-                                   string status,
-                                   double filled,
-                                   double remaining,
-                                   double avgFillPrice,
-                                   int permId,
-                                   int parentId,
-                                   double lastFillPrice,
-                                   int clientId,
-                                   string whyHeld,
-                                   double mktCapPrice)
+        void IEWrapper.OrderStatus(
+            int orderId,
+            string status,
+            double filled,
+            double remaining,
+            double avgFillPrice,
+            int permId,
+            int parentId,
+            double lastFillPrice,
+            int clientId,
+            string whyHeld,
+            double mktCapPrice)
         {
             OrderStatus?.Invoke(new OrderStatusMessage(orderId, status, filled, remaining, avgFillPrice, permId, parentId, lastFillPrice, clientId, whyHeld, mktCapPrice));
         }
@@ -227,18 +220,12 @@ namespace Wikiled.IB.Market.Api.Client
 
         void IEWrapper.UpdateMktDepth(int tickerId, int position, int operation, int side, double price, int size)
         {
-            UpdateMktDepth?.Invoke(new DeepBookMessage(tickerId, position, operation, side, price, size, ""));
+            UpdateMktDepth?.Invoke(new DeepBookMessage(tickerId, position, operation, side, price, size, "", false));
         }
 
-        void IEWrapper.UpdateMktDepthL2(int tickerId,
-                                        int position,
-                                        string marketMaker,
-                                        int operation,
-                                        int side,
-                                        double price,
-                                        int size)
+        void IEWrapper.UpdateMktDepthL2(int tickerId, int position, string marketMaker, int operation, int side, double price, int size, bool isSmartDepth)
         {
-            UpdateMktDepthL2?.Invoke(new DeepBookMessage(tickerId, position, operation, side, price, size, marketMaker));
+            UpdateMktDepthL2?.Invoke(new DeepBookMessage(tickerId, position, operation, side, price, size, marketMaker, isSmartDepth));
         }
 
         void IEWrapper.UpdateNewsBulletin(int msgId, int msgType, string message, string origExchange)
@@ -256,15 +243,7 @@ namespace Wikiled.IB.Market.Api.Client
             PositionEnd?.Invoke();
         }
 
-        void IEWrapper.RealtimeBar(int reqId,
-                                   long time,
-                                   double open,
-                                   double high,
-                                   double low,
-                                   double close,
-                                   long volume,
-                                   double WAP,
-                                   int count)
+        void IEWrapper.RealtimeBar(int reqId, long time, double open, double high, double low, double close, long volume, double WAP, int count)
         {
             RealtimeBar?.Invoke(new RealTimeBarMessage(reqId, time, open, high, low, close, volume, WAP, count));
         }
@@ -274,13 +253,7 @@ namespace Wikiled.IB.Market.Api.Client
             ScannerParameters?.Invoke(xml);
         }
 
-        void IEWrapper.ScannerData(int reqId,
-                                   int rank,
-                                   ContractDetails contractDetails,
-                                   string distance,
-                                   string benchmark,
-                                   string projection,
-                                   string legsStr)
+        void IEWrapper.ScannerData(int reqId, int rank, ContractDetails contractDetails, string distance, string benchmark, string projection, string legsStr)
         {
             ScannerData?.Invoke(new ScannerMessage(reqId, rank, contractDetails, distance, benchmark, projection, legsStr));
         }
@@ -330,7 +303,6 @@ namespace Wikiled.IB.Market.Api.Client
             DisplayGroupUpdated?.Invoke(reqId, contractInfo);
         }
 
-
         void IEWrapper.ConnectAck()
         {
             if (ClientSocket.AsyncEConnect)
@@ -339,12 +311,7 @@ namespace Wikiled.IB.Market.Api.Client
             }
         }
 
-        void IEWrapper.PositionMulti(int reqId,
-                                     string account,
-                                     string modelCode,
-                                     Contract contract,
-                                     double pos,
-                                     double avgCost)
+        void IEWrapper.PositionMulti(int reqId, string account, string modelCode, Contract contract, double pos, double avgCost)
         {
             PositionMulti?.Invoke(new PositionMultiMessage(reqId, account, modelCode, contract, pos, avgCost));
         }
@@ -354,12 +321,7 @@ namespace Wikiled.IB.Market.Api.Client
             PositionMultiEnd?.Invoke(reqId);
         }
 
-        void IEWrapper.AccountUpdateMulti(int reqId,
-                                          string account,
-                                          string modelCode,
-                                          string key,
-                                          string value,
-                                          string currency)
+        void IEWrapper.AccountUpdateMulti(int reqId, string account, string modelCode, string key, string value, string currency)
         {
             AccountUpdateMulti?.Invoke(new AccountUpdateMultiMessage(reqId, account, modelCode, key, value, currency));
         }
@@ -369,13 +331,7 @@ namespace Wikiled.IB.Market.Api.Client
             AccountUpdateMultiEnd?.Invoke(reqId);
         }
 
-        void IEWrapper.SecurityDefinitionOptionParameter(int reqId,
-                                                         string exchange,
-                                                         int underlyingConId,
-                                                         string tradingClass,
-                                                         string multiplier,
-                                                         HashSet<string> expirations,
-                                                         HashSet<double> strikes)
+        void IEWrapper.SecurityDefinitionOptionParameter(int reqId, string exchange, int underlyingConId, string tradingClass, string multiplier, HashSet<string> expirations, HashSet<double> strikes)
         {
             SecurityDefinitionOptionParameter?.Invoke(new SecurityDefinitionOptionParameterMessage(reqId, exchange, underlyingConId, tradingClass, multiplier, expirations, strikes));
         }
@@ -405,7 +361,7 @@ namespace Wikiled.IB.Market.Api.Client
             MktDepthExchanges?.Invoke(depthMktDataDescriptions);
         }
 
-        void IEWrapper.TickNews(int tickerId, long timeStamp,  string providerCode, string articleId, string headline,  string extraData)
+        void IEWrapper.TickNews(int tickerId, long timeStamp, string providerCode, string articleId, string headline, string extraData)
         {
             TickNews?.Invoke(new TickNewsMessage(tickerId, timeStamp, providerCode, articleId, headline, extraData));
         }
@@ -430,11 +386,7 @@ namespace Wikiled.IB.Market.Api.Client
             NewsArticle?.Invoke(new NewsArticleMessage(requestId, articleType, articleText));
         }
 
-        void IEWrapper.HistoricalNews(int requestId,
-                                      string time,
-                                      string providerCode,
-                                      string articleId,
-                                      string headline)
+        void IEWrapper.HistoricalNews(int requestId, string time, string providerCode, string articleId, string headline)
         {
             HistoricalNews?.Invoke(new HistoricalNewsMessage(requestId, time, providerCode, articleId, headline));
         }
@@ -479,76 +431,50 @@ namespace Wikiled.IB.Market.Api.Client
             OnPnl?.Invoke(new PnLMessage(reqId, dailyPnL, unrealizedPnL, realizedPnL));
         }
 
-        void IEWrapper.PnlSingle(int reqId,
-                                 int pos,
-                                 double dailyPnL,
-                                 double unrealizedPnL,
-                                 double realizedPnL,
-                                 double value)
+        void IEWrapper.PnlSingle(int reqId, int pos, double dailyPnL, double unrealizedPnL, double realizedPnL, double value)
         {
             OnPnlSingle?.Invoke(new PnLSingleMessage(reqId, pos, dailyPnL, unrealizedPnL, realizedPnL, value));
         }
 
         void IEWrapper.HistoricalTicks(int reqId, HistoricalTick[] ticks, bool done)
         {
-            ticks.ToList()
-                .ForEach(tick => OnHistoricalTick?.Invoke(new HistoricalTickMessage(reqId, tick.Time, tick.Price, tick.Size)));
+            ticks.ToList().ForEach(tick => OnHistoricalTick?.Invoke(new HistoricalTickMessage(reqId, tick.Time, tick.Price, tick.Size)));
         }
 
         void IEWrapper.HistoricalTicksBidAsk(int reqId, HistoricalTickBidAsk[] ticks, bool done)
         {
-            ticks.ToList()
-                .ForEach(tick => OnHistoricalTickBidAsk?.Invoke(new HistoricalTickBidAskMessage(
-                                                     reqId,
-                                                     tick.Time,
-                                                     tick.Mask,
-                                                     tick.PriceBid,
-                                                     tick.PriceAsk,
-                                                     tick.SizeBid,
-                                                     tick.SizeAsk)));
+            ticks.ToList().ForEach(
+                tick => OnHistoricalTickBidAsk?.Invoke(new HistoricalTickBidAskMessage(reqId, tick.Time, tick.TickAttribBidAsk, tick.PriceBid, tick.PriceAsk, tick.SizeBid, tick.SizeAsk)));
         }
 
         void IEWrapper.HistoricalTicksLast(int reqId, HistoricalTickLast[] ticks, bool done)
         {
-            ticks.ToList()
-                .ForEach(tick => OnHistoricalTickLast?.Invoke(new HistoricalTickLastMessage(
-                                                     reqId,
-                                                     tick.Time,
-                                                     tick.Mask,
-                                                     tick.Price,
-                                                     tick.Size,
-                                                     tick.Exchange,
-                                                     tick.SpecialConditions)));
+            ticks.ToList().ForEach(
+                tick => OnHistoricalTickLast?.Invoke(new HistoricalTickLastMessage(reqId, tick.Time, tick.TickAttribLast, tick.Price, tick.Size, tick.Exchange, tick.SpecialConditions)));
         }
 
-        void IEWrapper.TickByTickAllLast(int reqId,
-                                         int tickType,
-                                         long time,
-                                         double price,
-                                         int size,
-                                         TickAttrib attribs,
-                                         string exchange,
-                                         string specialConditions)
+        void IEWrapper.TickByTickAllLast(int reqId, int tickType, long time, double price, int size, TickAttribLast tickAttribLast, string exchange, string specialConditions)
         {
-            OnTickByTickAllLast?.Invoke(new TickByTickAllLastMessage(reqId, tickType, time, price, size, attribs, exchange, specialConditions));
+            OnTickByTickAllLast?.Invoke(new TickByTickAllLastMessage(reqId, tickType, time, price, size, tickAttribLast, exchange, specialConditions));
         }
 
-        void IEWrapper.TickByTickBidAsk(int reqId,
-                                        long time,
-                                        double bidPrice,
-                                        double askPrice,
-                                        int bidSize,
-                                        int askSize,
-                                        TickAttrib attribs)
+        void IEWrapper.TickByTickBidAsk(int reqId, long time, double bidPrice, double askPrice, int bidSize, int askSize, TickAttribBidAsk tickAttribBidAsk)
         {
-            OnTickByTickBidAsk?.Invoke(new TickByTickBidAskMessage(reqId, time, bidPrice, askPrice, bidSize, askSize, attribs));
+            OnTickByTickBidAsk?.Invoke(new TickByTickBidAskMessage(reqId, time, bidPrice, askPrice, bidSize, askSize, tickAttribBidAsk));
         }
 
         void IEWrapper.TickByTickMidPoint(int reqId, long time, double midPoint)
         {
             OnTickByTickMidPoint?.Invoke(new TickByTickMidPointMessage(reqId, time, midPoint));
         }
-     
+
+        void IEWrapper.OrderBound(long orderId, int apiClientId, int apiOrderId)
+        {
+            OrderBound?.Invoke(new OrderBoundMessage(orderId, apiClientId, apiOrderId));
+        }
+
+        public event Action<OrderBoundMessage> OrderBound;
+        
         public event Action<IErrorDescription> Error;
 
         public event Action ConnectionClosed;
@@ -662,7 +588,6 @@ namespace Wikiled.IB.Market.Api.Client
         public event Action<FamilyCode[]> FamilyCodes;
 
         public event Action<SymbolSamplesMessage> SymbolSamples;
-
 
         public event Action<DepthMktDataDescription[]> MktDepthExchanges;
 

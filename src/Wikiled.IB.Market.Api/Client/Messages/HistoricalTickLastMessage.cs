@@ -2,29 +2,29 @@
 {
     public class HistoricalTickLastMessage
     {
-        public int ReqId { get; }
-
-        public long Time { get; }
-
-        public int Mask { get; }
-
-        public double Price { get; }
-
-        public long Size { get; }
-
-        public string Exchange { get; }
-
-        public string SpecialConditions { get; }
-
-        public HistoricalTickLastMessage(int reqId, long time, int mask, double price, long size, string exchange, string specialConditions)
+        public HistoricalTickLastMessage(int reqId, long time, TickAttribLast tickAttribLast, double price, long size, string exchange, string specialConditions)
         {
             ReqId = reqId;
             Time = time;
-            Mask = mask;
+            TickAttribLast = tickAttribLast;
             Price = price;
             Size = size;
             Exchange = exchange;
             SpecialConditions = specialConditions;
         }
+
+        public string Exchange { get; }
+
+        public TickAttribLast TickAttribLast { get; }
+
+        public double Price { get; }
+
+        public int ReqId { get; }
+
+        public long Size { get; }
+
+        public string SpecialConditions { get; }
+
+        public long Time { get; }
     }
 }

@@ -48,15 +48,16 @@ namespace Wikiled.IB.Market.Api.Client
         {
         }
 
-        public virtual void TickEfp(int tickerId,
-                                    int tickType,
-                                    double basisPoints,
-                                    string formattedBasisPoints,
-                                    double impliedFuture,
-                                    int holdDays,
-                                    string futureLastTradeDate,
-                                    double dividendImpact,
-                                    double dividendsToLastTradeDate)
+        public virtual void TickEfp(
+            int tickerId,
+            int tickType,
+            double basisPoints,
+            string formattedBasisPoints,
+            double impliedFuture,
+            int holdDays,
+            string futureLastTradeDate,
+            double dividendImpact,
+            double dividendsToLastTradeDate)
         {
         }
 
@@ -64,16 +65,17 @@ namespace Wikiled.IB.Market.Api.Client
         {
         }
 
-        public virtual void TickOptionComputation(int tickerId,
-                                                  int field,
-                                                  double impliedVolatility,
-                                                  double delta,
-                                                  double optPrice,
-                                                  double pvDividend,
-                                                  double gamma,
-                                                  double vega,
-                                                  double theta,
-                                                  double undPrice)
+        public virtual void TickOptionComputation(
+            int tickerId,
+            int field,
+            double impliedVolatility,
+            double delta,
+            double optPrice,
+            double pvDividend,
+            double gamma,
+            double vega,
+            double theta,
+            double undPrice)
         {
         }
 
@@ -109,14 +111,7 @@ namespace Wikiled.IB.Market.Api.Client
         {
         }
 
-        public virtual void UpdatePortfolio(Contract contract,
-                                            double position,
-                                            double marketPrice,
-                                            double marketValue,
-                                            double averageCost,
-                                            double unrealizedPnl,
-                                            double realizedPnl,
-                                            string accountName)
+        public virtual void UpdatePortfolio(Contract contract, double position, double marketPrice, double marketValue, double averageCost, double unrealizedPnl, double realizedPnl, string accountName)
         {
         }
 
@@ -128,17 +123,18 @@ namespace Wikiled.IB.Market.Api.Client
         {
         }
 
-        public virtual void OrderStatus(int orderId,
-                                        string status,
-                                        double filled,
-                                        double remaining,
-                                        double avgFillPrice,
-                                        int permId,
-                                        int parentId,
-                                        double lastFillPrice,
-                                        int clientId,
-                                        string whyHeld,
-                                        double mktCapPrice)
+        public virtual void OrderStatus(
+            int orderId,
+            string status,
+            double filled,
+            double remaining,
+            double avgFillPrice,
+            int permId,
+            int parentId,
+            double lastFillPrice,
+            int clientId,
+            string whyHeld,
+            double mktCapPrice)
         {
         }
 
@@ -190,13 +186,7 @@ namespace Wikiled.IB.Market.Api.Client
         {
         }
 
-        public virtual void UpdateMktDepthL2(int tickerId,
-                                             int position,
-                                             string marketMaker,
-                                             int operation,
-                                             int side,
-                                             double price,
-                                             int size)
+        public virtual void UpdateMktDepthL2(int tickerId, int position, string marketMaker, int operation, int side, double price, int size, bool isSmartDepth)
         {
         }
 
@@ -212,15 +202,7 @@ namespace Wikiled.IB.Market.Api.Client
         {
         }
 
-        public virtual void RealtimeBar(int reqId,
-                                        long time,
-                                        double open,
-                                        double high,
-                                        double low,
-                                        double close,
-                                        long volume,
-                                        double wap,
-                                        int count)
+        public virtual void RealtimeBar(int reqId, long time, double open, double high, double low, double close, long volume, double wap, int count)
         {
         }
 
@@ -228,13 +210,7 @@ namespace Wikiled.IB.Market.Api.Client
         {
         }
 
-        public virtual void ScannerData(int reqId,
-                                        int rank,
-                                        ContractDetails contractDetails,
-                                        string distance,
-                                        string benchmark,
-                                        string projection,
-                                        string legsStr)
+        public virtual void ScannerData(int reqId, int rank, ContractDetails contractDetails, string distance, string benchmark, string projection, string legsStr)
         {
         }
 
@@ -274,12 +250,7 @@ namespace Wikiled.IB.Market.Api.Client
         {
         }
 
-        public virtual void PositionMulti(int requestId,
-                                          string account,
-                                          string modelCode,
-                                          Contract contract,
-                                          double pos,
-                                          double avgCost)
+        public virtual void PositionMulti(int requestId, string account, string modelCode, Contract contract, double pos, double avgCost)
         {
         }
 
@@ -287,12 +258,7 @@ namespace Wikiled.IB.Market.Api.Client
         {
         }
 
-        public virtual void AccountUpdateMulti(int requestId,
-                                               string account,
-                                               string modelCode,
-                                               string key,
-                                               string value,
-                                               string currency)
+        public virtual void AccountUpdateMulti(int requestId, string account, string modelCode, string key, string value, string currency)
         {
         }
 
@@ -300,14 +266,14 @@ namespace Wikiled.IB.Market.Api.Client
         {
         }
 
-
-        public virtual void SecurityDefinitionOptionParameter(int reqId,
-                                                              string exchange,
-                                                              int underlyingConId,
-                                                              string tradingClass,
-                                                              string multiplier,
-                                                              HashSet<string> expirations,
-                                                              HashSet<double> strikes)
+        public virtual void SecurityDefinitionOptionParameter(
+            int reqId,
+            string exchange,
+            int underlyingConId,
+            string tradingClass,
+            string multiplier,
+            HashSet<string> expirations,
+            HashSet<double> strikes)
         {
         }
 
@@ -331,12 +297,7 @@ namespace Wikiled.IB.Market.Api.Client
         {
         }
 
-        public virtual void TickNews(int tickerId,
-                                     long timeStamp,
-                                     string providerCode,
-                                     string articleId,
-                                     string headline,
-                                     string extraData)
+        public virtual void TickNews(int tickerId, long timeStamp, string providerCode, string articleId, string headline, string extraData)
         {
         }
 
@@ -356,11 +317,7 @@ namespace Wikiled.IB.Market.Api.Client
         {
         }
 
-        public virtual void HistoricalNews(int requestId,
-                                           string time,
-                                           string providerCode,
-                                           string articleId,
-                                           string headline)
+        public virtual void HistoricalNews(int requestId, string time, string providerCode, string articleId, string headline)
         {
         }
 
@@ -371,7 +328,6 @@ namespace Wikiled.IB.Market.Api.Client
         public virtual void HeadTimestamp(int reqId, string headTimestamp)
         {
         }
-
 
         public virtual void HistogramData(int reqId, HistogramEntry[] data)
         {
@@ -393,17 +349,11 @@ namespace Wikiled.IB.Market.Api.Client
         {
         }
 
-
         public virtual void Pnl(int reqId, double dailyPnL, double unrealizedPnL, double realizedPnL)
         {
         }
 
-        public virtual void PnlSingle(int reqId,
-                                      int pos,
-                                      double dailyPnL,
-                                      double realizedPnL,
-                                      double value,
-                                      double unrealizedPnL)
+        public virtual void PnlSingle(int reqId, int pos, double dailyPnL, double realizedPnL, double value, double unrealizedPnL)
         {
         }
 
@@ -419,29 +369,19 @@ namespace Wikiled.IB.Market.Api.Client
         {
         }
 
-        public void TickByTickAllLast(int reqId,
-                                      int tickType,
-                                      long time,
-                                      double price,
-                                      int size,
-                                      TickAttrib attribs,
-                                      string exchange,
-                                      string specialConditions)
+        public void TickByTickAllLast(int reqId, int tickType, long time, double price, int size, TickAttribLast tickAttribLast, string exchange, string specialConditions)
         {
         }
 
-        public void TickByTickBidAsk(int reqId,
-                                     long time,
-                                     double bidPrice,
-                                     double askPrice,
-                                     int bidSize,
-                                     int askSize,
-                                     TickAttrib attribs)
+        public void TickByTickBidAsk(int reqId, long time, double bidPrice, double askPrice, int bidSize, int askSize, TickAttribBidAsk tickAttribBidAsk)
         {
         }
 
         public void TickByTickMidPoint(int reqId, long time, double midPoint)
         {
         }
+
+        public void OrderBound(long orderId, int apiClientId, int apiOrderId)
+        { }
     }
 }

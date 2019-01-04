@@ -212,7 +212,6 @@ namespace Wikiled.IB.Market.Api.Client
 
         /**
          * @brief The order's type.
-         * Available Orders are at https://www.interactivebrokers.com/en/software/api/apiguide/tables/supported_order_types.htm 
          */
         public string OrderType { get; set; }
 
@@ -923,6 +922,17 @@ namespace Wikiled.IB.Market.Api.Client
         */
         public SoftDollarTier Tier { get; set; }
 
+
+        /**
+		* @brief Set to true to create tickets from API orders when TWS is used as an OMS 
+		*/
+        public bool IsOmsContainer { get; set; }
+
+        /**
+        * @brief Set to true to convert order of type 'Primary Peg' to 'D-Peg'
+        */
+        public bool DiscretionaryUpToLimitPrice { get; set; }
+
         // Note: Two orders can be 'equivalent' even if all fields do not match. This function is not intended to be used with Order objects returned from TWS.
         public override bool Equals(object pOther)
         {
@@ -1006,7 +1016,8 @@ namespace Wikiled.IB.Market.Api.Client
                 ConditionsCancelOrder != lTheOther.ConditionsCancelOrder ||
                 Tier != lTheOther.Tier ||
                 CashQty != lTheOther.CashQty ||
-                DontUseAutoPriceForHedge != lTheOther.DontUseAutoPriceForHedge)
+                DontUseAutoPriceForHedge != lTheOther.DontUseAutoPriceForHedge ||
+                IsOmsContainer != lTheOther.IsOmsContainer)
             {
                 return false;
             }

@@ -12,20 +12,20 @@ namespace Wikiled.IB.Market.Api.Client.Messages
 
         public long Size { get; }
 
-        public TickAttrib Attribs { get; }
+        public TickAttribLast TickAttribLast { get; }
 
         public string Exchange { get; }
 
         public string SpecialConditions { get; }
 
-        public TickByTickAllLastMessage(int reqId, int tickType, long time, double price, long size, TickAttrib attribs, string exchange, string specialConditions)
+        public TickByTickAllLastMessage(int reqId, int tickType, long time, double price, long size, TickAttribLast tickAttribLast, string exchange, string specialConditions)
         {
             ReqId = reqId;
             TickType = tickType;
             Time = time;
             Price = price;
             Size = size;
-            Attribs = attribs;
+            TickAttribLast = tickAttribLast;
             Exchange = exchange;
             SpecialConditions = specialConditions;
         }

@@ -18,9 +18,8 @@ namespace Wikiled.IB.Market.Api.Client
         private int port;
         private int redirectCount;
 
-        public EClientSocket(IEWrapper Wrapper, IEReaderSignal eReaderSignal)
-            :
-            base(Wrapper)
+        public EClientSocket(IEWrapper wrapper, IEReaderSignal eReaderSignal)
+            : base(wrapper)
         {
             this.eReaderSignal = eReaderSignal;
         }
@@ -39,9 +38,7 @@ namespace Wikiled.IB.Market.Api.Client
             }
             else if (ServerVersion < Constants.MinVersion || ServerVersion > Constants.MaxVersion)
             {
-                Wrapper.Error(ClientId,
-                              EClientErrors.UnsupportedVersion.Code,
-                              EClientErrors.UnsupportedVersion.Message);
+                Wrapper.Error(ClientId, EClientErrors.UNSUPPORTED_VERSION.Code, EClientErrors.UNSUPPORTED_VERSION.Message);
                 return;
             }
 
@@ -83,13 +80,11 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 if (!int.TryParse(srv[1], out port))
                 {
-                    throw new EClientException(EClientErrors.BadMessage);
+                    throw new EClientException(EClientErrors.BAD_MESSAGE);
                 }
             }
 
-
             ++redirectCount;
-
             if (redirectCount > Constants.RedirectCountMax)
             {
                 EDisconnect();
@@ -121,9 +116,7 @@ namespace Wikiled.IB.Market.Api.Client
         {
             if (IsConnected)
             {
-                Wrapper.Error(IncomingMessage.NotValid,
-                              EClientErrors.AlreadyConnected.Code,
-                              EClientErrors.AlreadyConnected.Message);
+                Wrapper.Error(IncomingMessage.NotValid, EClientErrors.AlreadyConnected.Code,                               EClientErrors.AlreadyConnected.Message);
                 return true;
             }
 

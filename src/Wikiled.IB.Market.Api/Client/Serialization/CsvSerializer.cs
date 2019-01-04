@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CsvHelper;
+using Microsoft.Extensions.Logging;
 using Wikiled.IB.Market.Api.Client.Helpers;
 using Wikiled.IB.Market.Api.Client.Messages;
 
@@ -14,13 +15,17 @@ namespace Wikiled.IB.Market.Api.Client.Serialization
     {
         private readonly IClientWrapper client;
 
-        public CsvSerializer(IClientWrapper client)
+        private ILogger<CsvSerializer> logger;
+
+        public CsvSerializer(ILogger<CsvSerializer> logger, IClientWrapper client)
         {
             this.client = client ?? throw new ArgumentNullException(nameof(client));
+            this.logger = logger;
         }
 
         public async Task Save(string fileName, IObservable<IPriceData> data, CancellationToken token)
         {
+            logger.LogInformation("Saving: {0}", fileName);
             using (var streamOutCsv = new StreamWriter(fileName, false, Encoding.UTF8))
             using (var csvDataOut = new CsvWriter(streamOutCsv))
             {
@@ -33,6 +38,9 @@ namespace Wikiled.IB.Market.Api.Client.Serialization
                 csvDataOut.NextRecord();
                 IPriceData previous = null;
                 await data.ForEachAsync(item => { previous = WritePrice(item, previous, csvDataOut); }, token).ConfigureAwait(false);
+                await csvDataOut.FlushAsync().ConfigureAwait(false);
+                await streamOutCsv.FlushAsync().ConfigureAwait(false);
+                logger.LogInformation("Saving: {0} Completed with {1} rows", fileName, csvDataOut.Context.Row);
             }
         }
 

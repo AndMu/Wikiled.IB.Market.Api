@@ -3,11 +3,11 @@ using System.IO;
 using System.Reactive;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Reactive.Testing;
 using Moq;
 using NUnit.Framework;
 using Wikiled.IB.Market.Api.Client;
-using Wikiled.IB.Market.Api.Client.Messages;
 using Wikiled.IB.Market.Api.Client.Serialization;
 
 namespace Wikiled.IB.Market.Api.Tests.Client.Serialization
@@ -36,7 +36,8 @@ namespace Wikiled.IB.Market.Api.Tests.Client.Serialization
         [Test]
         public void Construct()
         {
-            Assert.Throws<ArgumentNullException>(() => new CsvSerializer(null));
+            Assert.Throws<ArgumentNullException>(() => new CsvSerializer(null, mockClientWrapper.Object));
+            Assert.Throws<ArgumentNullException>(() => new CsvSerializer(new NullLogger<CsvSerializer>(), null));
         }
 
         [Test]
@@ -70,7 +71,7 @@ namespace Wikiled.IB.Market.Api.Tests.Client.Serialization
 
         private CsvSerializer CreateInstance()
         {
-            return new CsvSerializer(mockClientWrapper.Object);
+            return new CsvSerializer(new NullLogger<CsvSerializer>(), mockClientWrapper.Object);
         }
     }
 }

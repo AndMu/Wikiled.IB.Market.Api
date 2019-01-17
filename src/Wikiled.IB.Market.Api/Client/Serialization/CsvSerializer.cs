@@ -15,12 +15,12 @@ namespace Wikiled.IB.Market.Api.Client.Serialization
     {
         private readonly IClientWrapper client;
 
-        private ILogger<CsvSerializer> logger;
+        private readonly ILogger<CsvSerializer> logger;
 
         public CsvSerializer(ILogger<CsvSerializer> logger, IClientWrapper client)
         {
             this.client = client ?? throw new ArgumentNullException(nameof(client));
-            this.logger = logger;
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task Save(string fileName, IObservable<IPriceData> data, CancellationToken token)

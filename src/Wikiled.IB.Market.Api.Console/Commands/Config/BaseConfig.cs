@@ -1,23 +1,24 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Autofac;
 using Newtonsoft.Json;
 using System.IO;
+using Microsoft.Extensions.DependencyInjection;
 using Wikiled.Console.Arguments;
 using Wikiled.IB.Market.Api.Client;
 using Wikiled.IB.Market.Api.Modules;
+using Wikiled.Common.Utilities.Modules;
 
 namespace Wikiled.IB.Market.Api.Console.Commands.Config
 {
     public abstract class BaseConfig : ICommandConfig
     {
         [Required]
-        public string Stock { get; set; }
+        public string Symbol { get; set; }
 
-        public virtual void Build(ContainerBuilder builder)
+        public void Build(IServiceCollection services)
         {
             var json = File.ReadAllText("server.json");
             var config = JsonConvert.DeserializeObject<ServerConfig>(json);
-            builder.RegisterModule(new MarketIBModule(config));
+            services.RegisterModule(new MarketIBModule(config));
         }
     }
 }

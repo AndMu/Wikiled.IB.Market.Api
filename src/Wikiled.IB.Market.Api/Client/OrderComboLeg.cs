@@ -22,31 +22,34 @@
          */
         public double Price { get; set; }
 
-        public override bool Equals(object other)
+        protected bool Equals(OrderComboLeg other)
         {
-            if (this == other)
+            return Price.Equals(other.Price);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if(ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if(ReferenceEquals(this, obj))
             {
                 return true;
             }
 
-            if (other == null)
+            if(obj.GetType() != GetType())
             {
                 return false;
             }
 
-            var theOther = (OrderComboLeg)other;
-
-            if (Price != theOther.Price)
-            {
-                return false;
-            }
-
-            return true;
+            return Equals((OrderComboLeg)obj);
         }
 
         public override int GetHashCode()
         {
-            return -814345894 + Price.GetHashCode();
+            return Price.GetHashCode();
         }
     }
 }

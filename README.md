@@ -1,8 +1,8 @@
 # Interactive Brockers API C#
 
-9.74
+Based on version 9.79
 
-Ported from official IB library and updated to support RX TPL and AutoFac
+Ported from official IB library and updated to support RX TPL and DI
 
 
 Nuget library

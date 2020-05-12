@@ -50,8 +50,14 @@ namespace Wikiled.IB.Market.Api.Client
                                {
                                    try
                                    {
-                                       while (eClientSocket.IsConnected && !isDisposed)
+                                       while (eClientSocket.IsConnected)
                                        {
+                                           if (!eClientSocket.IsDataAvailable())
+                                           {
+                                               Thread.Sleep(1);
+                                               continue;
+                                           }
+
                                            if (!PutMessageToQueue())
                                            {
                                                break;
@@ -106,7 +112,7 @@ namespace Wikiled.IB.Market.Api.Client
             {
                 if (eClientSocket.IsConnected)
                 {
-                    eClientSocket.Wrapper.Error(ex.Message);
+                    eClientSocket.Wrapper.Error(ex);
                 }
 
                 return false;

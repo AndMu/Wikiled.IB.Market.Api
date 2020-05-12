@@ -61,6 +61,12 @@ namespace Wikiled.IB.Market.Api.Client
          */
         public Contract Contract { get; }
 
+        public string StockType
+        {
+            get;
+            set;
+        }
+
         /**
         * @brief The market name for this product.
         */

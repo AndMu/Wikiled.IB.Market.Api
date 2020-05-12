@@ -23,35 +23,37 @@ namespace Wikiled.IB.Market.Api.Client
 
         public string Value { get; set; }
 
-        public override bool Equals(object other)
+        protected bool Equals(TagValue other)
         {
-            if (this == other)
+            return Tag == other.Tag && Value == other.Value;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
             {
                 return true;
             }
 
-            if (other == null)
+            if (obj.GetType() != GetType())
             {
                 return false;
             }
 
-            var lTheOther = (TagValue)other;
-
-            if (Util.StringCompare(Tag, lTheOther.Tag) != 0 ||
-                Util.StringCompare(Value, lTheOther.Value) != 0)
-            {
-                return false;
-            }
-
-            return true;
+            return Equals((TagValue)obj);
         }
 
         public override int GetHashCode()
         {
-            var hashCode = 221537429;
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Tag);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Value);
-            return hashCode;
+            unchecked
+            {
+                return ((Tag != null ? Tag.GetHashCode() : 0) * 397) ^ (Value != null ? Value.GetHashCode() : 0);
+            }
         }
     }
 }

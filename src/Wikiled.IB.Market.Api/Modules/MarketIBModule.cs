@@ -1,12 +1,13 @@
 ﻿using System;
-using Autofac;
+using Microsoft.Extensions.DependencyInjection;
+using Wikiled.Common.Utilities.Modules;
 using Wikiled.IB.Market.Api.Client;
 using Wikiled.IB.Market.Api.Client.DataManagers;
 using Wikiled.IB.Market.Api.Client.Serialization;
 
 namespace Wikiled.IB.Market.Api.Modules
 {
-    public class MarketIBModule : Module
+    public class MarketIBModule : IModule
     {
         private readonly ServerConfig config;
 
@@ -15,22 +16,24 @@ namespace Wikiled.IB.Market.Api.Modules
             this.config = config ?? throw new ArgumentNullException(nameof(config));
         }
 
-        protected override void Load(ContainerBuilder builder)
+        public IServiceCollection ConfigureServices(IServiceCollection services)
         {
-            builder.RegisterInstance(config);
-            builder.RegisterType<IBClient>().As<IIBClient>().AsSelf().SingleInstance();
-            builder.RegisterType<ClientWrapper>().As<IClientWrapper>().SingleInstance();
-            builder.RegisterType<EReaderMonitorSignal>().As<IEReaderSignal>().AsSelf().SingleInstance();
-            builder.RegisterType<CsvSerializer>().As<ICsvSerializer>();
-            builder.RegisterType<HistoricalDataManager>();
-            builder.RegisterType<ContractManager>();
-            builder.RegisterType<HistoricalNewsManager>();
-            builder.RegisterType<NewsManager>();
-            builder.RegisterType<NewsProviderManager>();
-            builder.RegisterType<RealTimeBarsManager>();
-            builder.RegisterType<TickNewsManager>();
-            builder.RegisterType<ErrorManager>();
-            base.Load(builder);
+            services.AddSingleton(config);
+            services.AddSingleton<IBClient>().As<IIBClient, IBClient>();
+            services.AddSingleton<IClientWrapper, ClientWrapper>();
+            services.AddSingleton<IEReaderSignal, EReaderMonitorSignal>();
+            services.AddTransient<ICsvSerializer, CsvSerializer>();
+            services.AddTransient<HistoricalDataManager>();
+            services.AddTransient<ContractManager>();
+            services.AddTransient<HistoricalNewsManager>();
+
+            services.AddTransient<NewsManager>();
+            services.AddTransient<NewsProviderManager>();
+            services.AddTransient<RealTimeBarsManager>();
+            services.AddTransient<TickNewsManager>();
+            services.AddTransient<ErrorManager>();
+
+            return services;
         }
     }
 }

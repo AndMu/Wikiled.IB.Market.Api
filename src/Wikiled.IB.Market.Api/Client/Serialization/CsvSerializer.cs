@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 using System.Reactive.Linq;
 using System.Text;
@@ -26,8 +27,8 @@ namespace Wikiled.IB.Market.Api.Client.Serialization
         public async Task Save(string fileName, IObservable<IPriceData> data, CancellationToken token)
         {
             logger.LogInformation("Saving: {0}", fileName);
-            using (var streamOutCsv = new StreamWriter(fileName, false, Encoding.UTF8))
-            using (var csvDataOut = new CsvWriter(streamOutCsv))
+            using var streamOutCsv = new StreamWriter(fileName, false, Encoding.UTF8);
+            await using (var csvDataOut = new CsvWriter(streamOutCsv, CultureInfo.CurrentCulture))
             {
                 csvDataOut.WriteField("Date");
                 csvDataOut.WriteField("PX_OPEN");
@@ -35,7 +36,7 @@ namespace Wikiled.IB.Market.Api.Client.Serialization
                 csvDataOut.WriteField("PX_LOW");
                 csvDataOut.WriteField("PX_LAST");
                 csvDataOut.WriteField("PX_VOLUME");
-                csvDataOut.NextRecord();
+                await csvDataOut.NextRecordAsync().ConfigureAwait(false);
                 IPriceData previous = null;
                 await data.ForEachAsync(item => { previous = WritePrice(item, previous, csvDataOut); }, token).ConfigureAwait(false);
                 await csvDataOut.FlushAsync().ConfigureAwait(false);

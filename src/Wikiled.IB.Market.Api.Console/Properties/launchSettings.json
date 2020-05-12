@@ -2,7 +2,7 @@
   "profiles": {
     "Wikiled.IB.Market.Api.Console": {
       "commandName": "Project",
-      "commandLineArgs": "history -Stock=VXX"
+      "commandLineArgs": "options -Symbol=MSFT -Strike=160 -Expiry=20200619 -Type=Call"
     }
   }
 }

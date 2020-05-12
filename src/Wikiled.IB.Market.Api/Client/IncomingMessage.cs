@@ -78,5 +78,7 @@ namespace Wikiled.IB.Market.Api.Client
         public const int HistoricalTickLast = 98;
         public const int TickByTick = 99;
         public const int OrderBound = 100;
+        public const int CompletedOrder = 101;
+        public const int CompletedOrdersEnd = 102;
     }
 }

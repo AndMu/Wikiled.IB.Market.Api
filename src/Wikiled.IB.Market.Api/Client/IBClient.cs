@@ -473,6 +473,20 @@ namespace Wikiled.IB.Market.Api.Client
             OrderBound?.Invoke(new OrderBoundMessage(orderId, apiClientId, apiOrderId));
         }
 
+        void IEWrapper.CompletedOrder(Contract contract, Order order, OrderState orderState)
+        {
+            CompletedOrder?.Invoke(contract, order, orderState);
+        }
+
+        void IEWrapper.CompletedOrdersEnd()
+        {
+            CompletedOrdersEnd?.Invoke();
+        }
+
+        public event Action<Contract, Order, OrderState> CompletedOrder;
+
+        public event Action CompletedOrdersEnd;
+
         public event Action<OrderBoundMessage> OrderBound;
         
         public event Action<IErrorDescription> Error;

@@ -12,7 +12,7 @@ using Wikiled.IB.Market.Api.Console.Commands.Config;
 namespace Wikiled.IB.Market.Api.Console.Commands
 {
     /// <summary>
-    /// news -Stock=VXX
+    /// news -Symbol=VXX
     /// </summary>
     public class NewsCommand : Command
     {
@@ -34,6 +34,7 @@ namespace Wikiled.IB.Market.Api.Console.Commands
                            NewsProviderManager newsProvider,
                            ContractManager contractManager,
                            HistoricalNewsManager newsManager)
+            : base(log)
         {
             this.log = log ?? throw new ArgumentNullException(nameof(log));
             this.client = client ?? throw new ArgumentNullException(nameof(client));
@@ -53,7 +54,7 @@ namespace Wikiled.IB.Market.Api.Console.Commands
             }
 
             var providers = await newsProvider.Request().FirstOrDefaultAsync();
-            var contract = await contractManager.Request(ContractHelper.GetContract(config.Stock)).FirstOrDefaultAsync();
+            var contract = await contractManager.Request(ContractHelper.GetStockContract(config.Symbol)).FirstOrDefaultAsync();
             var news = newsManager.Request(contract.ContractDetails.Contract.ConId,
                                            providers.NewsProviders[2].ProviderCode,
                                            StringFormater.StrToDate(config.From, client.TimeZone).DateToStr(),

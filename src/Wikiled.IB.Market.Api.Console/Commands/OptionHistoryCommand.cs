@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -24,14 +25,14 @@ namespace Wikiled.IB.Market.Api.Console.Commands
 
         private readonly IClientWrapper client;
 
-        private readonly HistoricalDataManager historicalDataManager;
+        private readonly Func<HistoricalDataManager> historicalDataManager;
 
         private readonly ICsvSerializer serializer;
 
         public OptionHistoryCommand(
             ILogger<OptionHistoryCommand> log,
             IClientWrapper client,
-            HistoricalDataManager historicalDataManager,
+            Func<HistoricalDataManager> historicalDataManager,
             OptionsHistoricConfig config,
             ICsvSerializer serializer)
             : base(log)
@@ -53,15 +54,23 @@ namespace Wikiled.IB.Market.Api.Console.Commands
                 return;
             }
 
-            var request = historicalDataManager
-                            .Request(
-                                new MarketDataRequest(
-                                    ContractHelper.GetOptionsContract(config.Symbol, config.Strike, config.Expiry, ),
-                                    DateTime.UtcNow.Date,
-                                    new Duration(5, DurationType.Months),
-                                    BarSize.Hour,
-                                    WhatToShow.MIDPOINT));
-            await serializer.Save($"{config.Symbol}_{config.Expiry}_{config.Type}_{config.Strike}_historic.csv", request, token).ConfigureAwait(false);
+            List<Task> tasks = new List<Task>();
+            for (int i = 0; i < 10; i++)
+            {
+                double strike = config.Strike + i * 10;
+                var request = historicalDataManager()
+                    .Request(
+                        new MarketDataRequest(
+                            ContractHelper.GetOptionsContract(config.Symbol, strike, config.Expiry, OptionType.CALL),
+                            DateTime.UtcNow.Date,
+                            new Duration(5, DurationType.Months),
+                            BarSize.Hour,
+                            WhatToShow.MIDPOINT));
+                var task = serializer.Save($"{config.Symbol}_{config.Expiry}_{config.Type}_{strike}_historic.csv", request, token);
+                tasks.Add(task);
+            }
+
+            await Task.WhenAll(tasks).ConfigureAwait(false);
             log.LogInformation("History request completed");
         }
     }

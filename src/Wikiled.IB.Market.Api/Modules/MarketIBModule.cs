@@ -23,7 +23,7 @@ namespace Wikiled.IB.Market.Api.Modules
             services.AddSingleton<IClientWrapper, ClientWrapper>();
             services.AddSingleton<IEReaderSignal, EReaderMonitorSignal>();
             services.AddTransient<ICsvSerializer, CsvSerializer>();
-            services.AddTransient<HistoricalDataManager>();
+            services.AddTransientWithFactory<HistoricalDataManager, HistoricalDataManager>();
             services.AddTransient<ContractManager>();
             services.AddTransient<HistoricalNewsManager>();
 

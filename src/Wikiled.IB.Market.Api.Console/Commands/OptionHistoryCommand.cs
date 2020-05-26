@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -14,25 +15,26 @@ using Wikiled.IB.Market.Api.Console.Commands.Config;
 namespace Wikiled.IB.Market.Api.Console.Commands
 {
     /// <summary>
-    /// historic -Symbol=VXX
+    /// options -Symbol=MSFT -Strike=150 -Expiry=20200619 -Type=Call
     /// </summary>
-    public class HistoricCommand : Command
+    public class OptionHistoryCommand : Command
     {
-        private readonly ILogger<HistoricCommand> log;
+        private readonly ILogger<OptionHistoryCommand> log;
 
-        private readonly HistoricConfig config;
+        private readonly OptionsHistoricConfig config;
 
         private readonly IClientWrapper client;
 
-        private readonly HistoricalDataManager historicalDataManager;
+        private readonly Func<HistoricalDataManager> historicalDataManager;
 
         private readonly ICsvSerializer serializer;
 
-        public HistoricCommand(ILogger<HistoricCommand> log,
-                               IClientWrapper client,
-                               HistoricalDataManager historicalDataManager,
-                               HistoricConfig config,
-                               ICsvSerializer serializer)
+        public OptionHistoryCommand(
+            ILogger<OptionHistoryCommand> log,
+            IClientWrapper client,
+            Func<HistoricalDataManager> historicalDataManager,
+            OptionsHistoricConfig config,
+            ICsvSerializer serializer)
             : base(log)
         {
             this.log = log ?? throw new ArgumentNullException(nameof(log));
@@ -52,15 +54,23 @@ namespace Wikiled.IB.Market.Api.Console.Commands
                 return;
             }
 
-            var request = historicalDataManager
-                            .Request(
-                                new MarketDataRequest(
-                                    ContractHelper.GetStockContract(config.Symbol),
-                                    DateTime.UtcNow.Date,
-                                    new Duration(5, DurationType.Years),
-                                    BarSize.Day,
-                                    WhatToShow.BID_ASK));
-            await serializer.Save($"{config.Symbol}_historic.csv", request, token).ConfigureAwait(false);
+            List<Task> tasks = new List<Task>();
+            for (int i = 0; i < 10; i++)
+            {
+                double strike = config.Strike + i * 10;
+                var request = historicalDataManager()
+                    .Request(
+                        new MarketDataRequest(
+                            ContractHelper.GetOptionsContract(config.Symbol, strike, config.Expiry, OptionType.CALL),
+                            DateTime.UtcNow.Date,
+                            new Duration(5, DurationType.Months),
+                            BarSize.Hour,
+                            WhatToShow.MIDPOINT));
+                var task = serializer.Save($"{config.Symbol}_{config.Expiry}_{config.Type}_{strike}_historic.csv", request, token);
+                tasks.Add(task);
+            }
+
+            await Task.WhenAll(tasks).ConfigureAwait(false);
             log.LogInformation("History request completed");
         }
     }

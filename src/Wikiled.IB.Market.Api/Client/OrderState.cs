@@ -26,6 +26,8 @@ namespace Wikiled.IB.Market.Api.Client
             MaxCommission = 0.0;
             CommissionCurrency = null;
             WarningText = null;
+            CompletedTime = null;
+            CompletedStatus = null;
         }
 
         public OrderState(string status,
@@ -42,7 +44,9 @@ namespace Wikiled.IB.Market.Api.Client
                           double minCommission,
                           double maxCommission,
                           string commissionCurrency,
-                          string warningText)
+                          string warningText,
+                          string completedTime, 
+                          string completedStatus)
         {
             InitMarginBefore = initMarginBefore;
             MaintMarginBefore = maintMarginBefore;
@@ -58,7 +62,13 @@ namespace Wikiled.IB.Market.Api.Client
             MaxCommission = maxCommission;
             CommissionCurrency = commissionCurrency;
             WarningText = warningText;
+            CompletedTime = completedTime;
+            CompletedStatus = completedStatus;
         }
+
+        public string CompletedTime { get; set; }
+
+        public string CompletedStatus { get; set; }
 
         /**
          * @brief The order's current status
@@ -136,19 +146,29 @@ namespace Wikiled.IB.Market.Api.Client
          */
         public string WarningText { get; set; }
 
-        public override bool Equals(object other)
+        public override bool Equals(object obj)
         {
-            if (this == other)
-            {
-                return true;
-            }
-
-            if (other == null)
+            if (ReferenceEquals(null, obj))
             {
                 return false;
             }
 
-            var state = (OrderState)other;
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return Equals((OrderState)obj);
+        }
+
+
+        protected bool Equals(OrderState state)
+        {
 
             if (Commission != state.Commission ||
                 MinCommission != state.MinCommission ||
@@ -167,7 +187,9 @@ namespace Wikiled.IB.Market.Api.Client
                 Util.StringCompare(InitMarginAfter, state.InitMarginAfter) != 0 ||
                 Util.StringCompare(MaintMarginAfter, state.MaintMarginAfter) != 0 ||
                 Util.StringCompare(EquityWithLoanAfter, state.EquityWithLoanAfter) != 0 ||
-                Util.StringCompare(CommissionCurrency, state.CommissionCurrency) != 0)
+                Util.StringCompare(CommissionCurrency, state.CommissionCurrency) != 0 ||
+                Util.StringCompare(CompletedTime, state.CompletedTime) != 0 ||
+                Util.StringCompare(CompletedStatus, state.CompletedStatus) != 0)
             {
                 return false;
             }
@@ -177,7 +199,7 @@ namespace Wikiled.IB.Market.Api.Client
 
         public override int GetHashCode()
         {
-            var hashCode = 1936142708;
+            var hashCode = 1754944475;
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Status);
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(InitMarginBefore);
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(MaintMarginBefore);
@@ -193,6 +215,8 @@ namespace Wikiled.IB.Market.Api.Client
             hashCode = hashCode * -1521134295 + MaxCommission.GetHashCode();
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(CommissionCurrency);
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(WarningText);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(CompletedTime);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(CompletedStatus);
             return hashCode;
         }
     }

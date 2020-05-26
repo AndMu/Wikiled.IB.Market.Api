@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Wikiled.IB.Market.Api.Client
 {
@@ -7,7 +8,7 @@ namespace Wikiled.IB.Market.Api.Client
     {
         public static bool StringIsEmpty(string str)
         {
-            return str == null || str.Length == 0;
+            return string.IsNullOrEmpty(str);
         }
 
 
@@ -19,13 +20,6 @@ namespace Wikiled.IB.Market.Api.Client
         public static int StringCompare(string lhs, string rhs)
         {
             return NormalizeString(lhs).CompareTo(NormalizeString(rhs));
-        }
-
-        public static int StringCompareIgnCase(string lhs, string rhs)
-        {
-            var normalisedLhs = NormalizeString(lhs);
-            var normalisedRhs = NormalizeString(rhs);
-            return string.Compare(normalisedLhs, normalisedRhs, true);
         }
 
         public static bool VectorEqualsUnordered<T>(List<T> lhs, List<T> rhs)
@@ -95,7 +89,27 @@ namespace Wikiled.IB.Market.Api.Client
 
         public static string FormatDoubleString(string str)
         {
-            return string.IsNullOrEmpty(str) ? "" : string.Format("{0,0:N2}", double.Parse(str));
+            return string.IsNullOrEmpty(str) ? "" : $"{double.Parse(str),0:N2}";
         }
+
+        public static string LongMaxString(long value)
+        {
+            return (value == Int64.MaxValue) ? "" : "" + value;
+        }
+
+        public static string TagValueListToString(List<TagValue> options)
+        {
+            StringBuilder tagValuesStr = new StringBuilder();
+            int tagValuesCount = options?.Count ?? 0;
+
+            for (int i = 0; i < tagValuesCount; i++)
+            {
+                TagValue tagValue = options[i];
+                tagValuesStr.Append(tagValue.Tag).Append("=").Append(tagValue.Value).Append(";");
+            }
+
+            return tagValuesStr.ToString();
+        }
+
     }
 }

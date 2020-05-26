@@ -12,6 +12,12 @@ namespace Wikiled.IB.Market.Api.Client
             AddParameter(source, (int)msgId);
         }
 
+        public static void AddParameter<T>(this BinaryWriter source, T? value)
+            where T : struct
+        {
+            AddParameter(source, value == null ? null : value.ToString());
+        }
+
         public static void AddParameter(this BinaryWriter source, int value)
         {
             AddParameter(source, value.ToString(CultureInfo.InvariantCulture));
@@ -22,15 +28,15 @@ namespace Wikiled.IB.Market.Api.Client
             AddParameter(source, value.ToString(CultureInfo.InvariantCulture));
         }
 
-        public static void AddParameter(this BinaryWriter source, bool value)
+        public static void AddParameter(this BinaryWriter source, bool? value)
         {
-            if (value)
+            if (value.HasValue)
             {
-                AddParameter(source, "1");
+                AddParameter(source, value.Value ? "1" : "0");
             }
             else
             {
-                AddParameter(source, "0");
+                source.Write(Constants.Eol);
             }
         }
 
@@ -63,16 +69,7 @@ namespace Wikiled.IB.Market.Api.Client
 
         public static void AddParameter(this BinaryWriter source, List<TagValue> options)
         {
-            var tagValuesStr = new StringBuilder();
-            var tagValuesCount = options?.Count ?? 0;
-
-            for (var i = 0; i < tagValuesCount; i++)
-            {
-                var tagValue = options[i];
-                tagValuesStr.Append(tagValue.Tag).Append("=").Append(tagValue.Value).Append(";");
-            }
-
-            source.AddParameter(tagValuesStr.ToString());
+            source.AddParameter(Util.TagValueListToString(options));
         }
 
         public static void AddParameterMax(this BinaryWriter source, double value)

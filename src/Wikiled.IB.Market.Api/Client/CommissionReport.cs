@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Wikiled.IB.Market.Api.Client
+﻿namespace Wikiled.IB.Market.Api.Client
 {
     /**
      * @class CommissionReport
@@ -47,37 +45,34 @@ namespace Wikiled.IB.Market.Api.Client
          */
         public int YieldRedemptionDate { get; set; }
 
-        public override bool Equals(object pOther)
+        protected bool Equals(CommissionReport other)
         {
-            var retVal = false;
+            return ExecId == other.ExecId;
+        }
 
-            if (pOther == null)
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
             {
-                retVal = false;
-            }
-            else if (this == pOther)
-            {
-                retVal = true;
-            }
-            else
-            {
-                var other = (CommissionReport)pOther;
-                retVal = ExecId.Equals(other.ExecId);
+                return false;
             }
 
-            return retVal;
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return Equals((CommissionReport) obj);
         }
 
         public override int GetHashCode()
         {
-            var hashCode = -2052112293;
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(ExecId);
-            hashCode = hashCode * -1521134295 + Commission.GetHashCode();
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Currency);
-            hashCode = hashCode * -1521134295 + RealizedPnl.GetHashCode();
-            hashCode = hashCode * -1521134295 + Yield.GetHashCode();
-            hashCode = hashCode * -1521134295 + YieldRedemptionDate.GetHashCode();
-            return hashCode;
+            return ExecId != null ? ExecId.GetHashCode() : 0;
         }
     }
 }

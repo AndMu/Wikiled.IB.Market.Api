@@ -95,6 +95,7 @@
         public const int AvgOptVolume = 87;
         public const int DelayedLastTimestamp = 88;
         public const int SHORTABLE_SHARES = 89;
+        public const int DELAYED_HALTED = 90;
 
         public static string GetField(int tickType)
         {
@@ -190,6 +191,7 @@
                 case AvgOptVolume: return "avgOptVolume";
                 case DelayedLastTimestamp: return "delayedLastTimestamp";
                 case SHORTABLE_SHARES: return "shortableShares";
+                case DELAYED_HALTED: return "delayedHalted";
 
                 default: return "unknown";
             }

@@ -357,31 +357,39 @@ namespace Wikiled.IB.Market.Api.Client
         {
         }
 
-        public void HistoricalTicks(int reqId, HistoricalTick[] ticks, bool done)
+        public virtual void HistoricalTicks(int reqId, HistoricalTick[] ticks, bool done)
         {
         }
 
-        public void HistoricalTicksBidAsk(int reqId, HistoricalTickBidAsk[] ticks, bool done)
+        public virtual void HistoricalTicksBidAsk(int reqId, HistoricalTickBidAsk[] ticks, bool done)
         {
         }
 
-        public void HistoricalTicksLast(int reqId, HistoricalTickLast[] ticks, bool done)
+        public virtual void HistoricalTicksLast(int reqId, HistoricalTickLast[] ticks, bool done)
         {
         }
 
-        public void TickByTickAllLast(int reqId, int tickType, long time, double price, int size, TickAttribLast tickAttribLast, string exchange, string specialConditions)
+        public virtual void TickByTickAllLast(int reqId, int tickType, long time, double price, int size, TickAttribLast tickAttribLast, string exchange, string specialConditions)
         {
         }
 
-        public void TickByTickBidAsk(int reqId, long time, double bidPrice, double askPrice, int bidSize, int askSize, TickAttribBidAsk tickAttribBidAsk)
+        public virtual void TickByTickBidAsk(int reqId, long time, double bidPrice, double askPrice, int bidSize, int askSize, TickAttribBidAsk tickAttribBidAsk)
         {
         }
 
-        public void TickByTickMidPoint(int reqId, long time, double midPoint)
+        public virtual void TickByTickMidPoint(int reqId, long time, double midPoint)
         {
         }
 
-        public void OrderBound(long orderId, int apiClientId, int apiOrderId)
+        public virtual void OrderBound(long orderId, int apiClientId, int apiOrderId)
         { }
+
+        public virtual void CompletedOrder(Contract contract, Order order, OrderState orderState)
+        {
+        }
+
+        public virtual void CompletedOrdersEnd()
+        {
+        }
     }
 }

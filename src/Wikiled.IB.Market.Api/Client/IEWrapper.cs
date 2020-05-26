@@ -520,19 +520,20 @@ namespace Wikiled.IB.Market.Api.Client
         void UpdateMktDepth(int tickerId, int position, int operation, int side, double price, int size);
 
         /**
-         * @brief Returns the order book
-         * @param tickerId the request's identifier
-         * @param position the order book's row being updated
-         * @param marketMaker the exchange holding the order
-         * @param operation how to refresh the row:
-         *      0 - insert (insert this new order into the row identified by 'position')·
-         *      1 - update (update the existing order in the row identified by 'position')·
-         *      2 - delete (delete the existing order at the row identified by 'position').
-         * @param side 0 for ask, 1 for bid
-         * @param price the order's price
-         * @param size the order's size
-         * @sa updateMktDepth, EClientSocket::reqMarketDepth
-         */
+          * @brief Returns the order book
+          * @param tickerId the request's identifier
+          * @param position the order book's row being updated
+          * @param marketMaker the exchange holding the order if isSmartDepth is True, otherwise the MPID of the market maker
+          * @param operation how to refresh the row:
+          *      0 - insert (insert this new order into the row identified by 'position')·
+          *      1 - update (update the existing order in the row identified by 'position')·
+          *      2 - delete (delete the existing order at the row identified by 'position').
+          * @param side 0 for ask, 1 for bid
+          * @param price the order's price
+          * @param size the order's size
+          * @param isSmartDepth flag indicating if this is smart depth response (aggregate data from multiple exchanges, v974+)
+          * @sa updateMktDepth, EClientSocket::reqMarketDepth
+          */
         void UpdateMktDepthL2(int tickerId, int position, string marketMaker, int operation, int side, double price, int size, bool isSmartDepth);
 
         /**
@@ -564,27 +565,19 @@ namespace Wikiled.IB.Market.Api.Client
         void PositionEnd();
 
         /**
-         * @brief updates the real time 5 seconds bars
-         * @param reqId the request's identifier
-         * @param date the bar's date and time (either as a yyyymmss hh:mm:ss formatted string or as system time according to the request)
-         * @param open the bar's open point
-         * @param high the bar's high point
-         * @param low the bar's low point
-         * @param close the bar's closing point
-         * @param volume the bar's traded volume (only returned for TRADES data)
-         * @param WAP the bar's Weighted Average Price rounded to minimum increment (only available for TRADES).
-         * @param count the number of trades during the bar's timespan (only available for TRADES).
-         * @sa EClientSocket::reqRealTimeBars
-         */
-        void RealtimeBar(int reqId,
-                         long time,
-                         double open,
-                         double high,
-                         double low,
-                         double close,
-                         long volume,
-                         double wap,
-                         int count);
+                 * @brief updates the real time 5 seconds bars
+                 * @param reqId the request's identifier
+                 * @param date the bar's date and time (Epoch/Unix time)
+                 * @param open the bar's open point
+                 * @param high the bar's high point
+                 * @param low the bar's low point
+                 * @param close the bar's closing point
+                 * @param volume the bar's traded volume (only returned for TRADES data)
+                 * @param WAP the bar's Weighted Average Price rounded to minimum increment (only available for TRADES).
+                 * @param count the number of trades during the bar's timespan (only available for TRADES).
+                 * @sa EClientSocket::reqRealTimeBars
+                 */
+        void RealtimeBar(int reqId, long date, double open, double high, double low, double close, long volume, double WAP, int count);
 
         /**
          * @brief provides the xml-formatted parameters available from TWS market scanners (not all available in API).
@@ -965,5 +958,21 @@ namespace Wikiled.IB.Market.Api.Client
         void TickByTickMidPoint(int reqId, long time, double midPoint);
 
         void OrderBound(long orderId, int apiClientId, int apiOrderId);
+
+
+        /**
+         * @brief Feeds in completed orders.
+         * @param contract the order's Contract.
+         * @param order the completed Order.
+         * @param orderState the order's OrderState
+         * @sa completedOrdersEnd, EClientSocket::reqCompletedOrders
+         */
+        void CompletedOrder(Contract contract, Order order, OrderState orderState);
+
+        /**
+         * @brief Notifies the end of the completed orders' reception.
+         * @sa completedOrder, EClientSocket::reqCompletedOrders
+         */
+        void CompletedOrdersEnd();
     }
 }

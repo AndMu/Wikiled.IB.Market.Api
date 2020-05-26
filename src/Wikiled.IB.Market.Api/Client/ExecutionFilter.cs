@@ -61,44 +61,38 @@ namespace Wikiled.IB.Market.Api.Client
        */
         public string Side { get; set; }
 
-        public override bool Equals(object other)
+        protected bool Equals(ExecutionFilter other)
         {
-            var lBRetVal = false;
+            return ClientId == other.ClientId &&
+                   AcctCode == other.AcctCode &&
+                   Time == other.Time &&
+                   Symbol == other.Symbol &&
+                   SecType == other.SecType &&
+                   Exchange == other.Exchange &&
+                   Side == other.Side;
+        }
 
-            if (other == null)
-            {
-                lBRetVal = false;
-            }
-            else if (this == other)
-            {
-                lBRetVal = true;
-            }
-            else
-            {
-                var lTheOther = (ExecutionFilter)other;
-                lBRetVal = ClientId == lTheOther.ClientId &&
-                    string.Compare(AcctCode, lTheOther.AcctCode, true) == 0 &&
-                    string.Compare(Time, lTheOther.Time, true) == 0 &&
-                    string.Compare(Symbol, lTheOther.Symbol, true) == 0 &&
-                    string.Compare(SecType, lTheOther.SecType, true) == 0 &&
-                    string.Compare(Exchange, lTheOther.Exchange, true) == 0 &&
-                    string.Compare(Side, lTheOther.Side, true) == 0;
-            }
-
-            return lBRetVal;
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((ExecutionFilter) obj);
         }
 
         public override int GetHashCode()
         {
-            var hashCode = 82934527;
-            hashCode = hashCode * -1521134295 + ClientId.GetHashCode();
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(AcctCode);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Time);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Symbol);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(SecType);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Exchange);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Side);
-            return hashCode;
+            unchecked
+            {
+                var hashCode = ClientId;
+                hashCode = (hashCode * 397) ^ (AcctCode != null ? AcctCode.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (Time != null ? Time.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (Symbol != null ? Symbol.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (SecType != null ? SecType.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (Exchange != null ? Exchange.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (Side != null ? Side.GetHashCode() : 0);
+                return hashCode;
+            }
         }
     }
 }

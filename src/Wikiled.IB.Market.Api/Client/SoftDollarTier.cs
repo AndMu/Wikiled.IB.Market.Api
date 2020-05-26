@@ -33,36 +33,52 @@
          */
         public string DisplayName { get; }
 
+        public override string ToString()
+        {
+            return DisplayName;
+        }
+
+        protected bool Equals(SoftDollarTier other)
+        {
+            return Name == other.Name && Value == other.Value;
+        }
+
         public override bool Equals(object obj)
         {
-            var b = obj as SoftDollarTier;
-
-            if (Equals(b, null))
+            if (ReferenceEquals(null, obj))
             {
                 return false;
             }
 
-            return string.Compare(Name, b.Name, true) == 0 && string.Compare(Value, b.Value, true) == 0;
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return Equals((SoftDollarTier)obj);
         }
 
         public override int GetHashCode()
         {
-            return Name.GetHashCode() + Value.GetHashCode();
+            unchecked
+            {
+                return ((Name != null ? Name.GetHashCode() : 0) * 397) ^ (Value != null ? Value.GetHashCode() : 0);
+            }
         }
 
         public static bool operator ==(SoftDollarTier left, SoftDollarTier right)
         {
-            return left.Equals(right);
+            return Equals(left, right);
         }
 
         public static bool operator !=(SoftDollarTier left, SoftDollarTier right)
         {
-            return !left.Equals(right);
-        }
-
-        public override string ToString()
-        {
-            return DisplayName;
+            return !Equals(left, right);
         }
     }
 }

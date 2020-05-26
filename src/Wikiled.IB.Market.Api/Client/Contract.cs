@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Wikiled.IB.Market.Api.Client.Types;
 
 namespace Wikiled.IB.Market.Api.Client
 {
@@ -50,7 +51,7 @@ namespace Wikiled.IB.Market.Api.Client
         /**
          * @brief Either Put or Call (i.e. Options). Valid values are P, PUT, C, CALL. 
          */
-        public string Right { get; set; }
+        public OptionType? Right { get; set; }
 
         /**
          * @brief The instrument's multiplier (i.e. options, futures).

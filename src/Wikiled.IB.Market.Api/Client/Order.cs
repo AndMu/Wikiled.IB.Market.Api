@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using static System.Int64;
 
 namespace Wikiled.IB.Market.Api.Client
 {
@@ -21,8 +22,6 @@ namespace Wikiled.IB.Market.Api.Client
         public static int AuctionMatch = 1;
         public static int AuctionImprovement = 2;
         public static int AuctionTransparent = 3;
-
-        public static string EmptyStr = "";
 
         // Clearing info
 
@@ -115,13 +114,14 @@ namespace Wikiled.IB.Market.Api.Client
         {
             LmtPrice = double.MaxValue;
             AuxPrice = double.MaxValue;
-            ActiveStartTime = EmptyStr;
-            ActiveStopTime = EmptyStr;
+            ActiveStartTime = string.Empty;
+            ActiveStopTime = string.Empty;
             OutsideRth = false;
             OpenClose = "O";
             Origin = Customer;
             Transmit = true;
-            DesignatedLocation = EmptyStr;
+            DesignatedLocation = string.Empty;
+            OpenClose = string.Empty;
             ExemptCode = -1;
             MinQty = int.MaxValue;
             PercentOffset = double.MaxValue;
@@ -134,16 +134,16 @@ namespace Wikiled.IB.Market.Api.Client
             StockRangeUpper = double.MaxValue;
             Volatility = double.MaxValue;
             VolatilityType = int.MaxValue;
-            DeltaNeutralOrderType = EmptyStr;
+            DeltaNeutralOrderType = string.Empty;
             DeltaNeutralAuxPrice = double.MaxValue;
             DeltaNeutralConId = 0;
-            DeltaNeutralSettlingFirm = EmptyStr;
-            DeltaNeutralClearingAccount = EmptyStr;
-            DeltaNeutralClearingIntent = EmptyStr;
-            DeltaNeutralOpenClose = EmptyStr;
+            DeltaNeutralSettlingFirm = string.Empty;
+            DeltaNeutralClearingAccount = string.Empty;
+            DeltaNeutralClearingIntent = string.Empty;
+            DeltaNeutralOpenClose = string.Empty;
             DeltaNeutralShortSale = false;
             DeltaNeutralShortSaleSlot = 0;
-            DeltaNeutralDesignatedLocation = EmptyStr;
+            DeltaNeutralDesignatedLocation = string.Empty;
             ReferencePriceType = int.MaxValue;
             TrailStopPrice = double.MaxValue;
             TrailingPercent = double.MaxValue;
@@ -159,7 +159,7 @@ namespace Wikiled.IB.Market.Api.Client
             ScaleInitPosition = int.MaxValue;
             ScaleInitFillQty = int.MaxValue;
             ScaleRandomPercent = false;
-            ScaleTable = EmptyStr;
+            ScaleTable = string.Empty;
             WhatIf = false;
             NotHeld = false;
             Conditions = new List<OrderCondition>();
@@ -168,14 +168,23 @@ namespace Wikiled.IB.Market.Api.Client
             AdjustedStopPrice = double.MaxValue;
             AdjustedStopLimitPrice = double.MaxValue;
             AdjustedTrailingAmount = double.MaxValue;
-            ExtOperator = EmptyStr;
-            Tier = new SoftDollarTier(EmptyStr, EmptyStr, EmptyStr);
+            ExtOperator = string.Empty;
+            Tier = new SoftDollarTier(string.Empty, string.Empty, string.Empty);
             CashQty = double.MaxValue;
-            Mifid2DecisionMaker = EmptyStr;
-            Mifid2DecisionAlgo = EmptyStr;
-            Mifid2ExecutionTrader = EmptyStr;
-            Mifid2ExecutionAlgo = EmptyStr;
+            Mifid2DecisionMaker = string.Empty;
+            Mifid2DecisionAlgo = string.Empty;
+            Mifid2ExecutionTrader = string.Empty;
+            Mifid2ExecutionAlgo = string.Empty;
             DontUseAutoPriceForHedge = false;
+            AutoCancelDate = string.Empty;
+            FilledQuantity = double.MaxValue;
+            RefFuturesConId = int.MaxValue;
+            AutoCancelParent = false;
+            Shareholder = string.Empty;
+            ImbalanceOnly = false;
+            RouteMarketableToBbo = false;
+            ParentPermId = MaxValue;
+            UsePriceMgmtAlgo = null;
         }
 
         /**
@@ -204,6 +213,8 @@ namespace Wikiled.IB.Market.Api.Client
 		 * SLONG is available in specially-configured institutional accounts to indicate that long position not yet delivered is being sold.	
          */
         public string Action { get; set; }
+
+        public bool? UsePriceMgmtAlgo { get; set; }
 
         /**
          * @brief The number of positions being bought/sold.
@@ -933,21 +944,47 @@ namespace Wikiled.IB.Market.Api.Client
         */
         public bool DiscretionaryUpToLimitPrice { get; set; }
 
-        // Note: Two orders can be 'equivalent' even if all fields do not match. This function is not intended to be used with Order objects returned from TWS.
-        public override bool Equals(object pOther)
-        {
-            if (this == pOther)
-            {
-                return true;
-            }
+        public string AutoCancelDate { get; set; }
 
-            if (pOther == null)
+        public double FilledQuantity { get; set; }
+
+        public int RefFuturesConId { get; set; }
+
+        public bool AutoCancelParent { get; set; }
+
+        public string Shareholder { get; set; }
+
+        public bool ImbalanceOnly { get; set; }
+
+        public bool RouteMarketableToBbo { get; set; }
+
+        public long ParentPermId { get; set; }
+
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
             {
                 return false;
             }
 
-            var lTheOther = (Order)pOther;
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
 
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return Equals((Order)obj);
+        }
+
+
+        // Note: Two orders can be 'equivalent' even if all fields do not match. This function is not intended to be used with Order objects returned from TWS.
+        protected bool Equals(Order lTheOther)
+        {
             if (PermId == lTheOther.PermId)
             {
                 return true;
@@ -1017,7 +1054,14 @@ namespace Wikiled.IB.Market.Api.Client
                 Tier != lTheOther.Tier ||
                 CashQty != lTheOther.CashQty ||
                 DontUseAutoPriceForHedge != lTheOther.DontUseAutoPriceForHedge ||
-                IsOmsContainer != lTheOther.IsOmsContainer)
+                IsOmsContainer != lTheOther.IsOmsContainer ||
+                UsePriceMgmtAlgo != lTheOther.UsePriceMgmtAlgo ||
+                FilledQuantity != lTheOther.FilledQuantity ||
+                RefFuturesConId != lTheOther.RefFuturesConId ||
+                AutoCancelParent != lTheOther.AutoCancelParent ||
+                ImbalanceOnly != lTheOther.ImbalanceOnly ||
+                RouteMarketableToBbo != lTheOther.RouteMarketableToBbo ||
+                ParentPermId != lTheOther.ParentPermId)
             {
                 return false;
             }
@@ -1054,7 +1098,9 @@ namespace Wikiled.IB.Market.Api.Client
                 Util.StringCompare(AlgoId, lTheOther.AlgoId) != 0 ||
                 Util.StringCompare(ScaleTable, lTheOther.ScaleTable) != 0 ||
                 Util.StringCompare(ModelCode, lTheOther.ModelCode) != 0 ||
-                Util.StringCompare(ExtOperator, lTheOther.ExtOperator) != 0)
+                Util.StringCompare(ExtOperator, lTheOther.ExtOperator) != 0 ||
+                Util.StringCompare(AutoCancelDate, lTheOther.AutoCancelDate) != 0 ||
+                Util.StringCompare(Shareholder, lTheOther.Shareholder) != 0)
             {
                 return false;
             }
@@ -1080,7 +1126,7 @@ namespace Wikiled.IB.Market.Api.Client
 
         public override int GetHashCode()
         {
-            var hashCode = 1832365974;
+            var hashCode = 1040337091;
             hashCode = hashCode * -1521134295 + OrderId.GetHashCode();
             hashCode = hashCode * -1521134295 + Solicited.GetHashCode();
             hashCode = hashCode * -1521134295 + ClientId.GetHashCode();
@@ -1182,6 +1228,14 @@ namespace Wikiled.IB.Market.Api.Client
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Mifid2ExecutionTrader);
             hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Mifid2ExecutionAlgo);
             hashCode = hashCode * -1521134295 + DontUseAutoPriceForHedge.GetHashCode();
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(AutoCancelDate);
+            hashCode = hashCode * -1521134295 + FilledQuantity.GetHashCode();
+            hashCode = hashCode * -1521134295 + RefFuturesConId.GetHashCode();
+            hashCode = hashCode * -1521134295 + AutoCancelParent.GetHashCode();
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Shareholder);
+            hashCode = hashCode * -1521134295 + ImbalanceOnly.GetHashCode();
+            hashCode = hashCode * -1521134295 + RouteMarketableToBbo.GetHashCode();
+            hashCode = hashCode * -1521134295 + ParentPermId.GetHashCode();
             hashCode = hashCode * -1521134295 + RandomizeSize.GetHashCode();
             hashCode = hashCode * -1521134295 + RandomizePrice.GetHashCode();
             hashCode = hashCode * -1521134295 + ReferenceContractId.GetHashCode();
@@ -1200,6 +1254,9 @@ namespace Wikiled.IB.Market.Api.Client
             hashCode = hashCode * -1521134295 + ConditionsIgnoreRth.GetHashCode();
             hashCode = hashCode * -1521134295 + ConditionsCancelOrder.GetHashCode();
             hashCode = hashCode * -1521134295 + EqualityComparer<SoftDollarTier>.Default.GetHashCode(Tier);
+            hashCode = hashCode * -1521134295 + IsOmsContainer.GetHashCode();
+            hashCode = hashCode * -1521134295 + DiscretionaryUpToLimitPrice.GetHashCode();
+            hashCode = hashCode * -1521134295 + EqualityComparer<bool?>.Default.GetHashCode(UsePriceMgmtAlgo);
             return hashCode;
         }
     }

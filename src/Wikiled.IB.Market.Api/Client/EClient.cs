@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using Wikiled.IB.Market.Api.Client.Helpers;
 using Wikiled.IB.Market.Api.Client.Request;
@@ -59,7 +60,7 @@ namespace Wikiled.IB.Market.Api.Client
         /**
          * @brief Reference to the EWrapper implementing object.
          */
-        public IEWrapper Wrapper {get; }
+        public IEWrapper Wrapper { get; }
 
         public bool AllowRedirect { get; set; }
 
@@ -199,15 +200,37 @@ namespace Wikiled.IB.Market.Api.Client
             }
 
 
-            if (TcpStream != null)
-            {
-                TcpStream.Close();
-            }
+            TcpStream?.Close();
 
             if (resetState)
             {
                 Wrapper.ConnectionClosed();
             }
+        }
+
+        /**
+        * @brief Requests completed orders.\n
+        * @param apiOnly - request only API orders.\n
+        * @sa EWrapper::completedOrder, EWrapper::completedOrdersEnd
+        */
+        public void ReqCompletedOrders(bool apiOnly)
+        {
+            if (!CheckConnection())
+                return;
+
+            if (!CheckServerVersion(MinServerVer.COMPLETED_ORDERS,
+                " It does not support completed orders requests."))
+            {
+                return;
+            }
+
+            var paramsList = new BinaryWriter(new MemoryStream());
+            var lengthPos = PrepareBuffer(paramsList);
+
+            paramsList.AddParameter(OutgoingMessages.ReqCompletedOrders);
+            paramsList.AddParameter(apiOnly);
+
+            CloseAndSend(paramsList, lengthPos, EClientErrors.FAIL_SEND_REQCOMPLETEDORDERS);
         }
 
         /**
@@ -1307,6 +1330,11 @@ namespace Wikiled.IB.Market.Api.Client
                 paramsList.AddParameter(order.DiscretionaryUpToLimitPrice);
             }
 
+            if (ServerVersion >= MinServerVer.PRICE_MGMT_ALGO)
+            {
+                paramsList.AddParameter(order.UsePriceMgmtAlgo);
+            }
+
             CloseAndSend(id, paramsList, lengthPos, EClientErrors.FAIL_SEND_ORDER);
         }
 
@@ -1817,7 +1845,7 @@ namespace Wikiled.IB.Market.Api.Client
 		 * @param keepUpToDate set to True to received continuous updates on most recent bar data. If True, and endDateTime cannot be specified.
          * @sa EWrapper::historicalData
          */
-        public void ReqHistoricalData(int tickerId, MarketDataRequest request, List<TagValue> chartOptions=null)
+        public void ReqHistoricalData(int tickerId, MarketDataRequest request, List<TagValue> chartOptions = null)
         {
             if (!CheckConnection())
             {
@@ -2183,6 +2211,15 @@ namespace Wikiled.IB.Market.Api.Client
                 }
             }
 
+            if (!IsEmpty(contract.PrimaryExch))
+            {
+                if (!CheckServerVersion(tickerId, MinServerVer.MKT_DEPTH_PRIM_EXCHANGE,
+                    " It does not support PrimaryExch parameter in reqMktDepth."))
+                {
+                    return;
+                }
+            }
+
             const int version = 5;
             var paramsList = new BinaryWriter(new MemoryStream());
             var lengthPos = PrepareBuffer(paramsList);
@@ -2209,6 +2246,11 @@ namespace Wikiled.IB.Market.Api.Client
             }
 
             paramsList.AddParameter(contract.Exchange.ToString());
+            if (ServerVersion >= MinServerVer.MKT_DEPTH_PRIM_EXCHANGE)
+            {
+                paramsList.AddParameter(contract.PrimaryExch);
+            }
+
             paramsList.AddParameter(contract.Currency);
             paramsList.AddParameter(contract.LocalSymbol);
 
@@ -2406,6 +2448,11 @@ namespace Wikiled.IB.Market.Api.Client
          * @sa reqScannerParameters, ScannerSubscription, EWrapper::scannerData
          */
         public void ReqScannerSubscription(int reqId, ScannerSubscription subscription, List<TagValue> scannerSubscriptionOptions, List<TagValue> scannerSubscriptionFilterOptions)
+        {
+            ReqScannerSubscription(reqId, subscription, Util.TagValueListToString(scannerSubscriptionOptions), Util.TagValueListToString(scannerSubscriptionFilterOptions));
+        }
+
+        public void ReqScannerSubscription(int reqId, ScannerSubscription subscription, string scannerSubscriptionOptions, string scannerSubscriptionFilterOptions)
         {
             if (!CheckConnection())
             {
@@ -3738,7 +3785,7 @@ namespace Wikiled.IB.Market.Api.Client
                         order.ScaleInitFillQty != int.MaxValue ||
                         order.ScaleRandomPercent)
                     {
-                        ReportError(id, EClientErrors.UPDATE_TWS, "  It does not support Scale order parameters: PriceAdjustValue, PriceAdjustInterval, " + 
+                        ReportError(id, EClientErrors.UPDATE_TWS, "  It does not support Scale order parameters: PriceAdjustValue, PriceAdjustInterval, " +
                                                                  "ProfitOffset, AutoReset, InitPosition, InitFillQty and RandomPercent");
                         return false;
                     }
@@ -3805,31 +3852,54 @@ namespace Wikiled.IB.Market.Api.Client
                 (!IsEmpty(order.Mifid2DecisionMaker) || !IsEmpty(order.Mifid2DecisionAlgo)))
             {
                 ReportError(id, EClientErrors.UPDATE_TWS, " It does not support MIFID II decision maker parameters");
+                return false;
             }
 
             if (ServerVersion < MinServerVer.DecisionMaker &&
                 (!IsEmpty(order.Mifid2ExecutionTrader) || !IsEmpty(order.Mifid2ExecutionAlgo)))
             {
                 ReportError(id, EClientErrors.UPDATE_TWS, " It does not support MIFID II execution parameters");
+                return false;
             }
 
             if (ServerVersion < MinServerVer.AutoPriceForHedge && order.DontUseAutoPriceForHedge)
             {
                 ReportError(id, EClientErrors.UPDATE_TWS, " It does not support don't use auto price for hedge parameter");
+                return false;
             }
 
             if (ServerVersion < MinServerVer.ORDER_CONTAINER && order.IsOmsContainer)
             {
                 ReportError(id, EClientErrors.UPDATE_TWS, " It does not support oms container parameter.");
+                return false;
             }
 
             if (ServerVersion < MinServerVer.D_PEG_ORDERS && order.DiscretionaryUpToLimitPrice)
             {
                 ReportError(id, EClientErrors.UPDATE_TWS, " It does not support D-Peg orders.");
+                return false;
+            }
+
+            if (ServerVersion < MinServerVer.PRICE_MGMT_ALGO && order.UsePriceMgmtAlgo.HasValue)
+            {
+                ReportError(id, EClientErrors.UPDATE_TWS, " It does not support Use Price Management Algo requests.");
+                return false;
             }
 
             return true;
         }
+
+        public bool IsDataAvailable()
+        {
+            if (!IsConnected)
+            {
+                return false;
+            }
+
+            var networkStream = TcpStream as NetworkStream;
+            return networkStream == null || networkStream.DataAvailable;
+        }
+
 
         private bool IsEmpty(string str)
         {

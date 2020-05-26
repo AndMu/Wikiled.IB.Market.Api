@@ -13,7 +13,7 @@ using Wikiled.IB.Market.Api.Console.Commands.Config;
 namespace Wikiled.IB.Market.Api.Console.Commands
 {
     /// <summary>
-    /// realtime -Stock=VXX
+    /// realtime -Symbol=VXX
     /// </summary>
     public class RealtimeCommand : Command
     {
@@ -32,6 +32,7 @@ namespace Wikiled.IB.Market.Api.Console.Commands
                                RealTimeBarsManager realTimeBarsManager,
                                RealtimeConfig config,
                                ICsvSerializer serializer)
+            : base(log)
         {
             this.log = log ?? throw new ArgumentNullException(nameof(log));
             this.client = client ?? throw new ArgumentNullException(nameof(client));
@@ -50,8 +51,8 @@ namespace Wikiled.IB.Market.Api.Console.Commands
                 return;
             }
 
-            var stream = realTimeBarsManager.Request(ContractHelper.GetContract(config.Stock), WhatToShow.BID_ASK);
-            await serializer.Save($"{config.Stock}_realtime.csv", stream, token).ConfigureAwait(false);
+            var stream = realTimeBarsManager.Request(ContractHelper.GetStockContract(config.Symbol), WhatToShow.BID_ASK);
+            await serializer.Save($"{config.Symbol}_realtime.csv", stream, token).ConfigureAwait(false);
             log.LogInformation("Realtime request completed");
         }
     }
